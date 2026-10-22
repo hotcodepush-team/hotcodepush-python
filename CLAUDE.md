@@ -78,13 +78,13 @@ Run `uv run ruff format .` before every commit; the format check, lint, type che
 ## The OpenAPI snapshot
 
 The API's `/openapi` document is the contract, and `openapi.json` is its committed snapshot, the same bytes as `hotcodepush-node`'s, so the package builds and CI checks without the API.
-A schema change breaks `tests/test_openapi.py`, which calls every resource method once with every option it can send and answers it with the example of its operation's documented response: it fails when a method sends a path, method, query parameter, body field or content type the snapshot lacks, when it sends an `Idempotency-Key` where the operation documents none or none where it does, when a response property lands in a model's `model_extra` or fails its validation, when the session note and `sessionAuth` disagree, when a resource method has no call in `CALLS`, and when an operation has no method and is not in `UNIMPLEMENTED_OPERATIONS`.
+A schema change breaks `tests/test_openapi.py`, which calls every resource method once with every option it can send and answers it with the example of its operation's documented response: it fails when a method sends a path, method, query parameter, body field or content type the snapshot lacks, when it sends an `Idempotency-Key` where the operation documents none or none where it does, when a response property lands in a model's `model_extra` or fails its validation, when the session note and `sessionAuth` disagree, when a resource method has no call in `CALLS`, and when an operation has no method.
 
 When the API changes:
 
 1. Run the API locally, as `apps/api-worker/README.md` in the monorepo says.
 2. `HOTCODEPUSH_API_BASE_URL=http://localhost:8787 uv run scripts/sync_openapi.py`.
-3. Fix what no longer passes, add the resource methods for new endpoints, their models, their calls in `CALLS`, and take their operations out of `UNIMPLEMENTED_OPERATIONS`.
+3. Fix what no longer passes, and add the resource methods for new endpoints, their models and their calls in `CALLS`.
 4. Commit `openapi.json` with the change; it is never edited by hand.
 
 The integration test runs by hand against that API, started with `ENVIRONMENT=dev` and `DEV_DATABASE_URL` in its `.dev.vars` so the mail lands in its log: sign up through `POST /v1/auth/sign-up/email`, send the logged link's token to `GET /v1/auth/verify-email?token=`, sign in through `POST /v1/auth/sign-in/email` and take the `set-auth-token` header, then `HOTCODEPUSH_API_BASE_URL=http://localhost:8787 HOTCODEPUSH_API_TOKEN=<bearer> uv run pytest tests/test_integration.py`.

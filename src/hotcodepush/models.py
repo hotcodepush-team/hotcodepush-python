@@ -378,7 +378,9 @@ class DeviceCount(HotCodePushModel):
 
 
 class EmbeddedApp(HotCodePushModel):
-    """An app as an audit row or a usage row embeds it: its id and its name alone."""
+    """An app as an audit row, a usage row or a notification embeds it: its id and its name
+    alone.
+    """
 
     id: str
     name: str
@@ -488,9 +490,7 @@ class MultipartUpload(HotCodePushModel):
 
 
 class NamedEmbed(HotCodePushModel):
-    """The app, channel or member user a notification's `relations` embeds: the id and the
-    name.
-    """
+    """The channel or member user a notification's `relations` embeds: the id and the name."""
 
     id: str
     name: str
@@ -502,7 +502,7 @@ class Notification(HotCodePushModel):
     `None` once the row is deleted.
     """
 
-    app: NamedEmbed | None = None
+    app: EmbeddedApp | None = None
     app_id: str | None
     channel: NamedEmbed | None = None
     channel_id: str | None

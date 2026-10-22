@@ -711,10 +711,6 @@ CALLS: dict[str, Callable[[HotCodePush], object]] = {
 """One call per resource method with every option it can send, so a path, method, query
 parameter, body field, content type or response field the document lacks fails here."""
 
-UNIMPLEMENTED_OPERATIONS: frozenset[str] = frozenset()
-"""The operations of the snapshot no resource method calls yet, ordered by path; an operation
-leaves this list with the method that calls it."""
-
 UNDOCUMENTED_RESOURCES = frozenset({"health"})
 """`/health` is outside the document by the path rule."""
 
@@ -750,7 +746,7 @@ def test_holds_a_call_for_every_resource_method() -> None:
     assert sorted(CALLS) == sorted(resource_method_names)
 
 
-def test_calls_every_operation_the_snapshot_documents_but_the_unimplemented_ones() -> None:
+def test_calls_every_operation_the_snapshot_documents() -> None:
     api = SnapshotApi()
 
     for call in CALLS.values():
@@ -759,13 +755,7 @@ def test_calls_every_operation_the_snapshot_documents_but_the_unimplemented_ones
     called_operation_names = {
         f"{request.method} {resolve_path_template(request.url.path)}" for request in api.requests
     }
-    missing_operation_names = resolve_documented_operation_names() - called_operation_names
-    assert missing_operation_names == UNIMPLEMENTED_OPERATIONS, (
-        f"Called by no method and not listed as unimplemented: "
-        f"{sorted(missing_operation_names - UNIMPLEMENTED_OPERATIONS)}; "
-        f"called, yet still listed as unimplemented: "
-        f"{sorted(UNIMPLEMENTED_OPERATIONS - missing_operation_names)}"
-    )
+    assert resolve_documented_operation_names() - called_operation_names == set()
 
 
 @pytest.mark.parametrize("name", sorted(CALLS))
