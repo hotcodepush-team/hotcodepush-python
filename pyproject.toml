@@ -1,0 +1,83 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "hotcodepush"
+dynamic = ["version"]
+description = "The typed Python client for the HotCodePush REST API"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+authors = [{ name = "HotCodePush", email = "support@hotcodepush.com" }]
+keywords = [
+    "hotcodepush",
+    "over-the-air",
+    "ota",
+    "react-native",
+    "expo",
+    "capacitor",
+    "cordova",
+    "api",
+    "sdk",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Typing :: Typed",
+]
+dependencies = [
+    "httpx>=0.28,<1",
+    "pydantic>=2.6,<3",
+]
+
+[project.urls]
+Homepage = "https://hotcodepush.com"
+Documentation = "https://hotcodepush.com/docs/api/python"
+Repository = "https://github.com/hotcodepush-team/hotcodepush-python"
+"API Reference" = "https://api.hotcodepush.com/openapi"
+
+[dependency-groups]
+dev = [
+    "mypy>=2.4",
+    "pytest>=9.1",
+    "ruff>=0.17",
+]
+
+[tool.hatch.version]
+path = "src/hotcodepush/_version.py"
+
+[tool.hatch.build.targets.sdist]
+include = ["src", "tests", "openapi.json", "README.md", "LICENSE"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/hotcodepush"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "W", "N", "C4", "SIM"]
+ignore = ["E501"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["hotcodepush"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+files = ["src", "tests", "scripts"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+filterwarnings = ["error"]
