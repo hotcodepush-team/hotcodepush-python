@@ -15,12 +15,26 @@ from pydantic.alias_generators import to_camel
 
 AppUsageMonthRelation = Literal["app"]
 AuditLogRelation = Literal["app", "user"]
+BundleDeltaRelation = Literal["baseBundle"]
+DeviceRelation = Literal["channel", "currentRelease"]
 FailureAction = Literal["none", "notify", "pause", "revoke"]
 Framework = Literal["capacitor", "cordova", "expo", "react-native"]
 InvitationRelation = Literal["organization"]
 InvitationRole = Literal["admin", "billing", "member"]
 """A role an invitation grants: any but `owner`, which only a transfer hands over."""
 MemberRelation = Literal["user", "user.accounts"]
+NotificationCategory = Literal[
+    "account",
+    "billing",
+    "lifecycle",
+    "newsletter",
+    "product_alerts",
+    "service_notices",
+    "spending_alerts",
+    "team_activity",
+]
+NotificationMedium = Literal["email", "in_app"]
+NotificationRelation = Literal["app", "channel", "memberUser", "release"]
 Platform = Literal["android", "ios"]
 ReleaseRelation = Literal["bundle", "channel", "releaseCounters"]
 Role = Literal["admin", "billing", "member", "owner"]
@@ -88,6 +102,13 @@ class Account(HotCodePushModel):
     user_id: str
 
 
+class AdoptionPoint(HotCodePushModel):
+    """A moment of a release's adoption curve and the updates confirmed by then."""
+
+    at: datetime
+    confirmed_update_count: int
+
+
 class App(HotCodePushModel):
     channel_link_template: str | None
     created_at: datetime
@@ -98,6 +119,16 @@ class App(HotCodePushModel):
     name: str
     next_bundle_number: int
     organization_id: str
+    updated_at: datetime
+
+
+class AppFile(HotCodePushModel):
+    """A content-addressed file of the app, shared between its bundles."""
+
+    app_id: str
+    created_at: datetime
+    sha256: str
+    size_bytes: int
     updated_at: datetime
 
 
@@ -117,6 +148,29 @@ class AttributeCondition(HotCodePushModel):
     key: str
     type: Literal["attribute"] = "attribute"
     value_sha256: str
+
+
+class Audience(HotCodePushModel):
+    """The channel's active devices, the ones every condition reaches and the estimate at the
+    rollout percentage.
+    """
+
+    by_binary_version: list[DeviceCount]
+    by_platform: list[DeviceCount]
+    device_count: int
+    estimated_device_count: int
+    reached_device_count: int
+    warnings: list[AudienceWarning]
+
+
+class AudienceWarning(HotCodePushModel):
+    """What the release would likely not do, read from the registry and the registered
+    binaries.
+    """
+
+    code: Literal["FINGERPRINT_UNKNOWN", "UNSUPPORTED_CONDITION_SHARE"]
+    details: dict[str, object] | None
+    message: str
 
 
 class AuditLog(HotCodePushModel):
@@ -144,11 +198,37 @@ class AuditLog(HotCodePushModel):
     user_id: str | None
 
 
+class Binary(HotCodePushModel):
+    """A store build; the devices running it are the fleet statistics' `binary` buckets."""
+
+    app_id: str
+    build: str
+    bundle_id: str
+    created_at: datetime
+    fingerprint: str | None
+    id: str
+    platform: Platform
+    updated_at: datetime
+    version: str
+
+
 class BinaryCondition(HotCodePushModel):
     """Devices whose binary version lies in `range`, `>=2.0.0` say."""
 
     range: str
     type: Literal["binary"] = "binary"
+
+
+class BinaryCount(HotCodePushModel):
+    """The devices of one binary, `value` its id, named by its platform and version, beside
+    their newest report; the value and the names are `None` for the builds no binary records.
+    """
+
+    device_count: int
+    last_seen_at: datetime
+    platform: Platform | None
+    value: str | None
+    version: str | None
 
 
 class Bundle(HotCodePushModel):
@@ -174,6 +254,34 @@ class Bundle(HotCodePushModel):
     unused_since: datetime | None
     updated_at: datetime
     version: str
+
+
+class BundleDelta(HotCodePushModel):
+    """A delta pack of a bundle against one base, its size and patch count known once built;
+    `base_bundle` is set when `relations` names it.
+    """
+
+    base_bundle: Bundle | None = None
+    base_bundle_id: str
+    bundle_id: str
+    created_at: datetime
+    patch_count: int | None
+    requested_at: datetime
+    size_bytes: int | None
+    status: Literal["built", "failed", "requested"]
+    updated_at: datetime
+
+
+class BundleFile(HotCodePushModel):
+    """A file a bundle lists; `stored_at` is when the app's store held its hash."""
+
+    bundle_id: str
+    created_at: datetime
+    path: str
+    sha256: str
+    size_bytes: int
+    stored_at: datetime | None
+    updated_at: datetime
 
 
 class BundleSignature(HotCodePushModel):
@@ -217,11 +325,56 @@ class CustomerPortalSession(HotCodePushModel):
     url: str
 
 
+class DailyUpdateCounts(HotCodePushModel):
+    """A day's updates beside the channel's active devices of the day, the adoption rate's
+    denominator.
+    """
+
+    active_device_count: int | None
+    confirmed_update_count: int
+    day: date
+    failure_count: int
+    rolled_back_update_count: int
+
+
+class Device(HotCodePushModel):
+    """A device of the registry, the facts of its last report; `channel` and `current_release`
+    are set when `relations` names them.
+    """
+
+    app_id: str
+    attributes: dict[str, str]
+    binary_build: str
+    binary_version: str
+    channel: Channel | None = None
+    channel_id: str | None
+    channel_source: Literal["config", "runtime"]
+    country: str | None
+    created_at: datetime
+    current_release: Release | None = None
+    current_release_id: str | None
+    device_id: str
+    embedded_bundle_id: str | None
+    fingerprint: str | None
+    last_seen_at: datetime
+    os_version: str
+    platform: Platform
+    sdk_version: str
+    updated_at: datetime
+
+
 class DeviceCondition(HotCodePushModel):
     """Devices whose hashed id is one of `hashed_ids`."""
 
     hashed_ids: list[str]
     type: Literal["device"] = "device"
+
+
+class DeviceCount(HotCodePushModel):
+    """One value of a dimension and the number of devices that report it."""
+
+    device_count: int
+    value: str | None
 
 
 class EmbeddedApp(HotCodePushModel):
@@ -261,6 +414,24 @@ class FingerprintCondition(HotCodePushModel):
 
     fingerprint: str
     type: Literal["fingerprint"] = "fingerprint"
+
+
+class FleetStatistics(HotCodePushModel):
+    """The devices seen in the last thirty days: `device_count`, `current_device_count` the ones
+    running their channel's newest active release, and their counts per dimension, each the most
+    common first.
+    """
+
+    binary: list[BinaryCount]
+    binary_version: list[DeviceCount]
+    channel: list[DeviceCount]
+    country: list[DeviceCount]
+    current_device_count: int
+    device_count: int
+    os_version: list[OsVersionCount]
+    platform: list[DeviceCount]
+    release: list[ReleaseCount]
+    sdk_version: list[DeviceCount]
 
 
 class Invitation(HotCodePushModel):
@@ -314,6 +485,49 @@ class Member(HotCodePushModel):
 
 class MultipartUpload(HotCodePushModel):
     upload_id: str
+
+
+class NamedEmbed(HotCodePushModel):
+    """The app, channel or member user a notification's `relations` embeds: the id and the
+    name.
+    """
+
+    id: str
+    name: str
+
+
+class Notification(HotCodePushModel):
+    """An in-app notification of the caller, its `organization_id` `None` for one about the
+    account; `app`, `channel`, `member_user` and `release` are set when `relations` names them,
+    `None` once the row is deleted.
+    """
+
+    app: NamedEmbed | None = None
+    app_id: str | None
+    channel: NamedEmbed | None = None
+    channel_id: str | None
+    created_at: datetime
+    id: str
+    member_user: NamedEmbed | None = None
+    member_user_id: str | None
+    organization_id: str | None
+    read_at: datetime | None
+    release: ReleaseEmbed | None = None
+    release_id: str | None
+    type: str
+    updated_at: datetime
+    user_id: str
+
+
+class NotificationPreference(HotCodePushModel):
+    """Whether the caller receives one category's notifications through one medium, for the
+    account or, with `organization_id`, for one membership.
+    """
+
+    category: NotificationCategory
+    is_enabled: bool
+    medium: NotificationMedium
+    organization_id: str | None
 
 
 class OidcConfig(HotCodePushModel):
@@ -371,6 +585,21 @@ class OsCondition(HotCodePushModel):
     type: Literal["os"] = "os"
 
 
+class OsVersionCount(HotCodePushModel):
+    """The devices of one version of one platform's operating system."""
+
+    device_count: int
+    platform: Platform
+    value: str | None
+
+
+class ReasonCount(HotCodePushModel):
+    """A reason the devices reported and the number of events that gave it."""
+
+    event_count: int
+    reason: str
+
+
 class Release(HotCodePushModel):
     """A release of a bundle in a channel; `bundle`, `channel` and `release_counters` are set
     when `relations` names them.
@@ -407,6 +636,30 @@ class Release(HotCodePushModel):
     window_start_failure_count: int
 
 
+class ReleaseAdoption(HotCodePushModel):
+    """A live release's adoption curve since it went live, with the moments it reached half and
+    nine tenths of the channel's active devices.
+    """
+
+    adoption: list[AdoptionPoint]
+    channel_id: str
+    live_at: datetime
+    number: int
+    release_id: str
+    time_to_adoption: TimeToAdoption
+
+
+class ReleaseCount(HotCodePushModel):
+    """The devices of one release, `value` its id, named by its number and its channel; all
+    three are `None` for the embedded bundles.
+    """
+
+    channel_id: str | None
+    device_count: int
+    number: int | None
+    value: str | None
+
+
 class ReleaseCounters(HotCodePushModel):
     applied_update_count: int
     confirmed_update_count: int
@@ -418,6 +671,26 @@ class ReleaseCounters(HotCodePushModel):
     reported_failure_count: int
     updated_at: datetime
     verification_failure_count: int
+
+
+class ReleaseDeviceEvent(HotCodePushModel):
+    """A device's first event of each type on a release, with the reason a failure gave."""
+
+    created_at: datetime
+    device_id: str
+    reason: str | None
+    release_id: str
+    type: Literal["applied", "checked", "confirmed", "failed"]
+    updated_at: datetime
+
+
+class ReleaseEmbed(HotCodePushModel):
+    """The release a notification's `relations` embeds: the id and the number, since a release
+    has no name.
+    """
+
+    id: str
+    number: int
 
 
 class ReleaseProgression(HotCodePushModel):
@@ -440,6 +713,19 @@ class SamlConfig(HotCodePushModel):
     metadata: str | None = None
 
 
+class SigningKey(HotCodePushModel):
+    """A public key the app's bundles are verified against; its `fingerprint` is the `key_id` a
+    signature names.
+    """
+
+    app_id: str
+    created_at: datetime
+    fingerprint: str
+    id: str
+    public_key: str
+    updated_at: datetime
+
+
 class SsoProvider(HotCodePushModel):
     """An organization's SSO provider: the domain, and the token its TXT record
     `_hotcodepush-sso-{providerId}.{domain}` carries until `domain_verified`; the configs are
@@ -457,6 +743,26 @@ class SsoProvider(HotCodePushModel):
     type: Literal["oidc", "saml"]
     updated_at: datetime
     user_id: str | None
+
+
+class TimeToAdoption(HotCodePushModel):
+    """When a release reached half and nine tenths of the channel's active devices; `None` until
+    it does.
+    """
+
+    percent50_at: datetime | None
+    percent90_at: datetime | None
+
+
+class UpdateStatistics(HotCodePushModel):
+    """The updates per day of the period, the adoption curves of the newest live releases and
+    the reasons the devices reported.
+    """
+
+    days: list[DailyUpdateCounts]
+    failure_reasons: list[ReasonCount]
+    releases: list[ReleaseAdoption]
+    skipped_reasons: list[ReasonCount]
 
 
 class UploadedBundlePack(HotCodePushModel):
@@ -478,6 +784,32 @@ class Usage(HotCodePushModel):
     data_transfer_bytes: int
     month: str
     monthly_active_device_count: int
+
+
+class UsageDay(HotCodePushModel):
+    """A day's checks and data transfer, beside the bytes the devices reported downloading."""
+
+    check_count: int
+    data_transfer_bytes: int
+    day: date
+    device_download_bytes: int
+
+
+class UsageMonth(HotCodePushModel):
+    """A month's monthly active devices and data transfer, the numbers the invoice shows."""
+
+    data_transfer_bytes: int
+    month: date
+    monthly_active_device_count: int
+
+
+class UsageStatistics(HotCodePushModel):
+    """The monthly active devices and data transfer per month the period touches, and the
+    checks, data transfer and device downloads per day.
+    """
+
+    days: list[UsageDay]
+    months: list[UsageMonth]
 
 
 class User(HotCodePushModel):

@@ -3,7 +3,7 @@
 import inspect
 import io
 from collections.abc import Callable
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from functools import reduce
 from typing import Any
 
@@ -32,26 +32,49 @@ from tests.openapi_document import (
 from tests.stub_api import StubApi, resolve_sent_json
 
 APP_ID = "7c0f3a52-1d8e-4b6a-9f21-5e3c8a0d4b17"
+BINARY_ID = "3f6a9c2e-7b14-4d58-9e03-b2c8d6f1a475"
 BUNDLE_ID = "2a9e6c14-8b3f-4d70-a5e2-91c7f0b3d864"
 CHANNEL_ID = "e41b7d09-3c6a-4f85-b2d1-6a8f0c9e3b52"
 CREATED_SINCE = datetime(2026, 1, 1, tzinfo=UTC)
 CREATED_UNTIL = datetime(2026, 2, 1, tzinfo=UTC)
 DELIVERY_ID = "8f2c6a41-5d9e-4b73-a1c8-0e7b3d5f9a26"
+DEVICE_ID = "6b1e9d37-2f5c-4a80-9c46-d8e3a1f7b259"
 FILE = ManifestFile(path="index.html", sha256="a" * 64, size_bytes=5)
 INVITATION_ID = "9d3c5e81-6f2a-4b07-8c14-3e7a1f9b0d26"
 MEMBER_ID = "5b8a2f47-0e9c-4d31-a6b8-2c4f7e1d9a03"
+NOTIFICATION_ID = "7e2a5c19-4b8d-4f36-a0c7-1d9e3b6f8a52"
 ORGANIZATION_ID = "c6e0b3a8-4d1f-4a92-b7e5-8f3d2c0a6b19"
 PASSWORD = "correct horse battery staple"
 RELEASE_ID = "0f7d4c2b-9a6e-4e18-83b5-d1c9a7f2e604"
 SESSION_ID = "4e7b2d90-8c3a-4f61-b5d2-9a1c6e8f3b47"
 SESSION_ONLY_NOTE = "An API token answers `E_FORBIDDEN`; sign in with a session."
 SHA256 = "a" * 64
+SIGNING_KEY_ID = "1c4f8a6d-3e92-4b57-a0d8-5f2b7c9e1a34"
 TOKEN_ID = "8a3f1c6e-2d94-4b70-9e15-c7b4a2d8f063"
 UPLOAD_ID = "upload"
 USER_ID = "2d5c8f1a-7b36-4e09-a4c2-6f1e9b3d7a58"
 WEBHOOK_ID = "3b9e1d74-6a2f-4c58-8d03-f5a7c2e9b416"
 
 CALLS: dict[str, Callable[[HotCodePush], object]] = {
+    "apps.binaries.count": lambda hot_code_push: hot_code_push.apps.binaries.count(
+        app_id=APP_ID, fingerprint=f"fp1:{SHA256}", platform="ios"
+    ),
+    "apps.binaries.create": lambda hot_code_push: hot_code_push.apps.binaries.create(
+        app_id=APP_ID,
+        build="42",
+        files=[FILE],
+        fingerprint=f"fp1:{SHA256}",
+        force=True,
+        idempotency_key="key",
+        platform="android",
+        version="1.0.0",
+    ),
+    "apps.binaries.get": lambda hot_code_push: hot_code_push.apps.binaries.get(
+        app_id=APP_ID, binary_id=BINARY_ID
+    ),
+    "apps.binaries.list": lambda hot_code_push: hot_code_push.apps.binaries.list(
+        app_id=APP_ID, fingerprint=f"fp1:{SHA256}", limit=10, offset=10, platform="ios"
+    ),
     "apps.bundles.complete": lambda hot_code_push: hot_code_push.apps.bundles.complete(
         app_id=APP_ID, bundle_id=BUNDLE_ID
     ),
@@ -81,6 +104,18 @@ CALLS: dict[str, Callable[[HotCodePush], object]] = {
     ),
     "apps.bundles.delete": lambda hot_code_push: hot_code_push.apps.bundles.delete(
         app_id=APP_ID, bundle_id=BUNDLE_ID
+    ),
+    "apps.bundles.deltas.count": lambda hot_code_push: hot_code_push.apps.bundles.deltas.count(
+        app_id=APP_ID, bundle_id=BUNDLE_ID
+    ),
+    "apps.bundles.deltas.list": lambda hot_code_push: hot_code_push.apps.bundles.deltas.list(
+        app_id=APP_ID, bundle_id=BUNDLE_ID, limit=10, offset=10, relations=["baseBundle"]
+    ),
+    "apps.bundles.files.count": lambda hot_code_push: hot_code_push.apps.bundles.files.count(
+        app_id=APP_ID, bundle_id=BUNDLE_ID, is_stored=False
+    ),
+    "apps.bundles.files.list": lambda hot_code_push: hot_code_push.apps.bundles.files.list(
+        app_id=APP_ID, bundle_id=BUNDLE_ID, is_stored=False, limit=10, offset=10
     ),
     "apps.bundles.get": lambda hot_code_push: hot_code_push.apps.bundles.get(
         app_id=APP_ID, bundle_id=BUNDLE_ID
@@ -120,6 +155,16 @@ CALLS: dict[str, Callable[[HotCodePush], object]] = {
         hot_code_push.apps.bundles.pack.uploads.parts.upload(
             app_id=APP_ID, body=b"part", bundle_id=BUNDLE_ID, part_number=1, upload_id=UPLOAD_ID
         )
+    ),
+    "apps.channels.audience.get": lambda hot_code_push: hot_code_push.apps.channels.audience.get(
+        app_id=APP_ID,
+        attribute=["tier=gold"],
+        binary=[">=2.0.0"],
+        channel_id=CHANNEL_ID,
+        device=[DEVICE_ID],
+        fingerprint=[f"fp1:{SHA256}"],
+        os=[">=17"],
+        rollout_percentage=10,
     ),
     "apps.channels.count": lambda hot_code_push: hot_code_push.apps.channels.count(
         app_id=APP_ID, query="stag"
@@ -191,6 +236,15 @@ CALLS: dict[str, Callable[[HotCodePush], object]] = {
     "apps.channels.resume": lambda hot_code_push: hot_code_push.apps.channels.resume(
         app_id=APP_ID, channel_id=CHANNEL_ID
     ),
+    "apps.channels.rollbacks.create": lambda hot_code_push: (
+        hot_code_push.apps.channels.rollbacks.create(
+            app_id=APP_ID,
+            channel_id=CHANNEL_ID,
+            idempotency_key="key",
+            is_mandatory=False,
+            to_release_id=RELEASE_ID,
+        )
+    ),
     "apps.channels.update": lambda hot_code_push: hot_code_push.apps.channels.update(
         app_id=APP_ID,
         channel_id=CHANNEL_ID,
@@ -203,7 +257,139 @@ CALLS: dict[str, Callable[[HotCodePush], object]] = {
         name="beta",
     ),
     "apps.delete": lambda hot_code_push: hot_code_push.apps.delete(app_id=APP_ID),
+    "apps.devices.count": lambda hot_code_push: hot_code_push.apps.devices.count(
+        app_id=APP_ID,
+        attribute="tier=gold",
+        binary_build="42",
+        binary_version="1.0.0",
+        channel_id=CHANNEL_ID,
+        fingerprint=f"fp1:{SHA256}",
+        last_seen_since=datetime(2026, 1, 1, tzinfo=UTC),
+        last_seen_until=datetime(2026, 2, 1, tzinfo=UTC),
+        platform="ios",
+        sdk_version="1.0.0",
+    ),
+    "apps.devices.delete": lambda hot_code_push: hot_code_push.apps.devices.delete(
+        app_id=APP_ID, device_id=DEVICE_ID
+    ),
+    "apps.devices.delete_many": lambda hot_code_push: hot_code_push.apps.devices.delete_many(
+        app_id=APP_ID, ids=[DEVICE_ID]
+    ),
+    "apps.devices.events.count": lambda hot_code_push: hot_code_push.apps.devices.events.count(
+        app_id=APP_ID, device_id=DEVICE_ID, release_id=RELEASE_ID
+    ),
+    "apps.devices.events.list": lambda hot_code_push: hot_code_push.apps.devices.events.list(
+        app_id=APP_ID, device_id=DEVICE_ID, limit=10, offset=10, release_id=RELEASE_ID
+    ),
+    "apps.devices.get": lambda hot_code_push: hot_code_push.apps.devices.get(
+        app_id=APP_ID, device_id=DEVICE_ID, relations=["channel", "currentRelease"]
+    ),
+    "apps.devices.list": lambda hot_code_push: hot_code_push.apps.devices.list(
+        app_id=APP_ID,
+        attribute="tier=gold",
+        binary_build="42",
+        binary_version="1.0.0",
+        channel_id=CHANNEL_ID,
+        fingerprint=f"fp1:{SHA256}",
+        last_seen_since=datetime(2026, 1, 1, tzinfo=UTC),
+        last_seen_until=datetime(2026, 2, 1, tzinfo=UTC),
+        limit=10,
+        offset=10,
+        platform="ios",
+        relations=["channel", "currentRelease"],
+        sdk_version="1.0.0",
+    ),
+    "apps.files.upload": lambda hot_code_push: hot_code_push.apps.files.upload(
+        app_id=APP_ID, body=io.BytesIO(b"gzip"), content_length=4, sha256=SHA256
+    ),
+    "apps.files.uploads.complete": lambda hot_code_push: hot_code_push.apps.files.uploads.complete(
+        app_id=APP_ID,
+        parts=[UploadedPart(etag="etag", part_number=1)],
+        sha256=SHA256,
+        upload_id=UPLOAD_ID,
+    ),
+    "apps.files.uploads.create": lambda hot_code_push: hot_code_push.apps.files.uploads.create(
+        app_id=APP_ID, sha256=SHA256
+    ),
+    "apps.files.uploads.delete": lambda hot_code_push: hot_code_push.apps.files.uploads.delete(
+        app_id=APP_ID, sha256=SHA256, upload_id=UPLOAD_ID
+    ),
+    "apps.files.uploads.parts.upload": lambda hot_code_push: (
+        hot_code_push.apps.files.uploads.parts.upload(
+            app_id=APP_ID, body=b"part", part_number=1, sha256=SHA256, upload_id=UPLOAD_ID
+        )
+    ),
     "apps.get": lambda hot_code_push: hot_code_push.apps.get(app_id=APP_ID),
+    "apps.releases.audience.get": lambda hot_code_push: hot_code_push.apps.releases.audience.get(
+        app_id=APP_ID, release_id=RELEASE_ID
+    ),
+    "apps.releases.count": lambda hot_code_push: hot_code_push.apps.releases.count(
+        app_id=APP_ID,
+        bundle_id=BUNDLE_ID,
+        channel_id=CHANNEL_ID,
+        git_commit="main",
+        status="active",
+    ),
+    "apps.releases.get": lambda hot_code_push: hot_code_push.apps.releases.get(
+        app_id=APP_ID, relations=["bundle", "channel", "releaseCounters"], release_id=RELEASE_ID
+    ),
+    "apps.releases.list": lambda hot_code_push: hot_code_push.apps.releases.list(
+        app_id=APP_ID,
+        bundle_id=BUNDLE_ID,
+        channel_id=CHANNEL_ID,
+        git_commit="main",
+        limit=10,
+        offset=10,
+        relations=["bundle", "channel", "releaseCounters"],
+        status="active",
+    ),
+    "apps.releases.pause": lambda hot_code_push: hot_code_push.apps.releases.pause(
+        app_id=APP_ID, release_id=RELEASE_ID
+    ),
+    "apps.releases.resume": lambda hot_code_push: hot_code_push.apps.releases.resume(
+        app_id=APP_ID, release_id=RELEASE_ID
+    ),
+    "apps.releases.revoke": lambda hot_code_push: hot_code_push.apps.releases.revoke(
+        app_id=APP_ID, release_id=RELEASE_ID
+    ),
+    "apps.releases.update": lambda hot_code_push: hot_code_push.apps.releases.update(
+        app_id=APP_ID,
+        failure_action="pause",
+        failure_minimum_update_count=20,
+        failure_threshold_percent=10,
+        is_mandatory=True,
+        notes="Fixes the login.",
+        progression=ReleaseProgression(
+            percentages=[75, 100], step_minimum_seconds=3600, step_minimum_update_count=100
+        ),
+        release_id=RELEASE_ID,
+        rollout_percentage=50,
+    ),
+    "apps.signing_keys.count": lambda hot_code_push: hot_code_push.apps.signing_keys.count(
+        app_id=APP_ID
+    ),
+    "apps.signing_keys.create": lambda hot_code_push: hot_code_push.apps.signing_keys.create(
+        app_id=APP_ID, public_key="rsa-v1_5-sha256:a2V5"
+    ),
+    "apps.signing_keys.delete": lambda hot_code_push: hot_code_push.apps.signing_keys.delete(
+        app_id=APP_ID, signing_key_id=SIGNING_KEY_ID
+    ),
+    "apps.signing_keys.list": lambda hot_code_push: hot_code_push.apps.signing_keys.list(
+        app_id=APP_ID, limit=10, offset=10
+    ),
+    "apps.statistics.fleet.get": lambda hot_code_push: hot_code_push.apps.statistics.fleet.get(
+        app_id=APP_ID, channel_id=CHANNEL_ID
+    ),
+    "apps.statistics.updates.get": lambda hot_code_push: hot_code_push.apps.statistics.updates.get(
+        app_id=APP_ID,
+        channel_id=CHANNEL_ID,
+        period_since=date(2026, 9, 1),
+        period_until=date(2026, 9, 30),
+        release_id=RELEASE_ID,
+    ),
+    "apps.statistics.usage.get": lambda hot_code_push: hot_code_push.apps.statistics.usage.get(
+        app_id=APP_ID, period_since=date(2026, 9, 1), period_until=date(2026, 9, 30)
+    ),
     "apps.transfer": lambda hot_code_push: hot_code_push.apps.transfer(
         app_id=APP_ID, organization_id=ORGANIZATION_ID
     ),
@@ -220,6 +406,27 @@ CALLS: dict[str, Callable[[HotCodePush], object]] = {
     "invitations.count": lambda hot_code_push: hot_code_push.invitations.count(),
     "invitations.list": lambda hot_code_push: hot_code_push.invitations.list(
         limit=10, offset=10, relations=["organization"]
+    ),
+    "notification_preferences.list": lambda hot_code_push: (
+        hot_code_push.notification_preferences.list(organization_id=ORGANIZATION_ID)
+    ),
+    "notification_preferences.update": lambda hot_code_push: (
+        hot_code_push.notification_preferences.update(
+            category="product_alerts",
+            is_enabled=False,
+            medium="email",
+            organization_id=ORGANIZATION_ID,
+        )
+    ),
+    "notifications.count": lambda hot_code_push: hot_code_push.notifications.count(is_read=False),
+    "notifications.list": lambda hot_code_push: hot_code_push.notifications.list(
+        is_read=False, limit=10, offset=10, relations=["app", "channel", "memberUser", "release"]
+    ),
+    "notifications.update": lambda hot_code_push: hot_code_push.notifications.update(
+        is_read=True, notification_id=NOTIFICATION_ID
+    ),
+    "notifications.update_many": lambda hot_code_push: hot_code_push.notifications.update_many(
+        is_read=True
     ),
     "organizations.apps.count": lambda hot_code_push: hot_code_push.organizations.apps.count(
         organization_id=ORGANIZATION_ID, query="demo"
@@ -504,53 +711,7 @@ CALLS: dict[str, Callable[[HotCodePush], object]] = {
 """One call per resource method with every option it can send, so a path, method, query
 parameter, body field, content type or response field the document lacks fails here."""
 
-UNIMPLEMENTED_OPERATIONS = frozenset(
-    {
-        "GET /v1/apps/{appId}/binaries",
-        "POST /v1/apps/{appId}/binaries",
-        "GET /v1/apps/{appId}/binaries/count",
-        "GET /v1/apps/{appId}/binaries/{binaryId}",
-        "GET /v1/apps/{appId}/bundles/{bundleId}/deltas",
-        "GET /v1/apps/{appId}/bundles/{bundleId}/deltas/count",
-        "GET /v1/apps/{appId}/bundles/{bundleId}/files",
-        "GET /v1/apps/{appId}/bundles/{bundleId}/files/count",
-        "GET /v1/apps/{appId}/channels/{channelId}/audience",
-        "POST /v1/apps/{appId}/channels/{channelId}/rollbacks",
-        "DELETE /v1/apps/{appId}/devices",
-        "GET /v1/apps/{appId}/devices",
-        "GET /v1/apps/{appId}/devices/count",
-        "DELETE /v1/apps/{appId}/devices/{deviceId}",
-        "GET /v1/apps/{appId}/devices/{deviceId}",
-        "GET /v1/apps/{appId}/devices/{deviceId}/events",
-        "GET /v1/apps/{appId}/devices/{deviceId}/events/count",
-        "PUT /v1/apps/{appId}/files/{sha256}",
-        "POST /v1/apps/{appId}/files/{sha256}/uploads",
-        "DELETE /v1/apps/{appId}/files/{sha256}/uploads/{uploadId}",
-        "POST /v1/apps/{appId}/files/{sha256}/uploads/{uploadId}/complete",
-        "PUT /v1/apps/{appId}/files/{sha256}/uploads/{uploadId}/parts/{partNumber}",
-        "GET /v1/apps/{appId}/releases",
-        "GET /v1/apps/{appId}/releases/count",
-        "GET /v1/apps/{appId}/releases/{releaseId}",
-        "PATCH /v1/apps/{appId}/releases/{releaseId}",
-        "GET /v1/apps/{appId}/releases/{releaseId}/audience",
-        "POST /v1/apps/{appId}/releases/{releaseId}/pause",
-        "POST /v1/apps/{appId}/releases/{releaseId}/resume",
-        "POST /v1/apps/{appId}/releases/{releaseId}/revoke",
-        "GET /v1/apps/{appId}/signing-keys",
-        "POST /v1/apps/{appId}/signing-keys",
-        "GET /v1/apps/{appId}/signing-keys/count",
-        "DELETE /v1/apps/{appId}/signing-keys/{signingKeyId}",
-        "GET /v1/apps/{appId}/statistics/fleet",
-        "GET /v1/apps/{appId}/statistics/updates",
-        "GET /v1/apps/{appId}/statistics/usage",
-        "GET /v1/notification-preferences",
-        "PATCH /v1/notification-preferences",
-        "GET /v1/notifications",
-        "PATCH /v1/notifications",
-        "GET /v1/notifications/count",
-        "PATCH /v1/notifications/{notificationId}",
-    }
-)
+UNIMPLEMENTED_OPERATIONS: frozenset[str] = frozenset()
 """The operations of the snapshot no resource method calls yet, ordered by path; an operation
 leaves this list with the method that calls it."""
 

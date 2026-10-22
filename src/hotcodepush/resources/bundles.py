@@ -6,12 +6,16 @@ from .._http import HttpClient, resolve_path
 from .._types import NOT_GIVEN, NotGiven
 from ..models import Bundle, BundleSignature, Count, ManifestFile, Platform
 from ._base import BaseResource
+from .bundle_deltas import BundleDeltasResource
+from .bundle_files import BundleFilesResource
 from .bundle_pack import BundlePackResource
 
 
 class BundlesResource(BaseResource):
     def __init__(self, http_client: HttpClient) -> None:
         super().__init__(http_client)
+        self.deltas = BundleDeltasResource(http_client)
+        self.files = BundleFilesResource(http_client)
         self.pack = BundlePackResource(http_client)
 
     def complete(self, *, app_id: str, bundle_id: str) -> Bundle:

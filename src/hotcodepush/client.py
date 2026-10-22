@@ -11,6 +11,8 @@ from ._http import DEFAULT_BASE_URL, DEFAULT_CLIENT, HttpClient
 from .resources.apps import AppsResource
 from .resources.health import HealthResource
 from .resources.invitations import InvitationsResource
+from .resources.notification_preferences import NotificationPreferencesResource
+from .resources.notifications import NotificationsResource
 from .resources.organizations import OrganizationsResource
 from .resources.users import UsersResource
 
@@ -58,6 +60,8 @@ class HotCodePush:
         self.apps = AppsResource(self._http_client)
         self.health = HealthResource(self._http_client)
         self.invitations = InvitationsResource(self._http_client)
+        self.notification_preferences = NotificationPreferencesResource(self._http_client)
+        self.notifications = NotificationsResource(self._http_client)
         self.organizations = OrganizationsResource(self._http_client)
         self.users = UsersResource(self._http_client)
 

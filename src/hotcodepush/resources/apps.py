@@ -4,15 +4,27 @@ from .._http import HttpClient, resolve_path
 from .._types import NOT_GIVEN, NotGiven
 from ..models import App, Framework
 from ._base import BaseResource
+from .binaries import BinariesResource
 from .bundles import BundlesResource
 from .channels import ChannelsResource
+from .devices import DevicesResource
+from .files import FilesResource
+from .releases import ReleasesResource
+from .signing_keys import SigningKeysResource
+from .statistics import StatisticsResource
 
 
 class AppsResource(BaseResource):
     def __init__(self, http_client: HttpClient) -> None:
         super().__init__(http_client)
+        self.binaries = BinariesResource(http_client)
         self.bundles = BundlesResource(http_client)
         self.channels = ChannelsResource(http_client)
+        self.devices = DevicesResource(http_client)
+        self.files = FilesResource(http_client)
+        self.releases = ReleasesResource(http_client)
+        self.signing_keys = SigningKeysResource(http_client)
+        self.statistics = StatisticsResource(http_client)
 
     def delete(self, *, app_id: str) -> None:
         """Soft-deletes an app: gone at once, hard-deleted after seven days.

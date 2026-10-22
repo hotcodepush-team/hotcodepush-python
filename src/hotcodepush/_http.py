@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 from collections.abc import Callable, Mapping, Sequence
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from email.utils import parsedate_to_datetime
 from time import sleep
 from typing import BinaryIO, Literal, TypeVar
@@ -35,7 +35,7 @@ UPLOAD_TIMEOUT_SECONDS = 600.0
 
 HttpMethod = Literal["DELETE", "GET", "PATCH", "POST", "PUT"]
 JsonBody = Mapping[str, object]
-Query = Mapping[str, bool | datetime | int | str | Sequence[str] | NotGiven]
+Query = Mapping[str, bool | date | datetime | int | str | Sequence[str] | NotGiven]
 UploadBody = bytes | BinaryIO
 """Bytes, read again when a retry needs them, or a file object, read once and never retried."""
 
