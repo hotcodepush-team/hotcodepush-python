@@ -64,6 +64,12 @@ class HttpClient:
         if self._is_httpx_client_owned:
             self._httpx_client.close()
 
+    def fetch_bytes(self, method: HttpMethod, path: str, *, query: Query | None = None) -> bytes:
+        """A request answered with a binary body, such as a CSV download or a channel's QR image,
+        read whole.
+        """
+        return self._fetch_response(method, path, query=query).content
+
     def fetch_creating_post(
         self,
         path: str,
@@ -109,11 +115,19 @@ class HttpClient:
         )
         return TypeAdapter(response_type).validate_json(response.content)
 
-    def fetch_status(self, method: HttpMethod, path: str, *, query: Query | None = None) -> None:
+    def fetch_status(
+        self,
+        method: HttpMethod,
+        path: str,
+        *,
+        body: JsonBody | None = None,
+        is_retryable: bool | None = None,
+        query: Query | None = None,
+    ) -> None:
         """A request whose status is the whole answer: the body, such as `/health`'s
-        plain-text `ok`, is discarded.
+        plain-text `ok`, is discarded. `is_retryable` defaults as `fetch_json`'s does.
         """
-        self._fetch_response(method, path, query=query)
+        self._fetch_response(method, path, body=body, is_retryable=is_retryable, query=query)
 
     def fetch_upload(
         self,
@@ -196,7 +210,9 @@ def resolve_headers(*, client: str, token: str | None, user_agent: str | None) -
 
 
 def resolve_json_body(body: JsonBody) -> dict[str, object]:
-    """The body without its `NOT_GIVEN` values, models by their API names and timestamps in UTC."""
+    """The body without its `NOT_GIVEN` values, models by their API names without their `None`
+    fields, since no nested field of the API takes `null`, and timestamps in UTC.
+    """
     return {
         name: resolve_json_value(value)
         for name, value in body.items()
@@ -206,7 +222,7 @@ def resolve_json_body(body: JsonBody) -> dict[str, object]:
 
 def resolve_json_value(value: object) -> object:
     if isinstance(value, BaseModel):
-        return value.model_dump(by_alias=True, mode="json")
+        return value.model_dump(by_alias=True, exclude_none=True, mode="json")
     if isinstance(value, datetime):
         return resolve_utc_timestamp(value)
     if isinstance(value, list):

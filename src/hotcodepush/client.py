@@ -10,7 +10,9 @@ import httpx
 from ._http import DEFAULT_BASE_URL, DEFAULT_CLIENT, HttpClient
 from .resources.apps import AppsResource
 from .resources.health import HealthResource
+from .resources.invitations import InvitationsResource
 from .resources.organizations import OrganizationsResource
+from .resources.users import UsersResource
 
 TOKEN_ENVIRONMENT_VARIABLE = "HOTCODEPUSH_TOKEN"
 
@@ -55,7 +57,9 @@ class HotCodePush:
         )
         self.apps = AppsResource(self._http_client)
         self.health = HealthResource(self._http_client)
+        self.invitations = InvitationsResource(self._http_client)
         self.organizations = OrganizationsResource(self._http_client)
+        self.users = UsersResource(self._http_client)
 
     def close(self) -> None:
         """Closes the connection pool, unless the requests go through the caller's `http_client`."""

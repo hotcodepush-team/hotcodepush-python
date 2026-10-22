@@ -5,7 +5,14 @@ from email.utils import format_datetime
 import httpx
 import pytest
 
-from hotcodepush import NOT_GIVEN, HotCodePush, HotCodePushError, ManifestFile, __version__
+from hotcodepush import (
+    NOT_GIVEN,
+    HotCodePush,
+    HotCodePushError,
+    ManifestFile,
+    OidcConfig,
+    __version__,
+)
 from hotcodepush._http import (
     HttpMethod,
     resolve_path,
@@ -145,6 +152,21 @@ def test_sends_a_model_in_the_body_by_its_api_names() -> None:
     }
 
 
+def test_sends_a_model_in_the_body_without_its_none_fields() -> None:
+    api = StubApi(httpx.Response(200, json={"count": 1}))
+
+    api.create_http_client().fetch_json(
+        "PUT",
+        "/v1/organizations/organization/sso-provider",
+        Count,
+        body={"oidc": OidcConfig(client_id="client", client_secret="secret", issuer="issuer")},
+    )
+
+    assert resolve_sent_json(api.last_request) == {
+        "oidc": {"clientId": "client", "clientSecret": "secret", "issuer": "issuer"}
+    }
+
+
 def test_sends_a_timestamp_in_the_body_in_utc_with_a_z() -> None:
     api = StubApi(httpx.Response(200, json={"count": 1}))
 
@@ -201,6 +223,19 @@ def test_returns_the_validated_body_when_the_response_has_one() -> None:
     assert fetched_count == Count(count=3)
 
 
+def test_returns_the_body_whole_when_the_response_is_binary() -> None:
+    api = StubApi(httpx.Response(200, content=b"\x89PNG", headers={"Content-Type": "image/png"}))
+
+    fetched_bytes = api.create_http_client().fetch_bytes(
+        "GET", "/v1/apps/app/channels/channel/qr", query={"format": "png"}
+    )
+
+    assert fetched_bytes == b"\x89PNG"
+    assert str(api.last_request.url) == (
+        "https://api.hotcodepush.com/v1/apps/app/channels/channel/qr?format=png"
+    )
+
+
 def test_raises_a_hot_code_push_error_when_the_response_is_not_ok() -> None:
     api = StubApi(
         httpx.Response(401, json={"code": "E_UNAUTHENTICATED", "message": "The token is invalid."})
@@ -247,6 +282,26 @@ def test_retries_a_post_when_the_api_is_unavailable_and_the_call_is_retryable() 
     with pytest.raises(HotCodePushError):
         api.create_http_client().fetch_json(
             "POST", "/v1/apps/app/channels/channel/pause", Count, is_retryable=True
+        )
+
+    assert len(api.requests) == 3
+
+
+def test_sends_the_body_of_a_status_request_as_json_when_a_body_is_set() -> None:
+    api = StubApi(httpx.Response(204))
+
+    api.create_http_client().fetch_status("DELETE", "/v1/users/me", body={"password": "secret"})
+
+    assert api.last_request.headers["Content-Type"] == "application/json"
+    assert resolve_sent_json(api.last_request) == {"password": "secret"}
+
+
+def test_retries_a_status_post_when_the_api_is_unavailable_and_the_call_is_retryable() -> None:
+    api = StubApi(httpx.Response(503))
+
+    with pytest.raises(HotCodePushError):
+        api.create_http_client().fetch_status(
+            "POST", "/v1/organizations/organization/subscription/uncancel", is_retryable=True
         )
 
     assert len(api.requests) == 3

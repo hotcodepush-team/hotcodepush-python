@@ -71,6 +71,39 @@ def test_gets_lists_and_updates_the_created_organization(
     assert updated_organization.name == "Python Client Test Renamed"
 
 
+def test_lists_the_members_with_their_users_and_gets_one(
+    hot_code_push: HotCodePush, organization: Organization
+) -> None:
+    [owner] = hot_code_push.organizations.members.list(
+        organization_id=organization.id, relations=["user"]
+    )
+    fetched_member = hot_code_push.organizations.members.get(
+        member_id=owner.id, organization_id=organization.id
+    )
+
+    assert owner.user is not None
+    assert (fetched_member.id, fetched_member.role) == (owner.id, "owner")
+
+
+def test_creates_lists_and_withdraws_an_invitation(
+    hot_code_push: HotCodePush, organization: Organization
+) -> None:
+    created_invitation = hot_code_push.organizations.invitations.create(
+        email="invitee@example.com", organization_id=organization.id, role="member"
+    )
+    fetched_invitations = hot_code_push.organizations.invitations.list(
+        organization_id=organization.id
+    )
+    hot_code_push.organizations.invitations.delete(
+        invitation_id=created_invitation.id, organization_id=organization.id
+    )
+    pending_invitations = hot_code_push.invitations.list(relations=["organization"])
+
+    assert created_invitation.status == "pending"
+    assert created_invitation.id in [listed.id for listed in fetched_invitations]
+    assert all(listed.organization is not None for listed in pending_invitations)
+
+
 def test_gets_lists_and_updates_the_created_app(
     hot_code_push: HotCodePush, app: App, organization: Organization
 ) -> None:

@@ -6,13 +6,33 @@ from .._http import HttpClient, resolve_path
 from .._types import NOT_GIVEN, NotGiven
 from ..models import Count, Organization
 from ._base import BaseResource
+from .audit_logs import AuditLogsResource
+from .checkouts import CheckoutsResource
+from .customer_portal_sessions import CustomerPortalSessionsResource
+from .limits import LimitsResource
+from .members import MembersResource
 from .organization_apps import OrganizationAppsResource
+from .organization_invitations import OrganizationInvitationsResource
+from .sso_provider import SsoProviderResource
+from .subscription import SubscriptionResource
+from .usage import UsageResource
+from .webhooks import WebhooksResource
 
 
 class OrganizationsResource(BaseResource):
     def __init__(self, http_client: HttpClient) -> None:
         super().__init__(http_client)
         self.apps = OrganizationAppsResource(http_client)
+        self.audit_logs = AuditLogsResource(http_client)
+        self.checkouts = CheckoutsResource(http_client)
+        self.customer_portal_sessions = CustomerPortalSessionsResource(http_client)
+        self.invitations = OrganizationInvitationsResource(http_client)
+        self.limits = LimitsResource(http_client)
+        self.members = MembersResource(http_client)
+        self.sso_provider = SsoProviderResource(http_client)
+        self.subscription = SubscriptionResource(http_client)
+        self.usage = UsageResource(http_client)
+        self.webhooks = WebhooksResource(http_client)
 
     def count(self) -> Count:
         """The number of the caller's organizations."""

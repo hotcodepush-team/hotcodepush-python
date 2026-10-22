@@ -6,12 +6,14 @@ from .._http import HttpClient, resolve_path
 from .._types import NOT_GIVEN, NotGiven
 from ..models import Channel, Count, FailureAction
 from ._base import BaseResource
+from .channel_qr import ChannelQrResource
 from .channel_releases import ChannelReleasesResource
 
 
 class ChannelsResource(BaseResource):
     def __init__(self, http_client: HttpClient) -> None:
         super().__init__(http_client)
+        self.qr = ChannelQrResource(http_client)
         self.releases = ChannelReleasesResource(http_client)
 
     def count(self, *, app_id: str, query: str | NotGiven = NOT_GIVEN) -> Count:

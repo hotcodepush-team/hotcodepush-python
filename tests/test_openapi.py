@@ -3,6 +3,7 @@
 import inspect
 import io
 from collections.abc import Callable
+from datetime import UTC, datetime
 from functools import reduce
 from typing import Any
 
@@ -15,7 +16,9 @@ from hotcodepush import (
     BundleSignature,
     HotCodePush,
     ManifestFile,
+    OidcConfig,
     ReleaseProgression,
+    SamlConfig,
     UploadedPart,
 )
 from hotcodepush.resources._base import BaseResource
@@ -31,12 +34,22 @@ from tests.stub_api import StubApi, resolve_sent_json
 APP_ID = "7c0f3a52-1d8e-4b6a-9f21-5e3c8a0d4b17"
 BUNDLE_ID = "2a9e6c14-8b3f-4d70-a5e2-91c7f0b3d864"
 CHANNEL_ID = "e41b7d09-3c6a-4f85-b2d1-6a8f0c9e3b52"
+CREATED_SINCE = datetime(2026, 1, 1, tzinfo=UTC)
+CREATED_UNTIL = datetime(2026, 2, 1, tzinfo=UTC)
+DELIVERY_ID = "8f2c6a41-5d9e-4b73-a1c8-0e7b3d5f9a26"
 FILE = ManifestFile(path="index.html", sha256="a" * 64, size_bytes=5)
+INVITATION_ID = "9d3c5e81-6f2a-4b07-8c14-3e7a1f9b0d26"
+MEMBER_ID = "5b8a2f47-0e9c-4d31-a6b8-2c4f7e1d9a03"
 ORGANIZATION_ID = "c6e0b3a8-4d1f-4a92-b7e5-8f3d2c0a6b19"
+PASSWORD = "correct horse battery staple"
 RELEASE_ID = "0f7d4c2b-9a6e-4e18-83b5-d1c9a7f2e604"
+SESSION_ID = "4e7b2d90-8c3a-4f61-b5d2-9a1c6e8f3b47"
 SESSION_ONLY_NOTE = "An API token answers `E_FORBIDDEN`; sign in with a session."
 SHA256 = "a" * 64
+TOKEN_ID = "8a3f1c6e-2d94-4b70-9e15-c7b4a2d8f063"
 UPLOAD_ID = "upload"
+USER_ID = "2d5c8f1a-7b36-4e09-a4c2-6f1e9b3d7a58"
+WEBHOOK_ID = "3b9e1d74-6a2f-4c58-8d03-f5a7c2e9b416"
 
 CALLS: dict[str, Callable[[HotCodePush], object]] = {
     "apps.bundles.complete": lambda hot_code_push: hot_code_push.apps.bundles.complete(
@@ -137,6 +150,9 @@ CALLS: dict[str, Callable[[HotCodePush], object]] = {
     "apps.channels.pause": lambda hot_code_push: hot_code_push.apps.channels.pause(
         app_id=APP_ID, channel_id=CHANNEL_ID
     ),
+    "apps.channels.qr.get": lambda hot_code_push: hot_code_push.apps.channels.qr.get(
+        app_id=APP_ID, channel_id=CHANNEL_ID, format="png"
+    ),
     "apps.channels.releases.count": lambda hot_code_push: (
         hot_code_push.apps.channels.releases.count(app_id=APP_ID, channel_id=CHANNEL_ID, number=1)
     ),
@@ -198,6 +214,13 @@ CALLS: dict[str, Callable[[HotCodePush], object]] = {
         framework="expo",
         name="Demo",
     ),
+    "invitations.accept": lambda hot_code_push: hot_code_push.invitations.accept(
+        invitation_id=INVITATION_ID, token="token"
+    ),
+    "invitations.count": lambda hot_code_push: hot_code_push.invitations.count(),
+    "invitations.list": lambda hot_code_push: hot_code_push.invitations.list(
+        limit=10, offset=10, relations=["organization"]
+    ),
     "organizations.apps.count": lambda hot_code_push: hot_code_push.organizations.apps.count(
         organization_id=ORGANIZATION_ID, query="demo"
     ),
@@ -207,9 +230,51 @@ CALLS: dict[str, Callable[[HotCodePush], object]] = {
     "organizations.apps.list": lambda hot_code_push: hot_code_push.organizations.apps.list(
         limit=10, offset=10, organization_id=ORGANIZATION_ID, query="demo"
     ),
+    "organizations.audit_logs.count": lambda hot_code_push: (
+        hot_code_push.organizations.audit_logs.count(
+            actor_type="user",
+            app_id=APP_ID,
+            created_since=CREATED_SINCE,
+            created_until=CREATED_UNTIL,
+            organization_id=ORGANIZATION_ID,
+            type="channel.*",
+            user_id=USER_ID,
+        )
+    ),
+    "organizations.audit_logs.download_csv": lambda hot_code_push: (
+        hot_code_push.organizations.audit_logs.download_csv(
+            actor_type="user",
+            app_id=APP_ID,
+            created_since=CREATED_SINCE,
+            created_until=CREATED_UNTIL,
+            organization_id=ORGANIZATION_ID,
+            type="channel.*",
+            user_id=USER_ID,
+        )
+    ),
+    "organizations.audit_logs.list": lambda hot_code_push: (
+        hot_code_push.organizations.audit_logs.list(
+            actor_type="user",
+            app_id=APP_ID,
+            created_since=CREATED_SINCE,
+            created_until=CREATED_UNTIL,
+            limit=10,
+            offset=10,
+            organization_id=ORGANIZATION_ID,
+            relations=["app", "user"],
+            type="channel.*",
+            user_id=USER_ID,
+        )
+    ),
+    "organizations.checkouts.create": lambda hot_code_push: (
+        hot_code_push.organizations.checkouts.create(organization_id=ORGANIZATION_ID)
+    ),
     "organizations.count": lambda hot_code_push: hot_code_push.organizations.count(),
     "organizations.create": lambda hot_code_push: hot_code_push.organizations.create(
         idempotency_key="key", name="Acme"
+    ),
+    "organizations.customer_portal_sessions.create": lambda hot_code_push: (
+        hot_code_push.organizations.customer_portal_sessions.create(organization_id=ORGANIZATION_ID)
     ),
     "organizations.delete": lambda hot_code_push: hot_code_push.organizations.delete(
         organization_id=ORGANIZATION_ID
@@ -217,8 +282,115 @@ CALLS: dict[str, Callable[[HotCodePush], object]] = {
     "organizations.get": lambda hot_code_push: hot_code_push.organizations.get(
         organization_id=ORGANIZATION_ID
     ),
+    "organizations.invitations.count": lambda hot_code_push: (
+        hot_code_push.organizations.invitations.count(
+            organization_id=ORGANIZATION_ID, query="jane", role="member", status="pending"
+        )
+    ),
+    "organizations.invitations.create": lambda hot_code_push: (
+        hot_code_push.organizations.invitations.create(
+            email="jane@example.com",
+            idempotency_key="key",
+            organization_id=ORGANIZATION_ID,
+            role="member",
+        )
+    ),
+    "organizations.invitations.delete": lambda hot_code_push: (
+        hot_code_push.organizations.invitations.delete(
+            invitation_id=INVITATION_ID, organization_id=ORGANIZATION_ID
+        )
+    ),
+    "organizations.invitations.delete_many": lambda hot_code_push: (
+        hot_code_push.organizations.invitations.delete_many(
+            ids=[INVITATION_ID], organization_id=ORGANIZATION_ID
+        )
+    ),
+    "organizations.invitations.list": lambda hot_code_push: (
+        hot_code_push.organizations.invitations.list(
+            limit=10,
+            offset=10,
+            organization_id=ORGANIZATION_ID,
+            query="jane",
+            role="member",
+            status="pending",
+        )
+    ),
+    "organizations.limits.get": lambda hot_code_push: hot_code_push.organizations.limits.get(
+        organization_id=ORGANIZATION_ID
+    ),
     "organizations.list": lambda hot_code_push: hot_code_push.organizations.list(
         limit=10, offset=10
+    ),
+    "organizations.members.count": lambda hot_code_push: hot_code_push.organizations.members.count(
+        organization_id=ORGANIZATION_ID, query="jane", role="admin", user_id=USER_ID
+    ),
+    "organizations.members.delete": lambda hot_code_push: (
+        hot_code_push.organizations.members.delete(
+            member_id=MEMBER_ID, organization_id=ORGANIZATION_ID
+        )
+    ),
+    "organizations.members.delete_many": lambda hot_code_push: (
+        hot_code_push.organizations.members.delete_many(
+            ids=[MEMBER_ID], organization_id=ORGANIZATION_ID
+        )
+    ),
+    "organizations.members.get": lambda hot_code_push: hot_code_push.organizations.members.get(
+        member_id=MEMBER_ID, organization_id=ORGANIZATION_ID, relations=["user", "user.accounts"]
+    ),
+    "organizations.members.list": lambda hot_code_push: hot_code_push.organizations.members.list(
+        limit=10,
+        offset=10,
+        organization_id=ORGANIZATION_ID,
+        query="jane",
+        relations=["user", "user.accounts"],
+        role="admin",
+        user_id=USER_ID,
+    ),
+    "organizations.members.update": lambda hot_code_push: (
+        hot_code_push.organizations.members.update(
+            member_id=MEMBER_ID, organization_id=ORGANIZATION_ID, role="admin"
+        )
+    ),
+    "organizations.sso_provider.delete": lambda hot_code_push: (
+        hot_code_push.organizations.sso_provider.delete(organization_id=ORGANIZATION_ID)
+    ),
+    "organizations.sso_provider.get": lambda hot_code_push: (
+        hot_code_push.organizations.sso_provider.get(organization_id=ORGANIZATION_ID)
+    ),
+    "organizations.sso_provider.put": lambda hot_code_push: (
+        hot_code_push.organizations.sso_provider.put(
+            domain="example.com",
+            oidc=OidcConfig(
+                client_id="client",
+                client_secret="secret",
+                discovery_endpoint="https://idp.example.com/.well-known/openid-configuration",
+                issuer="https://idp.example.com",
+                scopes=["openid"],
+            ),
+            organization_id=ORGANIZATION_ID,
+            saml=SamlConfig(
+                cert="certificate",
+                entity_id="https://idp.example.com/saml",
+                entry_point="https://idp.example.com/saml/sso",
+                issuer="https://idp.example.com",
+                metadata="<EntityDescriptor/>",
+            ),
+        )
+    ),
+    "organizations.sso_provider.verifications.create": lambda hot_code_push: (
+        hot_code_push.organizations.sso_provider.verifications.create(
+            organization_id=ORGANIZATION_ID
+        )
+    ),
+    "organizations.subscription.cancel": lambda hot_code_push: (
+        hot_code_push.organizations.subscription.cancel(
+            comment="We moved to a monthly release train.",
+            organization_id=ORGANIZATION_ID,
+            reason="not_enough_value",
+        )
+    ),
+    "organizations.subscription.uncancel": lambda hot_code_push: (
+        hot_code_push.organizations.subscription.uncancel(organization_id=ORGANIZATION_ID)
     ),
     "organizations.update": lambda hot_code_push: hot_code_push.organizations.update(
         country_allowlist=["DE"],
@@ -227,6 +399,106 @@ CALLS: dict[str, Callable[[HotCodePush], object]] = {
         name="Acme",
         organization_id=ORGANIZATION_ID,
         spending_cap_cents=50_000,
+    ),
+    "organizations.usage.count_apps": lambda hot_code_push: (
+        hot_code_push.organizations.usage.count_apps(
+            month="2026-09", organization_id=ORGANIZATION_ID
+        )
+    ),
+    "organizations.usage.download_apps_csv": lambda hot_code_push: (
+        hot_code_push.organizations.usage.download_apps_csv(
+            month="2026-09", organization_id=ORGANIZATION_ID
+        )
+    ),
+    "organizations.usage.get": lambda hot_code_push: hot_code_push.organizations.usage.get(
+        month="2026-09", organization_id=ORGANIZATION_ID
+    ),
+    "organizations.usage.list_apps": lambda hot_code_push: (
+        hot_code_push.organizations.usage.list_apps(
+            limit=10,
+            month="2026-09",
+            offset=10,
+            organization_id=ORGANIZATION_ID,
+            relations=["app"],
+        )
+    ),
+    "organizations.webhooks.count": lambda hot_code_push: (
+        hot_code_push.organizations.webhooks.count(organization_id=ORGANIZATION_ID)
+    ),
+    "organizations.webhooks.create": lambda hot_code_push: (
+        hot_code_push.organizations.webhooks.create(
+            app_id=APP_ID,
+            events=["release.created"],
+            format="raw",
+            name="Deploys",
+            organization_id=ORGANIZATION_ID,
+            url="https://example.com/hooks/hotcodepush",
+        )
+    ),
+    "organizations.webhooks.delete": lambda hot_code_push: (
+        hot_code_push.organizations.webhooks.delete(
+            organization_id=ORGANIZATION_ID, webhook_id=WEBHOOK_ID
+        )
+    ),
+    "organizations.webhooks.deliveries.count": lambda hot_code_push: (
+        hot_code_push.organizations.webhooks.deliveries.count(
+            created_since=CREATED_SINCE,
+            created_until=CREATED_UNTIL,
+            organization_id=ORGANIZATION_ID,
+            status="failed",
+            webhook_id=WEBHOOK_ID,
+        )
+    ),
+    "organizations.webhooks.deliveries.list": lambda hot_code_push: (
+        hot_code_push.organizations.webhooks.deliveries.list(
+            created_since=CREATED_SINCE,
+            created_until=CREATED_UNTIL,
+            limit=10,
+            offset=10,
+            organization_id=ORGANIZATION_ID,
+            status="failed",
+            webhook_id=WEBHOOK_ID,
+        )
+    ),
+    "organizations.webhooks.deliveries.redeliver": lambda hot_code_push: (
+        hot_code_push.organizations.webhooks.deliveries.redeliver(
+            delivery_id=DELIVERY_ID, organization_id=ORGANIZATION_ID, webhook_id=WEBHOOK_ID
+        )
+    ),
+    "organizations.webhooks.get": lambda hot_code_push: hot_code_push.organizations.webhooks.get(
+        organization_id=ORGANIZATION_ID, webhook_id=WEBHOOK_ID
+    ),
+    "organizations.webhooks.list": lambda hot_code_push: hot_code_push.organizations.webhooks.list(
+        limit=10, offset=10, organization_id=ORGANIZATION_ID
+    ),
+    "organizations.webhooks.test": lambda hot_code_push: hot_code_push.organizations.webhooks.test(
+        organization_id=ORGANIZATION_ID, webhook_id=WEBHOOK_ID
+    ),
+    "organizations.webhooks.update": lambda hot_code_push: (
+        hot_code_push.organizations.webhooks.update(
+            app_id=None,
+            events=["release.created", "release.paused"],
+            is_enabled=True,
+            name="Releases",
+            organization_id=ORGANIZATION_ID,
+            url="https://example.com/hooks/releases",
+            webhook_id=WEBHOOK_ID,
+        )
+    ),
+    "users.delete": lambda hot_code_push: hot_code_push.users.delete(
+        password=PASSWORD, user_id="me"
+    ),
+    "users.get": lambda hot_code_push: hot_code_push.users.get(
+        relations=["accounts", "members", "members.organization"], user_id="me"
+    ),
+    "users.password.create": lambda hot_code_push: hot_code_push.users.password.create(
+        password=PASSWORD, user_id="me"
+    ),
+    "users.sessions.delete_many": lambda hot_code_push: hot_code_push.users.sessions.delete_many(
+        ids=[SESSION_ID], user_id="me"
+    ),
+    "users.tokens.delete_many": lambda hot_code_push: hot_code_push.users.tokens.delete_many(
+        ids=[TOKEN_ID], user_id="me"
     ),
 }
 """One call per resource method with every option it can send, so a path, method, query
@@ -243,7 +515,6 @@ UNIMPLEMENTED_OPERATIONS = frozenset(
         "GET /v1/apps/{appId}/bundles/{bundleId}/files",
         "GET /v1/apps/{appId}/bundles/{bundleId}/files/count",
         "GET /v1/apps/{appId}/channels/{channelId}/audience",
-        "GET /v1/apps/{appId}/channels/{channelId}/qr",
         "POST /v1/apps/{appId}/channels/{channelId}/rollbacks",
         "DELETE /v1/apps/{appId}/devices",
         "GET /v1/apps/{appId}/devices",
@@ -272,55 +543,12 @@ UNIMPLEMENTED_OPERATIONS = frozenset(
         "GET /v1/apps/{appId}/statistics/fleet",
         "GET /v1/apps/{appId}/statistics/updates",
         "GET /v1/apps/{appId}/statistics/usage",
-        "GET /v1/invitations",
-        "GET /v1/invitations/count",
-        "POST /v1/invitations/{invitationId}/accept",
         "GET /v1/notification-preferences",
         "PATCH /v1/notification-preferences",
         "GET /v1/notifications",
         "PATCH /v1/notifications",
         "GET /v1/notifications/count",
         "PATCH /v1/notifications/{notificationId}",
-        "GET /v1/organizations/{organizationId}/audit-logs",
-        "GET /v1/organizations/{organizationId}/audit-logs/count",
-        "POST /v1/organizations/{organizationId}/checkouts",
-        "POST /v1/organizations/{organizationId}/customer-portal-sessions",
-        "DELETE /v1/organizations/{organizationId}/invitations",
-        "GET /v1/organizations/{organizationId}/invitations",
-        "POST /v1/organizations/{organizationId}/invitations",
-        "GET /v1/organizations/{organizationId}/invitations/count",
-        "DELETE /v1/organizations/{organizationId}/invitations/{invitationId}",
-        "GET /v1/organizations/{organizationId}/limits",
-        "DELETE /v1/organizations/{organizationId}/members",
-        "GET /v1/organizations/{organizationId}/members",
-        "GET /v1/organizations/{organizationId}/members/count",
-        "DELETE /v1/organizations/{organizationId}/members/{memberId}",
-        "GET /v1/organizations/{organizationId}/members/{memberId}",
-        "PATCH /v1/organizations/{organizationId}/members/{memberId}",
-        "DELETE /v1/organizations/{organizationId}/sso-provider",
-        "GET /v1/organizations/{organizationId}/sso-provider",
-        "PUT /v1/organizations/{organizationId}/sso-provider",
-        "POST /v1/organizations/{organizationId}/sso-provider/verifications",
-        "POST /v1/organizations/{organizationId}/subscription/cancel",
-        "POST /v1/organizations/{organizationId}/subscription/uncancel",
-        "GET /v1/organizations/{organizationId}/usage",
-        "GET /v1/organizations/{organizationId}/usage/apps",
-        "GET /v1/organizations/{organizationId}/usage/apps/count",
-        "GET /v1/organizations/{organizationId}/webhooks",
-        "POST /v1/organizations/{organizationId}/webhooks",
-        "GET /v1/organizations/{organizationId}/webhooks/count",
-        "DELETE /v1/organizations/{organizationId}/webhooks/{webhookId}",
-        "GET /v1/organizations/{organizationId}/webhooks/{webhookId}",
-        "PATCH /v1/organizations/{organizationId}/webhooks/{webhookId}",
-        "GET /v1/organizations/{organizationId}/webhooks/{webhookId}/deliveries",
-        "GET /v1/organizations/{organizationId}/webhooks/{webhookId}/deliveries/count",
-        "POST /v1/organizations/{organizationId}/webhooks/{webhookId}/deliveries/{deliveryId}/redeliver",
-        "POST /v1/organizations/{organizationId}/webhooks/{webhookId}/test",
-        "DELETE /v1/users/{userId}",
-        "GET /v1/users/{userId}",
-        "POST /v1/users/{userId}/password",
-        "DELETE /v1/users/{userId}/sessions",
-        "DELETE /v1/users/{userId}/tokens",
     }
 )
 """The operations of the snapshot no resource method calls yet, ordered by path; an operation
