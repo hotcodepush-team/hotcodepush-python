@@ -20,7 +20,9 @@ src/hotcodepush/_types.py       NOT_GIVEN, the default of every optional argumen
 src/hotcodepush/exceptions.py   HotCodePushError and the parsing of the one error shape
 src/hotcodepush/models.py       every type a method takes or returns, derived from the snapshot by hand
 src/hotcodepush/resources/      one module per resource class
-tests/test_<module>.py          the unit tests of one module, through tests/stub_api.py
+tests/test_<resource>.py        the unit tests of one resource module's methods, through tests/stub_api.py; _upload.py and models.py are tested through them
+tests/test_http.py              the unit tests of _http.py and the client's options
+tests/test_exceptions.py        the unit tests of exceptions.py
 tests/test_openapi.py           the contract test: every resource method against the snapshot
 tests/test_integration.py       the client against a running API, skipped unless HOTCODEPUSH_API_BASE_URL is set
 tests/stub_api.py               StubApi, the httpx.MockTransport every unit test sends through

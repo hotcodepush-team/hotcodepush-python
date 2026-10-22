@@ -1,5 +1,6 @@
 """The typed Python client for the HotCodePush REST API."""
 
+from ._http import UploadBody
 from ._types import NOT_GIVEN, NotGiven
 from ._upload import PART_SIZE_BYTES, SINGLE_UPLOAD_LIMIT_BYTES
 from ._version import __version__
@@ -35,8 +36,7 @@ from .models import (
     DeviceCondition,
     DeviceCount,
     DeviceRelation,
-    EmbeddedApp,
-    EmbeddedOrganization,
+    EmbeddedRelease,
     EmbeddedUser,
     FailureAction,
     FingerprintCondition,
@@ -69,7 +69,6 @@ from .models import (
     ReleaseCount,
     ReleaseCounters,
     ReleaseDeviceEvent,
-    ReleaseEmbed,
     ReleaseProgression,
     ReleaseRelation,
     Role,
@@ -124,8 +123,7 @@ __all__ = [
     "DeviceCondition",
     "DeviceCount",
     "DeviceRelation",
-    "EmbeddedApp",
-    "EmbeddedOrganization",
+    "EmbeddedRelease",
     "EmbeddedUser",
     "FailureAction",
     "FingerprintCondition",
@@ -161,7 +159,6 @@ __all__ = [
     "ReleaseCount",
     "ReleaseCounters",
     "ReleaseDeviceEvent",
-    "ReleaseEmbed",
     "ReleaseProgression",
     "ReleaseRelation",
     "Role",
@@ -170,6 +167,7 @@ __all__ = [
     "SsoProvider",
     "TimeToAdoption",
     "UpdateStatistics",
+    "UploadBody",
     "UploadedBundlePack",
     "UploadedPart",
     "Usage",

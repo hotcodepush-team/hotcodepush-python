@@ -40,9 +40,12 @@ hot_code_push.apps.channels.pause(app_id=app.id, channel_id=channel.id)
 The resources mirror the API's paths, `/v1/apps/{appId}/channels` being `apps.channels`.
 Every method takes keyword arguments and returns pydantic models with snake_case fields.
 An optional argument you leave out stays out of the request; `None` sends `null`, which clears a field such as a channel's `expires_at`.
+`users.get(user_id="me")` answers the caller behind the token, as `me` addresses the caller wherever the API takes a `{userId}`.
 
 An upload takes `bytes` or a file object with its `content_length`, and streams it.
 Bytes above 64 MiB go up in parts, and a retry sends them again; a file object is read once, so a failed upload of one is not retried.
+
+Creating an organization, an invitation, an app, a channel, a release, a rollback, a bundle or a binary sends an `Idempotency-Key`, a UUID per call kept across the client's own retries; pass `idempotency_key` to reuse one when you retry the call yourself, and the API answers the first result again for 24 hours.
 
 A failed request raises a `HotCodePushError` with the API's `code`, `message` and `details` and the HTTP `status`.
 

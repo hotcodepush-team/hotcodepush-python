@@ -61,7 +61,9 @@ def resolve_response_example(method: str, template: str) -> object:
 
 def resolve_schema_example(schema: dict[str, Any]) -> object:
     """A value of the schema with every property set: the first branch of a union but `null`,
-    the first value of an enum, and an array of one item per branch of its items' union.
+    the first value of an enum, an array of one item per branch of its items' union, and a map
+    of one entry per name its `propertyNames` enumerates, or of one `key`, when
+    `additionalProperties` types its values; `{}`, any value, adds no entry.
     """
     branches = [branch for branch in resolve_branches(schema) if branch.get("type") != "null"]
     if branches != [schema]:
@@ -74,10 +76,15 @@ def resolve_schema_example(schema: dict[str, Any]) -> object:
     if isinstance(schema_type, list):
         schema_type = next(item for item in schema_type if item != "null")
     if schema_type == "object":
-        return {
+        example = {
             name: resolve_schema_example(property_schema)
             for name, property_schema in schema.get("properties", {}).items()
         }
+        value_schema = schema.get("additionalProperties")
+        if isinstance(value_schema, dict) and value_schema:
+            names = schema.get("propertyNames", {}).get("enum", ["key"])
+            example |= {name: resolve_schema_example(value_schema) for name in names}
+        return example
     if schema_type == "array":
         return [resolve_schema_example(branch) for branch in resolve_branches(schema["items"])]
     if schema_type == "string":

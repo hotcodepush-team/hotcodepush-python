@@ -841,6 +841,12 @@ def resolve_undeclared_fields(value: object, path: str) -> list[str]:
             for index, item in enumerate(value)
             for undeclared_field in resolve_undeclared_fields(item, f"{path}[{index}]")
         ]
+    if isinstance(value, dict):
+        return [
+            undeclared_field
+            for key, item in value.items()
+            for undeclared_field in resolve_undeclared_fields(item, f"{path}[{key}]")
+        ]
     if not isinstance(value, BaseModel):
         return []
     nested_undeclared_fields = [

@@ -135,7 +135,7 @@ class AppFile(HotCodePushModel):
 class AppUsageMonth(HotCodePushModel):
     """One live app's usage in a month; `app` is set when `relations` names it."""
 
-    app: EmbeddedApp | None = None
+    app: NamedEmbed | None = None
     app_id: str
     data_transfer_bytes: int
     month: str
@@ -181,7 +181,7 @@ class AuditLog(HotCodePushModel):
     actor_type: Literal["system", "user"]
     address: str | None
     api_key_id: str | None
-    app: EmbeddedApp | None = None
+    app: NamedEmbed | None = None
     app_id: str | None
     country: str | None
     created_at: datetime
@@ -377,22 +377,13 @@ class DeviceCount(HotCodePushModel):
     value: str | None
 
 
-class EmbeddedApp(HotCodePushModel):
-    """An app as an audit row, a usage row or a notification embeds it: its id and its name
-    alone.
+class EmbeddedRelease(HotCodePushModel):
+    """The release a notification's `relations` embeds: the id and the number, since a release
+    has no name.
     """
 
     id: str
-    name: str
-
-
-class EmbeddedOrganization(HotCodePushModel):
-    """An organization as an invitation embeds it for its invitee, who cannot read it yet: its
-    id and its name alone.
-    """
-
-    id: str
-    name: str
+    number: int
 
 
 class EmbeddedUser(HotCodePushModel):
@@ -446,7 +437,7 @@ class Invitation(HotCodePushModel):
     expires_at: datetime
     id: str
     inviter_id: str
-    organization: EmbeddedOrganization | None = None
+    organization: NamedEmbed | None = None
     organization_id: str
     role: InvitationRole
     status: Literal["accepted", "canceled", "pending", "rejected"]
@@ -490,7 +481,9 @@ class MultipartUpload(HotCodePushModel):
 
 
 class NamedEmbed(HotCodePushModel):
-    """The channel or member user a notification's `relations` embeds: the id and the name."""
+    """A row another row embeds through `relations`, its id and its name alone: an app, an
+    organization, a channel or a member user.
+    """
 
     id: str
     name: str
@@ -502,7 +495,7 @@ class Notification(HotCodePushModel):
     `None` once the row is deleted.
     """
 
-    app: EmbeddedApp | None = None
+    app: NamedEmbed | None = None
     app_id: str | None
     channel: NamedEmbed | None = None
     channel_id: str | None
@@ -512,7 +505,7 @@ class Notification(HotCodePushModel):
     member_user_id: str | None
     organization_id: str | None
     read_at: datetime | None
-    release: ReleaseEmbed | None = None
+    release: EmbeddedRelease | None = None
     release_id: str | None
     type: str
     updated_at: datetime
@@ -682,15 +675,6 @@ class ReleaseDeviceEvent(HotCodePushModel):
     release_id: str
     type: Literal["applied", "checked", "confirmed", "failed"]
     updated_at: datetime
-
-
-class ReleaseEmbed(HotCodePushModel):
-    """The release a notification's `relations` embeds: the id and the number, since a release
-    has no name.
-    """
-
-    id: str
-    number: int
 
 
 class ReleaseProgression(HotCodePushModel):

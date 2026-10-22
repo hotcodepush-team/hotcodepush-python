@@ -31,12 +31,12 @@ class HotCodePush:
             none.
         base_url: The base URL of the API.
         client: The `X-HotCodePush-Client` header, `<name>/<version>`.
-        user_agent: The `User-Agent` header, sent only when set, since a session keeps it and
-            the sessions page names the client by it.
-        timeout: The seconds every phase of a JSON call's attempt may take, httpx's connect,
-            read, write and pool timeouts; sixty when unset. An upload attempt gets ten minutes.
         http_client: The `httpx.Client` that sends the requests in place of the client's own;
             `close` leaves it open.
+        timeout: The seconds every phase of a JSON call's attempt may take, httpx's connect,
+            read, write and pool timeouts; sixty when unset. An upload attempt gets ten minutes.
+        user_agent: The `User-Agent` header, sent only when set, since a session keeps it and
+            the sessions page names the client by it.
     """
 
     def __init__(
@@ -45,9 +45,9 @@ class HotCodePush:
         *,
         base_url: str = DEFAULT_BASE_URL,
         client: str = DEFAULT_CLIENT,
-        user_agent: str | None = None,
-        timeout: float | None = None,
         http_client: httpx.Client | None = None,
+        timeout: float | None = None,
+        user_agent: str | None = None,
     ) -> None:
         self._http_client = HttpClient(
             base_url=base_url,
