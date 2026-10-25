@@ -6,19 +6,15 @@ The typed Python client for the [HotCodePush](https://hotcodepush.com) REST API,
 
 ## Installation
 
-The package is not on PyPI yet, so install a commit of `main` by its SHA:
-
 ```sh
-pip install git+https://github.com/hotcodepush-team/hotcodepush-python@<sha>
+pip install hotcodepush
 ```
 
 Or with uv:
 
 ```sh
-uv add git+https://github.com/hotcodepush-team/hotcodepush-python@<sha>
+uv add hotcodepush
 ```
-
-Pin a commit and bump it on purpose, never `@main`.
 
 It requires Python 3.11 or later.
 
