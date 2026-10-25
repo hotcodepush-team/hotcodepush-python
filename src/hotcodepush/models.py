@@ -18,7 +18,7 @@ AuditLogRelation = Literal["app", "user"]
 BundleDeltaRelation = Literal["baseBundle"]
 DeviceRelation = Literal["channel", "currentRelease"]
 FailureAction = Literal["none", "notify", "pause", "revoke"]
-Framework = Literal["capacitor", "cordova", "expo", "react-native"]
+Framework = Literal["capacitor", "cordova", "expo", "react_native"]
 InvitationRelation = Literal["organization"]
 InvitationRole = Literal["admin", "billing", "member"]
 """A role an invitation grants: any but `owner`, which only a transfer hands over."""
@@ -168,7 +168,7 @@ class AudienceWarning(HotCodePushModel):
     binaries.
     """
 
-    code: Literal["FINGERPRINT_UNKNOWN", "UNSUPPORTED_CONDITION_SHARE"]
+    code: Literal["fingerprint_unknown", "unsupported_condition_share"]
     details: dict[str, object] | None
     message: str
 

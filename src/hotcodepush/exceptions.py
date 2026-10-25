@@ -10,7 +10,7 @@ class HotCodePushError(Exception):
 
     `code`, `message` and `details` are the API's, verbatim, from its one error shape;
     a response outside that shape, such as a page of the platform in front of the API,
-    is `E_UNEXPECTED_RESPONSE` with the status, its body left out.
+    is `unexpected_response` with the status, its body left out.
     """
 
     def __init__(self, *, code: str, details: object, message: str, status: int) -> None:
@@ -29,7 +29,7 @@ def resolve_hot_code_push_error(status: int, text: str) -> HotCodePushError:
             code=code, details=body.get("details"), message=message, status=status
         )
     return HotCodePushError(
-        code="E_UNEXPECTED_RESPONSE",
+        code="unexpected_response",
         details=None,
         message=f"Request failed with status {status}.",
         status=status,

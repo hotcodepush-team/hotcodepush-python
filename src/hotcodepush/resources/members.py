@@ -28,7 +28,7 @@ class MembersResource(BaseResource):
     def delete(self, *, member_id: str, organization_id: str) -> None:
         """Removes a member; any member may remove themselves, which is leaving the organization.
 
-        An API token answers `E_FORBIDDEN`; sign in with a session.
+        An API token answers `forbidden`; sign in with a session.
         """
         self._http_client.fetch_status(
             "DELETE",
@@ -43,7 +43,7 @@ class MembersResource(BaseResource):
         """Removes the organization's members named by `ids`, one to 100; an id of another
         organization is skipped, and the Owner refuses the whole set.
 
-        An API token answers `E_FORBIDDEN`; sign in with a session.
+        An API token answers `forbidden`; sign in with a session.
         """
         self._http_client.fetch_status(
             "DELETE",
@@ -107,7 +107,7 @@ class MembersResource(BaseResource):
     def update(self, *, member_id: str, organization_id: str, role: Role) -> Member:
         """Changes a member's role; setting `owner` transfers the ownership.
 
-        An API token answers `E_FORBIDDEN`; sign in with a session.
+        An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_json(
             "PATCH",

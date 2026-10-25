@@ -29,7 +29,7 @@ class AppsResource(BaseResource):
     def delete(self, *, app_id: str) -> None:
         """Soft-deletes an app: gone at once, hard-deleted after seven days.
 
-        An API token answers `E_FORBIDDEN`; sign in with a session.
+        An API token answers `forbidden`; sign in with a session.
         """
         self._http_client.fetch_status("DELETE", resolve_path("/v1/apps/{appId}", appId=app_id))
 
@@ -41,10 +41,10 @@ class AppsResource(BaseResource):
     def transfer(self, *, app_id: str, organization_id: str) -> App:
         """Moves an app to another organization the caller is an Admin of.
 
-        A repeat answers `E_VALIDATION`, the app being in the target already, so the call is
+        A repeat answers `validation`, the app being in the target already, so the call is
         never retried.
 
-        An API token answers `E_FORBIDDEN`; sign in with a session.
+        An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_json(
             "POST",

@@ -15,7 +15,7 @@ class NotificationsResource(BaseResource):
         """The number of the caller's notifications under the list's filters; `is_read=False` is
         the bell's badge.
 
-        An API token answers `E_FORBIDDEN`; sign in with a session.
+        An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_json(
             "GET", resolve_path("/v1/notifications/count"), Count, query={"isRead": is_read}
@@ -31,7 +31,7 @@ class NotificationsResource(BaseResource):
     ) -> list[Notification]:
         """The caller's notifications, newest first.
 
-        An API token answers `E_FORBIDDEN`; sign in with a session.
+        An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_json(
             "GET",
@@ -43,7 +43,7 @@ class NotificationsResource(BaseResource):
     def update(self, *, is_read: Literal[True], notification_id: str) -> Notification:
         """Marks one of the caller's notifications read.
 
-        An API token answers `E_FORBIDDEN`; sign in with a session.
+        An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_json(
             "PATCH",
@@ -55,7 +55,7 @@ class NotificationsResource(BaseResource):
     def update_many(self, *, is_read: Literal[True]) -> None:
         """Marks every unread notification of the caller read.
 
-        An API token answers `E_FORBIDDEN`; sign in with a session.
+        An API token answers `forbidden`; sign in with a session.
         """
         self._http_client.fetch_status(
             "PATCH", resolve_path("/v1/notifications"), body={"isRead": is_read}

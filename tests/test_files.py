@@ -73,7 +73,7 @@ def test_deletes_the_upload_and_raises_when_a_part_is_refused() -> None:
             app_id="app", body=BYTES_ABOVE_SINGLE_UPLOAD_LIMIT, sha256=SHA256
         )
 
-    assert (raised.value.code, raised.value.status) == ("E_UPLOAD_INCOMPLETE", 409)
+    assert (raised.value.code, raised.value.status) == ("upload_incomplete", 409)
     assert api.sent_methods_and_urls == [
         f"POST {FILE_URL}/uploads",
         f"PUT {FILE_URL}/uploads/upload/parts/1",

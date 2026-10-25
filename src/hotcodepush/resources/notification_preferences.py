@@ -16,7 +16,7 @@ class NotificationPreferencesResource(BaseResource):
         included, in the catalog's order and email first: the categories set for the account, or
         with `organization_id` those set per membership.
 
-        An API token answers `E_FORBIDDEN`; sign in with a session.
+        An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_json(
             "GET",
@@ -36,7 +36,7 @@ class NotificationPreferencesResource(BaseResource):
         """Sets one preference, the category and the medium, and answers it; a mandatory
         category's email is always on.
 
-        An API token answers `E_FORBIDDEN`; sign in with a session.
+        An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_json(
             "PATCH",

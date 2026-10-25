@@ -11,8 +11,8 @@ from .webhook_deliveries import WebhookDeliveriesResource
 
 
 class WebhooksResource(BaseResource):
-    """The organization's webhooks, for Admins and Owners on a paying plan; any other plan
-    answers `E_PLAN_REQUIRED`.
+    """The organization's webhooks, for Admins and Owners on a plan that includes them; any
+    other plan answers `plan_required`.
     """
 
     def __init__(self, http_client: HttpClient) -> None:
@@ -22,7 +22,7 @@ class WebhooksResource(BaseResource):
     def count(self, *, organization_id: str) -> Count:
         """The number of the organization's webhooks.
 
-        An API token answers `E_FORBIDDEN`; sign in with a session.
+        An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_json(
             "GET",
@@ -42,13 +42,13 @@ class WebhooksResource(BaseResource):
         organization_id: str,
         url: str,
     ) -> CreatedWebhook:
-        """Creates a webhook, its name unique in the organization, `E_WEBHOOK_NAME_TAKEN`
+        """Creates a webhook, its name unique in the organization, `webhook_name_taken`
         otherwise; a `raw` webhook answers its secret this once.
 
-        The API keeps no `Idempotency-Key` for it and a repeat answers `E_WEBHOOK_NAME_TAKEN`, so
+        The API keeps no `Idempotency-Key` for it and a repeat answers `webhook_name_taken`, so
         the call is never retried.
 
-        An API token answers `E_FORBIDDEN`; sign in with a session.
+        An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_json(
             "POST",
@@ -62,7 +62,7 @@ class WebhooksResource(BaseResource):
     def delete(self, *, organization_id: str, webhook_id: str) -> None:
         """Deletes the webhook with its delivery log.
 
-        An API token answers `E_FORBIDDEN`; sign in with a session.
+        An API token answers `forbidden`; sign in with a session.
         """
         self._http_client.fetch_status(
             "DELETE",
@@ -74,7 +74,7 @@ class WebhooksResource(BaseResource):
         )
 
     def get(self, *, organization_id: str, webhook_id: str) -> Webhook:
-        """An API token answers `E_FORBIDDEN`; sign in with a session."""
+        """An API token answers `forbidden`; sign in with a session."""
         return self._http_client.fetch_json(
             "GET",
             resolve_path(
@@ -94,7 +94,7 @@ class WebhooksResource(BaseResource):
     ) -> list[Webhook]:
         """The organization's webhooks, newest first.
 
-        An API token answers `E_FORBIDDEN`; sign in with a session.
+        An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_json(
             "GET",
@@ -111,7 +111,7 @@ class WebhooksResource(BaseResource):
 
         Each call sends another sample event, so the call is never retried.
 
-        An API token answers `E_FORBIDDEN`; sign in with a session.
+        An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_json(
             "POST",
@@ -138,7 +138,7 @@ class WebhooksResource(BaseResource):
         format and the secret never change. Setting `is_enabled` on a webhook disabled after fifty
         consecutive failed deliveries starts its count again.
 
-        An API token answers `E_FORBIDDEN`; sign in with a session.
+        An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_json(
             "PATCH",

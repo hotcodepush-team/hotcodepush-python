@@ -9,7 +9,7 @@ class LimitsResource(BaseResource):
     def get(self, *, organization_id: str) -> dict[str, Limit]:
         """Every limit in effect for the organization, keyed by name.
 
-        An API token answers `E_FORBIDDEN`; sign in with a session.
+        An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_json(
             "GET",

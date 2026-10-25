@@ -16,14 +16,14 @@ def test_gets_the_qr_image_of_the_channel_in_the_given_format() -> None:
     assert api.sent_methods_and_urls == [f"GET {QR_URL}?format=png"]
 
 
-def test_raises_e_not_found_when_the_app_has_no_channel_link_template() -> None:
+def test_raises_not_found_when_the_app_has_no_channel_link_template() -> None:
     api = StubApi(
         httpx.Response(
-            404, json={"code": "E_NOT_FOUND", "message": "The app has no channel link template."}
+            404, json={"code": "not_found", "message": "The app has no channel link template."}
         )
     )
 
     with pytest.raises(HotCodePushError) as raised:
         api.client.apps.channels.qr.get(app_id="app", channel_id="channel")
 
-    assert (raised.value.code, raised.value.status) == ("E_NOT_FOUND", 404)
+    assert (raised.value.code, raised.value.status) == ("not_found", 404)

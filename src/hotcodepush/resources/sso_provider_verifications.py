@@ -10,11 +10,11 @@ class SsoProviderVerificationsResource(BaseResource):
         """Looks up the domain's TXT record for the provider's `domain_verification_token` and
         sets `domain_verified` when the record carries it; the answer is the provider, verified or
         still waiting for the record, and a resolver that cannot be asked answers
-        `E_DNS_LOOKUP_FAILED`.
+        `dns_lookup_failed`.
 
         A verified provider answers unchanged without a lookup, so the call is retried.
 
-        An API token answers `E_FORBIDDEN`; sign in with a session.
+        An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_json(
             "POST",

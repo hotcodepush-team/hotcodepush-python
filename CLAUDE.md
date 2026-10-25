@@ -55,10 +55,10 @@ Run `uv run ruff format .` before every commit; the format check, lint, type che
 
 - Auth is `Authorization: Bearer <token>`; the token falls back to `HOTCODEPUSH_TOKEN` and stays optional, since `/health` needs none.
 - Every request sends `X-HotCodePush-Client: <name>/<version>`, `python/<this package's version>` unless the caller passes its own `client`; `User-Agent` goes out only when the caller sets `user_agent`, since a session keeps it and the sessions page names the client by it.
-- Every error is one JSON shape, `code`, `message`, `details`; `HotCodePushError` carries them and the status verbatim, and a body without the shape becomes `E_UNEXPECTED_RESPONSE`.
+- Every error is one JSON shape, `code`, `message`, `details`; `HotCodePushError` carries them and the status verbatim, and a body without the shape becomes `unexpected_response`.
 - Every call goes through `HttpClient`, never a bare `httpx` call: sixty seconds per attempt, `JSON_TIMEOUT_SECONDS` or the caller's `timeout`, and ten minutes for a binary upload, `UPLOAD_TIMEOUT_SECONDS`, each httpx's limit on every phase of the attempt, the connect, each read and write and the pool; `send_with_retry` makes three attempts, backing off exponentially from 500 ms, on a transport error, 408, 429 and 5xx; a 429 or a 503 waits its `Retry-After` instead, at most sixty seconds, the rate-limit window.
 - Every creating `POST` — the eight operations whose OpenAPI document lists the `Idempotency-Key` header: organizations, invitations, apps, channels, releases, rollbacks, bundles and binaries — goes through `fetch_creating_post`, which sends the caller's `idempotency_key` or a UUID generated per call and kept across its retries. A checkout and a customer portal session carry no key and are never retried, since each call creates another Polar object.
-- Any other `POST` is retried only where a repeat is safe, `is_retryable=True`: `pause`, `resume`, the subscription's `cancel` and `uncancel`, a bundle's `complete`, a channel's bulk `revoke`, a signing key's `create`, the SSO verification, the two multipart starts and a file upload's completion; a pack's completion is never retried, since a repeat answers `E_NOT_FOUND` for an upload R2 already closed.
+- Any other `POST` is retried only where a repeat is safe, `is_retryable=True`: `pause`, `resume`, the subscription's `cancel` and `uncancel`, a bundle's `complete`, a channel's bulk `revoke`, a signing key's `create`, the SSO verification, the two multipart starts and a file upload's completion; a pack's completion is never retried, since a repeat answers `not_found` for an upload R2 already closed.
 - Lists take `limit` and `offset`; `relations` and `ids` are lists sent as comma lists, `?relations=user`, `?ids=a,b`, and any other list repeats its parameter, `?attribute=a&attribute=b`.
 - `me` is accepted wherever a `{userId}` appears; the client passes it through.
 - The `/v1/auth/*` slice is Better Auth's and outside the document; its client lives in the CLI and the console, never here.
@@ -75,7 +75,7 @@ Run `uv run ruff format .` before every commit; the format check, lint, type che
 - A model is a `HotCodePushModel` named after the API's entity, its fields the snapshot's properties in snake_case: required ones without a default, nullable ones `X | None`, a relation `X | None = None`; a date-time is a `datetime`, an enum a `Literal`, an alias in `models.py` when two types share it.
 - A query flag documented as `"true" | "false"` is a `bool`.
 - After a resource's `list` method, an annotation writes `builtins.list`, since the method shadows the builtin in the class body.
-- A method whose operation the document marks with `sessionAuth` carries ``An API token answers `E_FORBIDDEN`; sign in with a session.`` in its docstring; the contract test holds the note to the document.
+- A method whose operation the document marks with `sessionAuth` carries ``An API token answers `forbidden`; sign in with a session.`` in its docstring; the contract test holds the note to the document.
 
 ## The OpenAPI snapshot
 
@@ -98,7 +98,7 @@ The integration test runs by hand against that API, started with `ENVIRONMENT=de
 - Result variables carry the past participle of their operation: `fetched_channel`, `resolved_error`.
 - Alphabetical ordering within a scope: imports, dict keys, keyword arguments, model fields, declarations of one kind.
 - Booleans carry `is` or `has`; a state with a moment is a timestamp such as `paused_at`, never a boolean.
-- Error codes are `E_` plus SCREAMING_SNAKE, passed through verbatim, never renamed.
+- Every value of a catalog is lowercase snake_case with no prefix, error codes included: `not_found`, `unexpected_response`; the API's are passed through verbatim, never renamed.
 - Never `cast` or `# type: ignore`; a real check.
 - Test titles read `test_<verb>_…`, the verb in the third person, conditions starting with `when`; one test per request and branch.
 

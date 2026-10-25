@@ -55,7 +55,7 @@ class StubApi:
 
 class MultipartUploadStubApi(StubApi):
     """The API's side of a multipart upload: the upload id on its start, each part's number in
-    its etag, `E_UPLOAD_INCOMPLETE` for the failed part, `E_NOT_FOUND` on its deletion and the
+    its etag, `upload_incomplete` for the failed part, `not_found` on its deletion and the
     completed body on its completion.
     """
 
@@ -69,11 +69,11 @@ class MultipartUploadStubApi(StubApi):
         part_number = int(part_number_match.group(1)) if part_number_match else None
         if request.method == "DELETE":
             return httpx.Response(
-                404, json={"code": "E_NOT_FOUND", "message": "The upload does not exist."}
+                404, json={"code": "not_found", "message": "The upload does not exist."}
             )
         if request.method == "PUT" and part_number == self._failed_part_number:
             return httpx.Response(
-                409, json={"code": "E_UPLOAD_INCOMPLETE", "message": "The part was refused."}
+                409, json={"code": "upload_incomplete", "message": "The part was refused."}
             )
         if request.method == "PUT":
             return httpx.Response(

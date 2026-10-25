@@ -9,10 +9,10 @@ class UserPasswordResource(BaseResource):
         """Sets the first password of an account that signed up through GitHub, Google or SSO,
         and ends its other sessions.
 
-        An account with a password answers `E_PASSWORD_ALREADY_SET`, as a repeat would, so the
+        An account with a password answers `password_already_set`, as a repeat would, so the
         call is never retried.
 
-        An API token answers `E_FORBIDDEN`; sign in with a session.
+        An API token answers `forbidden`; sign in with a session.
         """
         self._http_client.fetch_status(
             "POST",

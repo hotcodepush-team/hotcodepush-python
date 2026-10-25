@@ -23,7 +23,7 @@ class WebhookDeliveriesResource(BaseResource):
     ) -> Count:
         """The number of the webhook's deliveries under the list's filters.
 
-        An API token answers `E_FORBIDDEN`; sign in with a session.
+        An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_json(
             "GET",
@@ -50,7 +50,7 @@ class WebhookDeliveriesResource(BaseResource):
         """The webhook's deliveries, newest first, filtered by `status` and by `created_since` and
         `created_until`, both inclusive.
 
-        An API token answers `E_FORBIDDEN`; sign in with a session.
+        An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_json(
             "GET",
@@ -77,7 +77,7 @@ class WebhookDeliveriesResource(BaseResource):
 
         Each call makes another attempt, so the call is never retried.
 
-        An API token answers `E_FORBIDDEN`; sign in with a session.
+        An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_json(
             "POST",

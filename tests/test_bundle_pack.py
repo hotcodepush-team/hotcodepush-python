@@ -72,5 +72,5 @@ def test_deletes_the_upload_and_raises_when_a_part_is_refused() -> None:
             app_id="app", body=BYTES_ABOVE_SINGLE_UPLOAD_LIMIT, bundle_id="bundle"
         )
 
-    assert raised.value.code == "E_UPLOAD_INCOMPLETE"
+    assert raised.value.code == "upload_incomplete"
     assert api.sent_methods_and_urls[-1] == f"DELETE {PACK_URL}/uploads/upload"

@@ -18,7 +18,7 @@ class SsoProviderResource(BaseResource):
         """Removes the SSO provider: password sign-in works again for its members, and the
         domain is forgotten.
 
-        An API token answers `E_FORBIDDEN`; sign in with a session.
+        An API token answers `forbidden`; sign in with a session.
         """
         self._http_client.fetch_status(
             "DELETE",
@@ -28,7 +28,7 @@ class SsoProviderResource(BaseResource):
         )
 
     def get(self, *, organization_id: str) -> SsoProvider:
-        """An API token answers `E_FORBIDDEN`; sign in with a session."""
+        """An API token answers `forbidden`; sign in with a session."""
         return self._http_client.fetch_json(
             "GET",
             resolve_path(
@@ -49,7 +49,7 @@ class SsoProviderResource(BaseResource):
         replacing the one before; a new or changed domain starts unverified, with a new token for
         its TXT record.
 
-        An API token answers `E_FORBIDDEN`; sign in with a session.
+        An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_json(
             "PUT",

@@ -13,7 +13,7 @@ class CustomerPortalSessionsResource(BaseResource):
         Each call creates another session and the API keeps no `Idempotency-Key` for it, so the
         call is never retried.
 
-        An API token answers `E_FORBIDDEN`; sign in with a session.
+        An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_json(
             "POST",

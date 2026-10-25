@@ -159,7 +159,7 @@ def test_passes_the_apis_error_through_when_there_is_nothing_to_roll_back(
         hot_code_push.apps.channels.rollbacks.create(app_id=app.id, channel_id=channel.id)
 
     assert (raised.value.code, raised.value.details, raised.value.status) == (
-        "E_VALIDATION",
+        "validation",
         {"field": "toReleaseId", "rule": "no_earlier_release", "target": "json"},
         400,
     )
@@ -185,10 +185,10 @@ def test_passes_the_apis_error_through_when_a_bundle_misses_its_files(
         hot_code_push.apps.bundles.get(app_id=app.id, bundle_id=created_bundle.id)
 
     assert (raised_on_completion.value.code, raised_on_completion.value.status) == (
-        "E_UPLOAD_INCOMPLETE",
+        "upload_incomplete",
         409,
     )
-    assert raised_after_deletion.value.code == "E_NOT_FOUND"
+    assert raised_after_deletion.value.code == "not_found"
 
 
 def test_creates_a_bundle_uploads_its_file_and_pack_completes_it_and_reads_its_manifest_hash(
@@ -279,7 +279,7 @@ def test_completes_a_bundle_whose_files_are_stored_lists_it_as_ready_and_deletes
 
     assert fetched_unstored_files == []
     assert created_bundle.id in [listed.id for listed in ready_bundles]
-    assert (raised.value.code, raised.value.status) == ("E_NOT_FOUND", 404)
+    assert (raised.value.code, raised.value.status) == ("not_found", 404)
 
 
 def test_creates_a_binary_and_reads_it_with_its_bundle(
@@ -324,7 +324,7 @@ def test_deletes_the_channel(hot_code_push: HotCodePush, app: App, channel: Chan
     with pytest.raises(HotCodePushError) as raised:
         hot_code_push.apps.channels.get(app_id=app.id, channel_id=channel.id)
 
-    assert (raised.value.code, raised.value.status) == ("E_NOT_FOUND", 404)
+    assert (raised.value.code, raised.value.status) == ("not_found", 404)
 
 
 def test_transfers_the_app_to_another_organization(
@@ -343,7 +343,7 @@ def test_deletes_the_app(hot_code_push: HotCodePush, app: App) -> None:
     with pytest.raises(HotCodePushError) as raised:
         hot_code_push.apps.get(app_id=app.id)
 
-    assert (raised.value.code, raised.value.status) == ("E_NOT_FOUND", 404)
+    assert (raised.value.code, raised.value.status) == ("not_found", 404)
 
 
 def resolve_manifest_file(path: str, content: bytes) -> ManifestFile:

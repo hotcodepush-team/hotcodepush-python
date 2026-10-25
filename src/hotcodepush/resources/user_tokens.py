@@ -9,7 +9,7 @@ class UserTokensResource(BaseResource):
         """Deletes the caller's API tokens named by `ids`, one to 100; an id that is not the
         caller's is skipped.
 
-        An API token answers `E_FORBIDDEN`; sign in with a session.
+        An API token answers `forbidden`; sign in with a session.
         """
         self._http_client.fetch_status(
             "DELETE",

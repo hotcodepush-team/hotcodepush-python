@@ -24,7 +24,7 @@ class SubscriptionResource(BaseResource):
 
         A cancel already scheduled stays as it is, so the call is retried.
 
-        An API token answers `E_FORBIDDEN`; sign in with a session.
+        An API token answers `forbidden`; sign in with a session.
         """
         self._http_client.fetch_status(
             "POST",
@@ -41,7 +41,7 @@ class SubscriptionResource(BaseResource):
 
         A subscription with no end scheduled stays as it is, so the call is retried.
 
-        An API token answers `E_FORBIDDEN`; sign in with a session.
+        An API token answers `forbidden`; sign in with a session.
         """
         self._http_client.fetch_status(
             "POST",

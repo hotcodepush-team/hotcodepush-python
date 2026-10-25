@@ -238,22 +238,22 @@ def test_returns_the_body_whole_when_the_response_is_binary() -> None:
 
 def test_raises_a_hot_code_push_error_when_the_response_is_not_ok() -> None:
     api = StubApi(
-        httpx.Response(401, json={"code": "E_UNAUTHENTICATED", "message": "The token is invalid."})
+        httpx.Response(401, json={"code": "unauthenticated", "message": "The token is invalid."})
     )
 
     with pytest.raises(HotCodePushError) as raised:
         api.create_http_client().fetch_json("GET", "/v1/users/me", Count)
 
-    assert (raised.value.code, raised.value.status) == ("E_UNAUTHENTICATED", 401)
+    assert (raised.value.code, raised.value.status) == ("unauthenticated", 401)
 
 
-def test_raises_e_unexpected_response_when_a_rate_limit_in_front_of_the_api_answers_html() -> None:
+def test_raises_unexpected_response_when_a_rate_limit_in_front_of_the_api_answers_html() -> None:
     api = StubApi(httpx.Response(429, text="<html>Too Many Requests</html>"))
 
     with pytest.raises(HotCodePushError) as raised:
         api.create_http_client().fetch_json("POST", "/v1/invitations/invitation/accept", Count)
 
-    assert (raised.value.code, raised.value.status) == ("E_UNEXPECTED_RESPONSE", 429)
+    assert (raised.value.code, raised.value.status) == ("unexpected_response", 429)
 
 
 @pytest.mark.parametrize("method", ["DELETE", "GET", "PUT"])

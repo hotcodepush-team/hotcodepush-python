@@ -19,7 +19,7 @@ class OrganizationInvitationsResource(BaseResource):
     ) -> Count:
         """The number of the organization's invitations under the list's filters.
 
-        An API token answers `E_FORBIDDEN`; sign in with a session.
+        An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_json(
             "GET",
@@ -42,7 +42,7 @@ class OrganizationInvitationsResource(BaseResource):
         """Invites an address to the organization, as a Member unless `role` says otherwise; the
         invitation mail carries the token.
 
-        An API token answers `E_FORBIDDEN`; sign in with a session.
+        An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_creating_post(
             resolve_path(
@@ -56,7 +56,7 @@ class OrganizationInvitationsResource(BaseResource):
     def delete(self, *, invitation_id: str, organization_id: str) -> None:
         """Withdraws an invitation.
 
-        An API token answers `E_FORBIDDEN`; sign in with a session.
+        An API token answers `forbidden`; sign in with a session.
         """
         self._http_client.fetch_status(
             "DELETE",
@@ -71,7 +71,7 @@ class OrganizationInvitationsResource(BaseResource):
         """Withdraws the organization's invitations named by `ids`, one to 100; an id of another
         organization is skipped.
 
-        An API token answers `E_FORBIDDEN`; sign in with a session.
+        An API token answers `forbidden`; sign in with a session.
         """
         self._http_client.fetch_status(
             "DELETE",
@@ -94,7 +94,7 @@ class OrganizationInvitationsResource(BaseResource):
         """The organization's invitations, newest first; `query` selects those whose email
         contains it, and `status="pending"` those still pending and not yet expired.
 
-        An API token answers `E_FORBIDDEN`; sign in with a session.
+        An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_json(
             "GET",

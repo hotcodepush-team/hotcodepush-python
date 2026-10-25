@@ -23,7 +23,7 @@ class AuditLogsResource(BaseResource):
     ) -> Count:
         """The number of the audit log's rows under the list's filters.
 
-        An API token answers `E_FORBIDDEN`; sign in with a session.
+        An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_json(
             "GET",
@@ -55,7 +55,7 @@ class AuditLogsResource(BaseResource):
     ) -> bytes:
         """The audit log under the list's filters as `text/csv`, every matching row, read whole.
 
-        An API token answers `E_FORBIDDEN`; sign in with a session.
+        An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_bytes(
             "GET",
@@ -87,10 +87,10 @@ class AuditLogsResource(BaseResource):
         type: str | NotGiven = NOT_GIVEN,
         user_id: str | NotGiven = NOT_GIVEN,
     ) -> list[AuditLog]:
-        """The organization's audit log, newest first; `type` takes `channel.*` for every action
-        on an object. Paying plans only, `E_PLAN_REQUIRED` otherwise.
+        """The organization's audit log, newest first, on a plan that includes it, `plan_required`
+        otherwise; `type` takes `channel.*` for every action on an object.
 
-        An API token answers `E_FORBIDDEN`; sign in with a session.
+        An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_json(
             "GET",

@@ -20,10 +20,10 @@ class UsersResource(BaseResource):
         """Soft-deletes the caller's account: gone at once, hard-deleted after seven days.
 
         `user_id` takes `me` for the caller; `password` is the account's own, and a wrong one
-        answers `E_FORBIDDEN`, as does an account without a password, which sets one first
+        answers `forbidden`, as does an account without a password, which sets one first
         through `users.password.create`.
 
-        An API token answers `E_FORBIDDEN`; sign in with a session.
+        An API token answers `forbidden`; sign in with a session.
         """
         self._http_client.fetch_status(
             "DELETE",
@@ -33,7 +33,7 @@ class UsersResource(BaseResource):
 
     def get(self, *, relations: list[UserRelation] | NotGiven = NOT_GIVEN, user_id: str) -> User:
         """The caller behind the token; `user_id` takes `me` for the caller, and another user
-        answers `E_FORBIDDEN`.
+        answers `forbidden`.
 
         `relations` embeds the caller's `accounts`, their sign-in identities, their `members` rows
         of live organizations and, with `members.organization`, each row's organization.

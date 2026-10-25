@@ -117,7 +117,7 @@ class ReleasesResource(BaseResource):
         """Revokes a release for good: devices on it move to the newest eligible older release or
         the embedded bundle.
 
-        A repeat answers `E_RELEASE_REVOKED`, so the call is never retried.
+        A repeat answers `release_revoked`, so the call is never retried.
         """
         return self._http_client.fetch_json(
             "POST",

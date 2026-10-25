@@ -41,7 +41,7 @@ class OrganizationsResource(BaseResource):
     def create(self, *, idempotency_key: str | NotGiven = NOT_GIVEN, name: str) -> Organization:
         """Creates an organization with the caller as its Owner.
 
-        An API token answers `E_FORBIDDEN`; sign in with a session.
+        An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_creating_post(
             resolve_path("/v1/organizations"),
@@ -54,7 +54,7 @@ class OrganizationsResource(BaseResource):
         """Soft-deletes an organization with everything under it: gone at once, hard-deleted
         after seven days.
 
-        An API token answers `E_FORBIDDEN`; sign in with a session.
+        An API token answers `forbidden`; sign in with a session.
         """
         self._http_client.fetch_status(
             "DELETE",
@@ -92,9 +92,9 @@ class OrganizationsResource(BaseResource):
         spending_cap_cents: int | NotGiven = NOT_GIVEN,
     ) -> Organization:
         """Changes the name, the security settings and the spending cap; the security settings
-        and the cap need a paying plan.
+        and the cap need a plan that includes them.
 
-        An API token answers `E_FORBIDDEN`; sign in with a session.
+        An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_json(
             "PATCH",
