@@ -7,13 +7,7 @@ The typed Python client for the [HotCodePush](https://hotcodepush.com) REST API,
 ## Installation
 
 ```sh
-pip install hotcodepush
-```
-
-Or with uv:
-
-```sh
-uv add hotcodepush
+pip install hotcodepush    # or: uv add hotcodepush
 ```
 
 It requires Python 3.11 or later.
@@ -34,33 +28,27 @@ hot_code_push.apps.channels.pause(app_id=app.id, channel_id=channel.id)
 ```
 
 The resources mirror the API's paths, `/v1/apps/{appId}/channels` being `apps.channels`.
-Every method takes keyword arguments and returns pydantic models with snake_case fields.
-An optional argument you leave out stays out of the request; `None` sends `null`, which clears a field such as a channel's `expires_at`.
-`users.get(user_id="me")` answers the caller behind the token, as `me` addresses the caller wherever the API takes a `{userId}`.
-
-An upload takes `bytes` or a file object with its `content_length`, and streams it.
-Bytes above 64 MiB go up in parts, and a retry sends them again; a file object is read once, so a failed upload of one is not retried.
-
-Creating an organization, an invitation, an app, a channel, a release, a rollback, a bundle or a binary sends an `Idempotency-Key`, a UUID per call kept across the client's own retries; pass `idempotency_key` to reuse one when you retry the call yourself, and the API answers the first result again for 24 hours.
-
-A failed request raises a `HotCodePushError` with the API's `code`, `message` and `details` and the HTTP `status`.
+Every method takes keyword arguments and returns pydantic models with snake_case fields; an argument left out stays out of the request, and `None` sends `null`.
+Uploads take `bytes` or a file object with its `content_length` and stream it.
+Creating calls send an `Idempotency-Key` and are retried; pass `idempotency_key` to reuse one across your own retries.
+A failed request raises a `HotCodePushError` with the API's `code`, `message`, `details` and the HTTP `status`.
 
 ## Documentation
 
-The documentation lives at [hotcodepush.com/docs/api/python](https://hotcodepush.com/docs/api/python).
+See [hotcodepush.com/docs/api/python](https://hotcodepush.com/docs/api/python).
 
 ## Development
 
 ```sh
 uv sync
-uv run ruff format --check .
-uv run ruff check .
-uv run mypy
 uv run pytest
+uv run ruff check . && uv run mypy
+uv run ruff format .       # run before every commit
 uv build
 ```
 
-`uv run ruff format .` formats the code.
+`uv run scripts/sync_openapi.py` fetches the API's OpenAPI document into `openapi.json`, which the contract test checks the client against.
+`CLAUDE.md` holds the layout and the rules.
 
 ## License
 
