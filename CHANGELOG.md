@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/hotcodepush-team/hotcodepush-python/compare/v0.2.0...v0.2.1) (2026-10-31)
+
+
+### Documentation
+
+* rewrite README [skip ci] ([8864795](https://github.com/hotcodepush-team/hotcodepush-python/commit/8864795c0c025111386ee542ba618364f71bfab9))
+
 ## [0.2.0](https://github.com/hotcodepush-team/hotcodepush-python/compare/v0.1.0...v0.2.0) (2026-10-25)
 
 
