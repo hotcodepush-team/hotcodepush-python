@@ -35,11 +35,11 @@ class OrganizationsResource(BaseResource):
         self.webhooks = WebhooksResource(http_client)
 
     def count(self) -> Count:
-        """The number of the caller's organizations."""
+        """Counts your organizations."""
         return self._http_client.fetch_json("GET", resolve_path("/v1/organizations/count"), Count)
 
     def create(self, *, idempotency_key: str | NotGiven = NOT_GIVEN, name: str) -> Organization:
-        """Creates an organization with the caller as its Owner.
+        """Creates an organization with you as its Owner.
 
         An API token answers `forbidden`; sign in with a session.
         """
@@ -51,8 +51,9 @@ class OrganizationsResource(BaseResource):
         )
 
     def delete(self, *, organization_id: str) -> None:
-        """Soft-deletes an organization with everything under it: gone at once, hard-deleted
-        after seven days.
+        """Soft-deletes an organization with everything in it.
+
+        It is gone at once and hard-deleted after seven days.
 
         An API token answers `forbidden`; sign in with a session.
         """
@@ -71,8 +72,9 @@ class OrganizationsResource(BaseResource):
     def list(
         self, *, limit: int | NotGiven = NOT_GIVEN, offset: int | NotGiven = NOT_GIVEN
     ) -> list[Organization]:
-        """The caller's organizations, newest first; the caller's role in each is on their
-        member rows, `users.get(relations=["members"], user_id="me")`.
+        """Lists your organizations, newest first.
+
+        Your role in each is on your member rows: `users.get(relations=["members"], user_id="me")`.
         """
         return self._http_client.fetch_json(
             "GET",
@@ -91,8 +93,9 @@ class OrganizationsResource(BaseResource):
         organization_id: str,
         spending_cap_cents: int | NotGiven = NOT_GIVEN,
     ) -> Organization:
-        """Changes the name, the security settings and the spending cap; the security settings
-        and the cap need a plan that includes them.
+        """Changes the name, the security settings or the spending cap.
+
+        The security settings and the spending cap need a plan that includes them.
 
         An API token answers `forbidden`; sign in with a session.
         """

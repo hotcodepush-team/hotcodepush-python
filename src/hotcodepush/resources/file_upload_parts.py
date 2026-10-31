@@ -16,10 +16,10 @@ class FileUploadPartsResource(BaseResource):
         sha256: str,
         upload_id: str,
     ) -> UploadedPart:
-        """Uploads one part of a multipart upload; its `etag` and `part_number` complete the
-        upload.
+        """Uploads one part of a multipart upload.
 
-        A file object `body` needs its `content_length`; bytes carry their own.
+        Pass the returned `etag` and `part_number` to complete the upload. A file object `body`
+        needs its `content_length`.
         """
         return self._http_client.fetch_upload(
             resolve_path(

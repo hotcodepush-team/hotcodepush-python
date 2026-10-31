@@ -14,7 +14,7 @@ class BinariesResource(BaseResource):
         fingerprint: str | NotGiven = NOT_GIVEN,
         platform: Platform | NotGiven = NOT_GIVEN,
     ) -> Count:
-        """The number of the app's store builds under the list's filters."""
+        """Counts the store builds of the app that match the filters."""
         return self._http_client.fetch_json(
             "GET",
             resolve_path("/v1/apps/{appId}/binaries/count", appId=app_id),
@@ -34,11 +34,10 @@ class BinariesResource(BaseResource):
         platform: Platform,
         version: str,
     ) -> Binary:
-        """Creates the binary, a store build on its identity with the bundle compiled into it,
-        its files uploaded first.
+        """Creates a binary: a store build with the bundle compiled into it.
 
-        An identical create answers the existing one; a conflicting fingerprint or file set is
-        refused unless `force` is set.
+        Upload its files first. Creating an identical binary again answers the existing one. A
+        conflicting fingerprint or file set is refused unless `force` is set.
         """
         return self._http_client.fetch_creating_post(
             resolve_path("/v1/apps/{appId}/binaries", appId=app_id),
@@ -70,7 +69,7 @@ class BinariesResource(BaseResource):
         offset: int | NotGiven = NOT_GIVEN,
         platform: Platform | NotGiven = NOT_GIVEN,
     ) -> list[Binary]:
-        """The app's store builds, newest first."""
+        """Lists the store builds of the app, newest first."""
         return self._http_client.fetch_json(
             "GET",
             resolve_path("/v1/apps/{appId}/binaries", appId=app_id),

@@ -16,8 +16,9 @@ class RollbacksResource(BaseResource):
         is_mandatory: bool | NotGiven = NOT_GIVEN,
         to_release_id: str | None | NotGiven = NOT_GIVEN,
     ) -> Release:
-        """Releases the channel's previous bundle again, or the one of `to_release_id`; a
-        rollback is a new release.
+        """Rolls the channel back by releasing its previous bundle again.
+
+        `to_release_id` picks another earlier release instead. A rollback is a new release.
         """
         return self._http_client.fetch_creating_post(
             resolve_path(

@@ -17,7 +17,7 @@ class OrganizationInvitationsResource(BaseResource):
         role: Role | NotGiven = NOT_GIVEN,
         status: Literal["pending"] | NotGiven = NOT_GIVEN,
     ) -> Count:
-        """The number of the organization's invitations under the list's filters.
+        """Counts the invitations of the organization that match the filters.
 
         An API token answers `forbidden`; sign in with a session.
         """
@@ -39,8 +39,9 @@ class OrganizationInvitationsResource(BaseResource):
         organization_id: str,
         role: InvitationRole | NotGiven = NOT_GIVEN,
     ) -> Invitation:
-        """Invites an address to the organization, as a Member unless `role` says otherwise; the
-        invitation mail carries the token.
+        """Invites an email address to the organization, as a Member unless `role` says otherwise.
+
+        The invitation email carries the token.
 
         An API token answers `forbidden`; sign in with a session.
         """
@@ -68,8 +69,9 @@ class OrganizationInvitationsResource(BaseResource):
         )
 
     def delete_many(self, *, ids: list[str], organization_id: str) -> None:
-        """Withdraws the organization's invitations named by `ids`, one to 100; an id of another
-        organization is skipped.
+        """Withdraws the invitations of the organization named by `ids`, 1 to 100.
+
+        An id of another organization is skipped.
 
         An API token answers `forbidden`; sign in with a session.
         """
@@ -91,8 +93,10 @@ class OrganizationInvitationsResource(BaseResource):
         role: Role | NotGiven = NOT_GIVEN,
         status: Literal["pending"] | NotGiven = NOT_GIVEN,
     ) -> list[Invitation]:
-        """The organization's invitations, newest first; `query` selects those whose email
-        contains it, and `status="pending"` those still pending and not yet expired.
+        """Lists the invitations of the organization, newest first.
+
+        `query` selects the invitations whose email contains it. `status="pending"` selects the
+        ones still pending and not yet expired.
 
         An API token answers `forbidden`; sign in with a session.
         """

@@ -28,7 +28,7 @@ class DevicesResource(BaseResource):
         platform: Platform | NotGiven = NOT_GIVEN,
         sdk_version: str | NotGiven = NOT_GIVEN,
     ) -> Count:
-        """The number of the app's devices under the list's filters."""
+        """Counts the devices of the app that match the filters."""
         return self._http_client.fetch_json(
             "GET",
             resolve_path("/v1/apps/{appId}/devices/count", appId=app_id),
@@ -47,15 +47,16 @@ class DevicesResource(BaseResource):
         )
 
     def delete(self, *, app_id: str, device_id: str) -> None:
-        """Deletes a device's registry row, the erasure request."""
+        """Deletes the registry row of a device, for an erasure request."""
         self._http_client.fetch_status(
             "DELETE",
             resolve_path("/v1/apps/{appId}/devices/{deviceId}", appId=app_id, deviceId=device_id),
         )
 
     def delete_many(self, *, app_id: str, ids: list[str]) -> None:
-        """Deletes the app's devices named by `ids`, one to 100; an id of another app is
-        skipped.
+        """Deletes the devices of the app named by `ids`, 1 to 100.
+
+        An id of another app is skipped.
         """
         self._http_client.fetch_status(
             "DELETE",
@@ -94,7 +95,10 @@ class DevicesResource(BaseResource):
         relations: list[DeviceRelation] | NotGiven = NOT_GIVEN,
         sdk_version: str | NotGiven = NOT_GIVEN,
     ) -> list[Device]:
-        """The app's devices, the newest report first; `attribute` takes one `key=value`."""
+        """Lists the devices of the app, newest report first.
+
+        `attribute` takes one `key=value`.
+        """
         return self._http_client.fetch_json(
             "GET",
             resolve_path("/v1/apps/{appId}/devices", appId=app_id),

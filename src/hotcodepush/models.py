@@ -1,8 +1,8 @@
-"""The types every resource method takes or returns, derived from the OpenAPI snapshot.
+"""The types that resource methods take and return, derived from the OpenAPI snapshot.
 
-Fields are snake_case and read the API's camelCase names; a field the API adds later is kept
-in `model_extra`, so it never breaks a reader. `relations` embeds linked rows as the optional
-fields named after them.
+Fields are the API's camelCase names in snake_case. A field the API adds later lands in
+`model_extra`, so it never breaks your code. The rows a `relations` argument names fill the
+optional fields of the same name.
 """
 
 from __future__ import annotations
@@ -21,7 +21,7 @@ FailureAction = Literal["none", "notify", "pause", "revoke"]
 Framework = Literal["capacitor", "cordova", "expo", "react_native"]
 InvitationRelation = Literal["organization"]
 InvitationRole = Literal["admin", "billing", "member"]
-"""A role an invitation grants: any but `owner`, which only a transfer hands over."""
+"""A role an invitation grants. `owner` is missing, since only a transfer hands it over."""
 MemberRelation = Literal["user", "user.accounts"]
 NotificationCategory = Literal[
     "account",
@@ -94,7 +94,7 @@ class HotCodePushModel(BaseModel):
 
 
 class Account(HotCodePushModel):
-    """A sign-in identity of a user: `credential` for the password, otherwise its provider."""
+    """A sign-in identity of a user: `credential` for a password, otherwise the provider."""
 
     created_at: datetime
     id: str
@@ -103,7 +103,7 @@ class Account(HotCodePushModel):
 
 
 class AdoptionPoint(HotCodePushModel):
-    """A moment of a release's adoption curve and the updates confirmed by then."""
+    """A point on a release's adoption curve: a moment and the updates confirmed by then."""
 
     at: datetime
     confirmed_update_count: int
@@ -133,7 +133,7 @@ class AppFile(HotCodePushModel):
 
 
 class AppUsageMonth(HotCodePushModel):
-    """One live app's usage in a month; `app` is set when `relations` names it."""
+    """The usage of one live app in a month. `app` is set when `relations` names it."""
 
     app: NamedEmbed | None = None
     app_id: str
@@ -143,7 +143,7 @@ class AppUsageMonth(HotCodePushModel):
 
 
 class AttributeCondition(HotCodePushModel):
-    """Devices whose attribute `key` holds the value of the SHA-256 `value_sha256`."""
+    """Devices whose attribute `key` holds the value with the SHA-256 hash `value_sha256`."""
 
     key: str
     type: Literal["attribute"] = "attribute"
@@ -151,7 +151,7 @@ class AttributeCondition(HotCodePushModel):
 
 
 class Audience(HotCodePushModel):
-    """The channel's active devices, the ones every condition reaches and the estimate at the
+    """The active devices of a channel, the ones all conditions reach, and the estimate at the
     rollout percentage.
     """
 
@@ -164,8 +164,8 @@ class Audience(HotCodePushModel):
 
 
 class AudienceWarning(HotCodePushModel):
-    """What the release would likely not do, read from the registry and the registered
-    binaries.
+    """A problem the release would likely have, based on the device registry and the
+    registered binaries.
     """
 
     code: Literal["fingerprint_unknown", "unsupported_condition_share"]
@@ -174,8 +174,9 @@ class AudienceWarning(HotCodePushModel):
 
 
 class AuditLog(HotCodePushModel):
-    """A row of the audit log: who did what to which object, and when; `app` and `user` are set
-    when `relations` names them, while the app or the user is live.
+    """A row of the audit log: who did what to which object, and when.
+
+    `app` and `user` are set when `relations` names them and the app or user still exists.
     """
 
     actor_type: Literal["system", "user"]
@@ -199,7 +200,7 @@ class AuditLog(HotCodePushModel):
 
 
 class Binary(HotCodePushModel):
-    """A store build; the devices running it are the fleet statistics' `binary` buckets."""
+    """A store build. The fleet statistics count its devices in their `binary` buckets."""
 
     app_id: str
     build: str
@@ -213,15 +214,17 @@ class Binary(HotCodePushModel):
 
 
 class BinaryCondition(HotCodePushModel):
-    """Devices whose binary version lies in `range`, `>=2.0.0` say."""
+    """Devices whose binary version lies in `range`, such as `>=2.0.0`."""
 
     range: str
     type: Literal["binary"] = "binary"
 
 
 class BinaryCount(HotCodePushModel):
-    """The devices of one binary, `value` its id, named by its platform and version, beside
-    their newest report; the value and the names are `None` for the builds no binary records.
+    """The devices of one binary and their newest report.
+
+    `value` is the binary's id. `value`, `platform` and `version` are `None` for builds without
+    a registered binary.
     """
 
     device_count: int
@@ -257,8 +260,8 @@ class Bundle(HotCodePushModel):
 
 
 class BundleDelta(HotCodePushModel):
-    """A delta pack of a bundle against one base, its size and patch count known once built;
-    `base_bundle` is set when `relations` names it.
+    """A delta pack of a bundle against one base. Its size and patch count are known once it is
+    built. `base_bundle` is set when `relations` names it.
     """
 
     base_bundle: Bundle | None = None
@@ -273,7 +276,7 @@ class BundleDelta(HotCodePushModel):
 
 
 class BundleFile(HotCodePushModel):
-    """A file a bundle lists; `stored_at` is when the app's store held its hash."""
+    """A file a bundle lists. `stored_at` is when the app stored a file with its hash."""
 
     bundle_id: str
     created_at: datetime
@@ -285,7 +288,7 @@ class BundleFile(HotCodePushModel):
 
 
 class BundleSignature(HotCodePushModel):
-    """The signature of a bundle's manifest: the signing key's fingerprint and the value."""
+    """The signature of a bundle manifest: the fingerprint of the signing key and the value."""
 
     key_id: str
     value: str
@@ -314,7 +317,7 @@ class Checkout(HotCodePushModel):
 
 
 class Count(HotCodePushModel):
-    """What every list's `count` answers: the rows the list's filters match."""
+    """The answer of every `count` method: the number of rows the filters match."""
 
     count: int
 
@@ -326,8 +329,9 @@ class CustomerPortalSession(HotCodePushModel):
 
 
 class DailyUpdateCounts(HotCodePushModel):
-    """A day's updates beside the channel's active devices of the day, the adoption rate's
-    denominator.
+    """The updates of one day and the active devices of the channel that day.
+
+    The active devices are the denominator of the adoption rate.
     """
 
     active_device_count: int | None
@@ -338,8 +342,9 @@ class DailyUpdateCounts(HotCodePushModel):
 
 
 class Device(HotCodePushModel):
-    """A device of the registry, the facts of its last report; `channel` and `current_release`
-    are set when `relations` names them.
+    """A device of the registry, as of its last report.
+
+    `channel` and `current_release` are set when `relations` names them.
     """
 
     app_id: str
@@ -378,8 +383,8 @@ class DeviceCount(HotCodePushModel):
 
 
 class EmbeddedRelease(HotCodePushModel):
-    """The release a notification's `relations` embeds: the id and the number, since a release
-    has no name.
+    """A release embedded in a notification: the id and the number, since a release has no
+    name.
     """
 
     id: str
@@ -387,7 +392,8 @@ class EmbeddedRelease(HotCodePushModel):
 
 
 class EmbeddedUser(HotCodePushModel):
-    """A user embedded under another caller's member or audit row: what a colleague is shown;
+    """A user embedded in a member or audit log row: what a colleague may see.
+
     `accounts` is set when `relations` names `user.accounts`.
     """
 
@@ -410,9 +416,9 @@ class FingerprintCondition(HotCodePushModel):
 
 
 class FleetStatistics(HotCodePushModel):
-    """The devices seen in the last thirty days: `device_count`, `current_device_count` the ones
-    running their channel's newest active release, and their counts per dimension, each the most
-    common first.
+    """The devices seen in the last thirty days, with counts per dimension, most common first.
+
+    `current_device_count` counts the devices on the newest active release of their channel.
     """
 
     binary: list[BinaryCount]
@@ -428,8 +434,9 @@ class FleetStatistics(HotCodePushModel):
 
 
 class Invitation(HotCodePushModel):
-    """An invitation to an organization; `organization` is set on the caller's own invitations
-    when `relations` names it.
+    """An invitation to an organization.
+
+    `organization` is set on your own invitations when `relations` names it.
     """
 
     created_at: datetime
@@ -445,7 +452,7 @@ class Invitation(HotCodePushModel):
 
 
 class Limit(HotCodePushModel):
-    """A limit in effect: its value, the plan's default and whether the value overrides it."""
+    """A limit in effect: its value, the plan default and whether the value overrides it."""
 
     default: int
     is_overridden: bool
@@ -453,7 +460,7 @@ class Limit(HotCodePushModel):
 
 
 class ManifestFile(HotCodePushModel):
-    """A file of a bundle's manifest: its path, the SHA-256 of its content and its size."""
+    """A file of a bundle manifest: its path, the SHA-256 hash of its content and its size."""
 
     path: str
     sha256: str
@@ -461,7 +468,7 @@ class ManifestFile(HotCodePushModel):
 
 
 class Member(HotCodePushModel):
-    """A member of an organization; `organization` and `user` are set when `relations` names
+    """A member of an organization. `organization` and `user` are set when `relations` names
     them.
     """
 
@@ -481,8 +488,8 @@ class MultipartUpload(HotCodePushModel):
 
 
 class NamedEmbed(HotCodePushModel):
-    """A row another row embeds through `relations`, its id and its name alone: an app, an
-    organization, a channel or a member user.
+    """The id and name of a row embedded through `relations`: an app, an organization, a
+    channel or a member user.
     """
 
     id: str
@@ -490,8 +497,10 @@ class NamedEmbed(HotCodePushModel):
 
 
 class Notification(HotCodePushModel):
-    """An in-app notification of the caller, its `organization_id` `None` for one about the
-    account; `app`, `channel`, `member_user` and `release` are set when `relations` names them,
+    """An in-app notification for you. `organization_id` is `None` when it is about your
+    account.
+
+    `app`, `channel`, `member_user` and `release` are set when `relations` names them, and are
     `None` once the row is deleted.
     """
 
@@ -513,8 +522,9 @@ class Notification(HotCodePushModel):
 
 
 class NotificationPreference(HotCodePushModel):
-    """Whether the caller receives one category's notifications through one medium, for the
-    account or, with `organization_id`, for one membership.
+    """Whether you receive the notifications of one category through one medium.
+
+    It applies to your account, or to one membership when `organization_id` is set.
     """
 
     category: NotificationCategory
@@ -524,7 +534,7 @@ class NotificationPreference(HotCodePushModel):
 
 
 class OidcConfig(HotCodePushModel):
-    """The OpenID Connect provider of an organization's SSO; a field left `None` is not sent."""
+    """The OpenID Connect provider for the SSO of an organization. A `None` field is not sent."""
 
     client_id: str
     client_secret: str
@@ -572,14 +582,14 @@ class Organization(HotCodePushModel):
 
 
 class OsCondition(HotCodePushModel):
-    """Devices whose operating system version lies in `range`, `>=17` say."""
+    """Devices whose operating system version lies in `range`, such as `>=17`."""
 
     range: str
     type: Literal["os"] = "os"
 
 
 class OsVersionCount(HotCodePushModel):
-    """The devices of one version of one platform's operating system."""
+    """The devices on one operating system version of one platform."""
 
     device_count: int
     platform: Platform
@@ -594,8 +604,9 @@ class ReasonCount(HotCodePushModel):
 
 
 class Release(HotCodePushModel):
-    """A release of a bundle in a channel; `bundle`, `channel` and `release_counters` are set
-    when `relations` names them.
+    """A release of a bundle in a channel.
+
+    `bundle`, `channel` and `release_counters` are set when `relations` names them.
     """
 
     auto_paused_at: datetime | None
@@ -630,8 +641,9 @@ class Release(HotCodePushModel):
 
 
 class ReleaseAdoption(HotCodePushModel):
-    """A live release's adoption curve since it went live, with the moments it reached half and
-    nine tenths of the channel's active devices.
+    """The adoption curve of a live release since it went live.
+
+    It includes the moments the release reached half and nine tenths of the active devices.
     """
 
     adoption: list[AdoptionPoint]
@@ -643,8 +655,9 @@ class ReleaseAdoption(HotCodePushModel):
 
 
 class ReleaseCount(HotCodePushModel):
-    """The devices of one release, `value` its id, named by its number and its channel; all
-    three are `None` for the embedded bundles.
+    """The devices of one release. `value` is the release id.
+
+    `value`, `number` and `channel_id` are `None` for devices on the embedded bundle.
     """
 
     channel_id: str | None
@@ -667,7 +680,9 @@ class ReleaseCounters(HotCodePushModel):
 
 
 class ReleaseDeviceEvent(HotCodePushModel):
-    """A device's first event of each type on a release, with the reason a failure gave."""
+    """The first event of each type that a device reported on a release, with the reason of a
+    failure.
+    """
 
     created_at: datetime
     device_id: str
@@ -678,7 +693,9 @@ class ReleaseDeviceEvent(HotCodePushModel):
 
 
 class ReleaseProgression(HotCodePushModel):
-    """The schedule that raises a release's rollout through `percentages`, a step at a time."""
+    """A schedule that raises the rollout of a release through `percentages`, one step at a
+    time.
+    """
 
     percentages: list[int]
     step_minimum_seconds: int
@@ -686,8 +703,9 @@ class ReleaseProgression(HotCodePushModel):
 
 
 class SamlConfig(HotCodePushModel):
-    """The SAML provider of an organization's SSO: its `metadata`, or its `cert` with its
-    `entity_id`; a field left `None` is not sent.
+    """The SAML provider for the SSO of an organization.
+
+    Set either `metadata`, or `cert` with `entity_id`. A `None` field is not sent.
     """
 
     cert: str | None = None
@@ -698,8 +716,8 @@ class SamlConfig(HotCodePushModel):
 
 
 class SigningKey(HotCodePushModel):
-    """A public key the app's bundles are verified against; its `fingerprint` is the `key_id` a
-    signature names.
+    """A public key that verifies the bundles of an app. Its `fingerprint` is the `key_id`
+    that a signature names.
     """
 
     app_id: str
@@ -711,9 +729,10 @@ class SigningKey(HotCodePushModel):
 
 
 class SsoProvider(HotCodePushModel):
-    """An organization's SSO provider: the domain, and the token its TXT record
-    `_hotcodepush-sso-{providerId}.{domain}` carries until `domain_verified`; the configs are
-    write-only.
+    """The SSO provider of an organization. The OIDC and SAML configs are write-only.
+
+    `domain_verified` is set once the TXT record `_hotcodepush-sso-{providerId}.{domain}`
+    carries the `domain_verification_token`.
     """
 
     created_at: datetime
@@ -730,8 +749,8 @@ class SsoProvider(HotCodePushModel):
 
 
 class TimeToAdoption(HotCodePushModel):
-    """When a release reached half and nine tenths of the channel's active devices; `None` until
-    it does.
+    """When a release reached half and nine tenths of the active devices of its channel. Each
+    is `None` until it happens.
     """
 
     percent50_at: datetime | None
@@ -739,7 +758,7 @@ class TimeToAdoption(HotCodePushModel):
 
 
 class UpdateStatistics(HotCodePushModel):
-    """The updates per day of the period, the adoption curves of the newest live releases and
+    """The updates per day of a period, the adoption curves of the newest live releases and
     the reasons the devices reported.
     """
 
@@ -754,15 +773,15 @@ class UploadedBundlePack(HotCodePushModel):
 
 
 class UploadedPart(HotCodePushModel):
-    """A part of a multipart upload; its `etag` and `part_number` complete the upload."""
+    """A part of a multipart upload. Pass its `etag` and `part_number` to complete the upload."""
 
     etag: str
     part_number: int
 
 
 class Usage(HotCodePushModel):
-    """An organization's monthly active devices and data transfer in `month`, `YYYY-MM`, summed
-    over its apps' rows.
+    """The monthly active devices and data transfer of an organization in `month`, summed over
+    its apps. `month` is `YYYY-MM`.
     """
 
     data_transfer_bytes: int
@@ -771,7 +790,7 @@ class Usage(HotCodePushModel):
 
 
 class UsageDay(HotCodePushModel):
-    """A day's checks and data transfer, beside the bytes the devices reported downloading."""
+    """The checks and data transfer of one day, and the bytes the devices reported downloading."""
 
     check_count: int
     data_transfer_bytes: int
@@ -780,7 +799,7 @@ class UsageDay(HotCodePushModel):
 
 
 class UsageMonth(HotCodePushModel):
-    """A month's monthly active devices and data transfer, the numbers the invoice shows."""
+    """The monthly active devices and data transfer of one month, as the invoice shows them."""
 
     data_transfer_bytes: int
     month: date
@@ -788,8 +807,8 @@ class UsageMonth(HotCodePushModel):
 
 
 class UsageStatistics(HotCodePushModel):
-    """The monthly active devices and data transfer per month the period touches, and the
-    checks, data transfer and device downloads per day.
+    """The monthly active devices and data transfer of each month in a period, and the checks,
+    data transfer and device downloads per day.
     """
 
     days: list[UsageDay]
@@ -797,7 +816,7 @@ class UsageStatistics(HotCodePushModel):
 
 
 class User(HotCodePushModel):
-    """The caller; `accounts` and `members` are set when `relations` names them."""
+    """You, the caller. `accounts` and `members` are set when `relations` names them."""
 
     accounts: list[Account] | None = None
     banned_at: datetime | None
@@ -845,10 +864,11 @@ class User(HotCodePushModel):
 
 
 class Webhook(HotCodePushModel):
-    """An outbound webhook: the `format`, `raw` for the JSON payload or `slack`, `discord` or
-    `teams` for a chat message, the subscribed audit `events`, the app filter, `None` for every
-    app's events and the organization's, and `is_enabled`, off after fifty consecutive failed
-    deliveries.
+    """An outbound webhook for the audit `events` it subscribes to.
+
+    `format` is `raw` for the JSON payload, or `slack`, `discord` or `teams` for a chat message.
+    `app_id` is `None` for the events of every app and of the organization. `is_enabled` turns
+    off after fifty failed deliveries in a row.
     """
 
     app_id: str | None
@@ -866,17 +886,20 @@ class Webhook(HotCodePushModel):
 
 # Out of the alphabetical order: a subclass follows its base.
 class CreatedWebhook(Webhook):
-    """A created webhook with its signing `secret`, answered this once; `None` for a chat
-    format, whose URL carries the token.
+    """A created webhook with its signing `secret`, returned only this once.
+
+    `secret` is `None` for a chat format, whose URL carries the token.
     """
 
     secret: str | None
 
 
 class WebhookDelivery(HotCodePushModel):
-    """One event sent to a webhook with its attempts: the `type`, the audit type or
-    `webhook.test`, the receiver's last `response_code` and `response_body`, cut at 4,096
-    characters, and `next_attempt_at` while the queue retries it.
+    """One event sent to a webhook, with its attempts.
+
+    `type` is the audit type or `webhook.test`. `response_code` and `response_body` are from the
+    last attempt, and the body is cut at 4,096 characters. `next_attempt_at` is set while the
+    queue retries the delivery.
     """
 
     attempt_count: int

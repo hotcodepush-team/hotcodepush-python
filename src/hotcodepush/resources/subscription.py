@@ -8,7 +8,7 @@ from ._base import BaseResource
 
 
 class SubscriptionResource(BaseResource):
-    """The organization's one subscription."""
+    """The one subscription of the organization."""
 
     def cancel(
         self,
@@ -19,10 +19,10 @@ class SubscriptionResource(BaseResource):
             "missing_features", "not_enough_value", "other", "technical_issues", "too_expensive"
         ],
     ) -> None:
-        """Schedules the end of the subscription at the end of its period, with the reason and
-        the comment of the retention dialog.
+        """Ends the subscription at the end of its current period.
 
-        A cancel already scheduled stays as it is, so the call is retried.
+        Pass the reason and comment from the cancellation dialog. Retried, since a scheduled
+        cancellation stays as it is.
 
         An API token answers `forbidden`; sign in with a session.
         """
@@ -37,9 +37,9 @@ class SubscriptionResource(BaseResource):
         )
 
     def uncancel(self, *, organization_id: str) -> None:
-        """Clears the scheduled end of the subscription, so it renews as before.
+        """Removes the scheduled end of the subscription, so it renews as before.
 
-        A subscription with no end scheduled stays as it is, so the call is retried.
+        Retried, since a subscription without a scheduled end stays as it is.
 
         An API token answers `forbidden`; sign in with a session.
         """

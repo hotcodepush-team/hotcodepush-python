@@ -23,7 +23,7 @@ class ReleasesResource(BaseResource):
         git_commit: str | NotGiven = NOT_GIVEN,
         status: Literal["active", "paused", "revoked"] | NotGiven = NOT_GIVEN,
     ) -> Count:
-        """The number of the app's releases under the list's filters."""
+        """Counts the releases of the app that match the filters."""
         return self._http_client.fetch_json(
             "GET",
             resolve_path("/v1/apps/{appId}/releases/count", appId=app_id),
@@ -43,8 +43,9 @@ class ReleasesResource(BaseResource):
         relations: list[ReleaseRelation] | NotGiven = NOT_GIVEN,
         release_id: str,
     ) -> Release:
-        """A release with its status: when it went live in the index and when the purge
-        completed.
+        """Gets a release with its status.
+
+        The status includes when the release went live in the index and when the purge completed.
         """
         return self._http_client.fetch_json(
             "GET",
@@ -67,8 +68,10 @@ class ReleasesResource(BaseResource):
         relations: list[ReleaseRelation] | NotGiven = NOT_GIVEN,
         status: Literal["active", "paused", "revoked"] | NotGiven = NOT_GIVEN,
     ) -> list[Release]:
-        """Every release of the app, newest first; `git_commit` selects those whose bundle's
-        commit hash, ref or message contains it.
+        """Lists every release of the app, newest first.
+
+        `git_commit` selects the releases whose bundle has a commit hash, ref or message that
+        contains it.
         """
         return self._http_client.fetch_json(
             "GET",
@@ -86,9 +89,9 @@ class ReleasesResource(BaseResource):
         )
 
     def pause(self, *, app_id: str, release_id: str) -> Release:
-        """Stops offering a release; devices on it keep it.
+        """Stops offering a release. Devices on it keep it.
 
-        Pausing a paused release answers it unchanged, so the call is retried.
+        Retried, since pausing a paused release answers it unchanged.
         """
         return self._http_client.fetch_json(
             "POST",
@@ -102,7 +105,7 @@ class ReleasesResource(BaseResource):
     def resume(self, *, app_id: str, release_id: str) -> Release:
         """Offers a paused release again.
 
-        Resuming an active release answers it unchanged, so the call is retried.
+        Retried, since resuming an active release answers it unchanged.
         """
         return self._http_client.fetch_json(
             "POST",
@@ -114,10 +117,10 @@ class ReleasesResource(BaseResource):
         )
 
     def revoke(self, *, app_id: str, release_id: str) -> Release:
-        """Revokes a release for good: devices on it move to the newest eligible older release or
-        the embedded bundle.
+        """Revokes a release for good.
 
-        A repeat answers `release_revoked`, so the call is never retried.
+        Devices on it move to the newest eligible older release, or to the embedded bundle. Never
+        retried, since a repeat answers `release_revoked`.
         """
         return self._http_client.fetch_json(
             "POST",
@@ -140,9 +143,10 @@ class ReleasesResource(BaseResource):
         release_id: str,
         rollout_percentage: int | NotGiven = NOT_GIVEN,
     ) -> Release:
-        """Changes the rollout percentage in both directions, the progression schedule, `None`
-        stopping it, the mandatory flag, the notes or the auto-pause overrides, `None` inheriting
-        the channel's.
+        """Changes the rollout, the progression, the mandatory flag, the notes or the auto-pause.
+
+        The rollout percentage can go up or down. `None` stops the progression schedule. `None` on
+        an auto-pause override inherits the channel's value.
         """
         return self._http_client.fetch_json(
             "PATCH",

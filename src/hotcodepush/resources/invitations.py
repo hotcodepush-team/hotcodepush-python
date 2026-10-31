@@ -7,12 +7,12 @@ from ._base import BaseResource
 
 
 class InvitationsResource(BaseResource):
-    """The caller's own invitations, across organizations."""
+    """Your own invitations, across organizations."""
 
     def accept(self, *, invitation_id: str, token: str) -> Member:
-        """Accepts an invitation addressed to the caller with the token from its mail.
+        """Accepts an invitation sent to you, with the token from its email.
 
-        A repeat answers `invitation_invalid`, so the call is never retried.
+        Never retried, since a repeat answers `invitation_invalid`.
 
         An API token answers `forbidden`; sign in with a session.
         """
@@ -24,7 +24,7 @@ class InvitationsResource(BaseResource):
         )
 
     def count(self) -> Count:
-        """The number of the caller's pending invitations across organizations.
+        """Counts your pending invitations across organizations.
 
         An API token answers `forbidden`; sign in with a session.
         """
@@ -37,8 +37,9 @@ class InvitationsResource(BaseResource):
         offset: int | NotGiven = NOT_GIVEN,
         relations: list[InvitationRelation] | NotGiven = NOT_GIVEN,
     ) -> list[Invitation]:
-        """The caller's pending invitations across organizations, newest first;
-        `relations=["organization"]` embeds each one's organization as its id and name.
+        """Lists your pending invitations across organizations, newest first.
+
+        `relations=["organization"]` embeds the id and name of each organization.
 
         An API token answers `forbidden`; sign in with a session.
         """

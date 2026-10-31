@@ -8,7 +8,7 @@ from ._base import BaseResource
 
 class BundleDeltasResource(BaseResource):
     def count(self, *, app_id: str, bundle_id: str) -> Count:
-        """The number of the bundle's delta packs."""
+        """Counts the delta packs of the bundle."""
         return self._http_client.fetch_json(
             "GET",
             resolve_path(
@@ -28,8 +28,10 @@ class BundleDeltasResource(BaseResource):
         offset: int | NotGiven = NOT_GIVEN,
         relations: list[BundleDeltaRelation] | NotGiven = NOT_GIVEN,
     ) -> list[BundleDelta]:
-        """The bundle's delta packs, one per base its devices run, newest first;
-        `relations=["baseBundle"]` embeds the base.
+        """Lists the delta packs of the bundle, newest first.
+
+        There is one pack per base bundle that its devices run. `relations=["baseBundle"]`
+        embeds the base.
         """
         return self._http_client.fetch_json(
             "GET",

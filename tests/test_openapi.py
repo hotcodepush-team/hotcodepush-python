@@ -1,5 +1,3 @@
-"""The contract test: every resource method against the OpenAPI snapshot."""
-
 import inspect
 import io
 from collections.abc import Callable
@@ -55,6 +53,7 @@ UPLOAD_ID = "upload"
 USER_ID = "2d5c8f1a-7b36-4e09-a4c2-6f1e9b3d7a58"
 WEBHOOK_ID = "3b9e1d74-6a2f-4c58-8d03-f5a7c2e9b416"
 
+# Each call sends every option its method takes, so anything the snapshot lacks fails a test.
 CALLS: dict[str, Callable[[HotCodePush], object]] = {
     "apps.binaries.count": lambda hot_code_push: hot_code_push.apps.binaries.count(
         app_id=APP_ID, fingerprint=f"fp1:{SHA256}", platform="ios"
@@ -708,16 +707,12 @@ CALLS: dict[str, Callable[[HotCodePush], object]] = {
         ids=[TOKEN_ID], user_id="me"
     ),
 }
-"""One call per resource method with every option it can send, so a path, method, query
-parameter, body field, content type or response field the document lacks fails here."""
 
+# `/health` is not in the OpenAPI document.
 UNDOCUMENTED_RESOURCES = frozenset({"health"})
-"""`/health` is outside the document by the path rule."""
 
 
 class SnapshotApi(StubApi):
-    """Answers every request with the example of its operation's documented 2xx response."""
-
     def respond(self, request: httpx.Request) -> httpx.Response:
         template = resolve_path_template(request.url.path)
         if template is None:
@@ -834,7 +829,6 @@ def resolve_resource_method_names(resource: BaseResource, path: str) -> list[str
 
 
 def resolve_undeclared_fields(value: object, path: str) -> list[str]:
-    """The response fields a model keeps in `model_extra`: documented, yet not declared."""
     if isinstance(value, list):
         return [
             undeclared_field
@@ -858,7 +852,6 @@ def resolve_undeclared_fields(value: object, path: str) -> list[str]:
 
 
 def resolve_undocumented_fields(value: object, schema: dict[str, Any], path: str) -> list[str]:
-    """The fields of a sent body its schema lacks, nested objects and list items included."""
     if isinstance(value, list):
         item_schema = next(
             branch["items"] for branch in resolve_branches(schema) if "items" in branch

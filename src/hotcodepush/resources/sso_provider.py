@@ -8,15 +8,16 @@ from .sso_provider_verifications import SsoProviderVerificationsResource
 
 
 class SsoProviderResource(BaseResource):
-    """The organization's one SSO provider."""
+    """The one SSO provider of the organization."""
 
     def __init__(self, http_client: HttpClient) -> None:
         super().__init__(http_client)
         self.verifications = SsoProviderVerificationsResource(http_client)
 
     def delete(self, *, organization_id: str) -> None:
-        """Removes the SSO provider: password sign-in works again for its members, and the
-        domain is forgotten.
+        """Removes the SSO provider.
+
+        Its members can sign in with a password again, and the domain is forgotten.
 
         An API token answers `forbidden`; sign in with a session.
         """
@@ -28,7 +29,10 @@ class SsoProviderResource(BaseResource):
         )
 
     def get(self, *, organization_id: str) -> SsoProvider:
-        """An API token answers `forbidden`; sign in with a session."""
+        """Gets the SSO provider.
+
+        An API token answers `forbidden`; sign in with a session.
+        """
         return self._http_client.fetch_json(
             "GET",
             resolve_path(
@@ -45,9 +49,10 @@ class SsoProviderResource(BaseResource):
         organization_id: str,
         saml: SamlConfig | NotGiven = NOT_GIVEN,
     ) -> SsoProvider:
-        """Sets the OIDC or SAML provider, exactly one of `oidc` and `saml`, and its domain,
-        replacing the one before; a new or changed domain starts unverified, with a new token for
-        its TXT record.
+        """Sets the SSO provider and its domain, replacing the one before.
+
+        Pass exactly one of `oidc` and `saml`. A new or changed domain starts unverified, with a new
+        token for its TXT record.
 
         An API token answers `forbidden`; sign in with a session.
         """

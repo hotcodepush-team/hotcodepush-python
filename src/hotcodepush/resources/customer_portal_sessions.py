@@ -7,11 +7,13 @@ from ._base import BaseResource
 
 class CustomerPortalSessionsResource(BaseResource):
     def create(self, *, organization_id: str) -> CustomerPortalSession:
-        """A session of Polar's customer portal for the organization's invoices and payment
-        method; an organization that never subscribed has none.
+        """Creates a session of the Polar customer portal.
 
-        Each call creates another session and the API keeps no `Idempotency-Key` for it, so the
-        call is never retried.
+        The portal shows the invoices and payment method of the organization. An organization that
+        never subscribed has none.
+
+        Never retried, since each call creates another session and the API keeps no
+        `Idempotency-Key` for it.
 
         An API token answers `forbidden`; sign in with a session.
         """

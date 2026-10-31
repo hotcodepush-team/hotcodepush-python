@@ -7,8 +7,9 @@ from ._base import BaseResource
 
 class ReleaseAudienceResource(BaseResource):
     def get(self, *, app_id: str, release_id: str) -> Audience:
-        """The devices a release reaches, evaluated over the registry the way the device
-        evaluates the index.
+        """Gets the devices a release reaches.
+
+        The API evaluates the registry the same way a device evaluates the index.
         """
         return self._http_client.fetch_json(
             "GET",

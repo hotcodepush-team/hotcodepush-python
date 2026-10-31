@@ -18,9 +18,10 @@ class StatisticsUpdatesResource(BaseResource):
         period_until: date | NotGiven = NOT_GIVEN,
         release_id: str | NotGiven = NOT_GIVEN,
     ) -> UpdateStatistics:
-        """The update statistics of the period, `period_since` to `period_until` inclusive, of
-        one channel when `channel_id` names it; `release_id` narrows the adoption curves to that
-        one release, whatever its age.
+        """Gets the update statistics from `period_since` to `period_until`, both inclusive.
+
+        `channel_id` limits them to one channel. `release_id` limits the adoption curves to that
+        release, whatever its age.
         """
         return self._http_client.fetch_json(
             "GET",

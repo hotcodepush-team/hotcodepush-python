@@ -7,8 +7,9 @@ from .bundle_pack_upload_parts import BundlePackUploadPartsResource
 
 
 class BundlePackUploadsResource(BaseResource):
-    """The multipart upload of a pack above the request body limit: create, upload the parts,
-    complete, or delete to abort.
+    """The multipart upload of a pack above the request body limit.
+
+    Create the upload, upload the parts, then complete it, or delete it to abort.
     """
 
     def __init__(self, http_client: HttpClient) -> None:
@@ -18,9 +19,9 @@ class BundlePackUploadsResource(BaseResource):
     def complete(
         self, *, app_id: str, bundle_id: str, parts: list[UploadedPart], upload_id: str
     ) -> UploadedBundlePack:
-        """Assembles the parts into the pack, replacing one uploaded before.
+        """Assembles the parts into the pack, replacing any pack uploaded before.
 
-        R2 refuses a second completion, so the call is never retried.
+        Never retried, since R2 refuses a second completion.
         """
         return self._http_client.fetch_json(
             "POST",
@@ -35,11 +36,10 @@ class BundlePackUploadsResource(BaseResource):
         )
 
     def create(self, *, app_id: str, bundle_id: str) -> MultipartUpload:
-        """Starts a multipart upload of the pack; every part but the last is at least five
-        mebibytes, all of one size.
+        """Starts a multipart upload of the pack.
 
-        The start holds no state, and an upload a repeat leaves unused expires by the bucket's
-        default, so the call is retried.
+        All parts but the last must have the same size, at least 5 MiB. Retried, since the start
+        holds no state and the bucket expires an unused upload.
         """
         return self._http_client.fetch_json(
             "POST",
@@ -53,7 +53,7 @@ class BundlePackUploadsResource(BaseResource):
         )
 
     def delete(self, *, app_id: str, bundle_id: str, upload_id: str) -> None:
-        """Aborts a multipart pack upload, discarding its parts."""
+        """Aborts a multipart pack upload and discards its parts."""
         self._http_client.fetch_status(
             "DELETE",
             resolve_path(

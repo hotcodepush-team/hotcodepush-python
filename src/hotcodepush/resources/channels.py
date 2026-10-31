@@ -21,7 +21,7 @@ class ChannelsResource(BaseResource):
         self.rollbacks = RollbacksResource(http_client)
 
     def count(self, *, app_id: str, query: str | NotGiven = NOT_GIVEN) -> Count:
-        """The number of the app's channels under the list's filters."""
+        """Counts the channels of the app that match the filters."""
         return self._http_client.fetch_json(
             "GET",
             resolve_path("/v1/apps/{appId}/channels/count", appId=app_id),
@@ -42,8 +42,9 @@ class ChannelsResource(BaseResource):
         is_protected: bool | NotGiven = NOT_GIVEN,
         name: str,
     ) -> Channel:
-        """Creates a channel; the name is one to 64 letters, digits, hyphens or underscores and
-        unique per app.
+        """Creates a channel.
+
+        The name has 1 to 64 letters, digits, hyphens or underscores, and is unique in the app.
         """
         return self._http_client.fetch_creating_post(
             resolve_path("/v1/apps/{appId}/channels", appId=app_id),
@@ -61,7 +62,7 @@ class ChannelsResource(BaseResource):
         )
 
     def delete(self, *, app_id: str, channel_id: str) -> None:
-        """Deletes a channel at once; the app's default channel is refused."""
+        """Deletes a channel at once. The default channel of the app is refused."""
         self._http_client.fetch_status(
             "DELETE",
             resolve_path(
@@ -70,10 +71,10 @@ class ChannelsResource(BaseResource):
         )
 
     def delete_many(self, *, app_id: str, ids: list[str]) -> None:
-        """Deletes the app's channels named by `ids`, one to 100; an id of another app is skipped.
+        """Deletes the channels of the app named by `ids`, 1 to 100.
 
-        The app's default channel, or a protected channel when the caller is a Member, refuses
-        the whole set.
+        An id of another app is skipped. The whole request is refused if it names the default
+        channel, or a protected channel while you are a Member.
         """
         self._http_client.fetch_status(
             "DELETE",
@@ -82,7 +83,10 @@ class ChannelsResource(BaseResource):
         )
 
     def get(self, *, app_id: str, channel_id: str) -> Channel:
-        """A channel; `apps.statistics.fleet.get` with its `channel_id` counts its devices."""
+        """Gets a channel.
+
+        To count its devices, call `apps.statistics.fleet.get` with its `channel_id`.
+        """
         return self._http_client.fetch_json(
             "GET",
             resolve_path(
@@ -99,7 +103,10 @@ class ChannelsResource(BaseResource):
         offset: int | NotGiven = NOT_GIVEN,
         query: str | NotGiven = NOT_GIVEN,
     ) -> list[Channel]:
-        """The app's channels, newest first; `query` selects those whose name contains it."""
+        """Lists the channels of the app, newest first.
+
+        `query` selects the channels whose name contains it.
+        """
         return self._http_client.fetch_json(
             "GET",
             resolve_path("/v1/apps/{appId}/channels", appId=app_id),
@@ -108,9 +115,9 @@ class ChannelsResource(BaseResource):
         )
 
     def pause(self, *, app_id: str, channel_id: str) -> Channel:
-        """Pauses a channel: it serves nothing new, and devices keep what they have.
+        """Pauses a channel. It serves nothing new, and devices keep what they have.
 
-        Pausing a paused channel answers it unchanged, so the call is retried.
+        Retried, since pausing a paused channel answers it unchanged.
         """
         return self._http_client.fetch_json(
             "POST",
@@ -124,7 +131,7 @@ class ChannelsResource(BaseResource):
     def resume(self, *, app_id: str, channel_id: str) -> Channel:
         """Resumes a paused channel.
 
-        Resuming a running channel answers it unchanged, so the call is retried.
+        Retried, since resuming a running channel answers it unchanged.
         """
         return self._http_client.fetch_json(
             "POST",
@@ -148,8 +155,9 @@ class ChannelsResource(BaseResource):
         is_protected: bool | NotGiven = NOT_GIVEN,
         name: str | NotGiven = NOT_GIVEN,
     ) -> Channel:
-        """Edits the name, the protected and discoverable flags, the expiry and the auto-pause
-        policy; `None` clears a nullable one.
+        """Updates the name, flags, expiry or auto-pause policy of a channel.
+
+        The flags are `is_protected` and `is_discoverable`. `None` clears a nullable field.
         """
         return self._http_client.fetch_json(
             "PATCH",

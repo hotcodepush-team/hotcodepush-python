@@ -8,7 +8,10 @@ from ._base import BaseResource
 
 class StatisticsFleetResource(BaseResource):
     def get(self, *, app_id: str, channel_id: str | NotGiven = NOT_GIVEN) -> FleetStatistics:
-        """The registry's snapshot of the fleet, of one channel when `channel_id` names it."""
+        """Gets a snapshot of the device fleet from the registry.
+
+        `channel_id` limits it to one channel.
+        """
         return self._http_client.fetch_json(
             "GET",
             resolve_path("/v1/apps/{appId}/statistics/fleet", appId=app_id),

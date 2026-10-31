@@ -20,11 +20,13 @@ class FilesResource(BaseResource):
         content_length: int | None = None,
         sha256: str,
     ) -> AppFile:
-        """Uploads one file: the body is the file gzip-compressed and `sha256` the hash of its
-        uncompressed content; a hash the app already holds answers the existing file.
+        """Uploads one file of the app.
 
-        Bytes above `SINGLE_UPLOAD_LIMIT_BYTES` go up in parts; a file object goes up in one
-        request, so it stays within the limit, and needs its `content_length`.
+        The body is the gzip-compressed file, and `sha256` is the hash of the uncompressed
+        content. A hash the app already holds answers the existing file.
+
+        Bytes above `SINGLE_UPLOAD_LIMIT_BYTES` go up in parts. A file object goes up in one
+        request, so it must stay within that limit and needs its `content_length`.
         """
         if is_above_single_upload_limit(body):
             return upload_in_parts(

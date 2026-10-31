@@ -7,8 +7,9 @@ from .file_upload_parts import FileUploadPartsResource
 
 
 class FileUploadsResource(BaseResource):
-    """The multipart upload of a larger file: create, upload the parts, complete, or delete to
-    abort.
+    """The multipart upload of a larger file.
+
+    Create the upload, upload the parts, then complete it, or delete it to abort.
     """
 
     def __init__(self, http_client: HttpClient) -> None:
@@ -20,8 +21,7 @@ class FileUploadsResource(BaseResource):
     ) -> AppFile:
         """Assembles the parts into the file and checks its hash.
 
-        A hash the app already holds answers the stored file before any assembly, so the call is
-        retried.
+        Retried, since a hash the app already holds answers the stored file before any assembly.
         """
         return self._http_client.fetch_json(
             "POST",
@@ -37,11 +37,10 @@ class FileUploadsResource(BaseResource):
         )
 
     def create(self, *, app_id: str, sha256: str) -> MultipartUpload:
-        """Starts a multipart upload; every part but the last is at least five mebibytes, all of
-        one size.
+        """Starts a multipart upload.
 
-        The start holds no state, and an upload a repeat leaves unused expires by the bucket's
-        default, so the call is retried.
+        All parts but the last must have the same size, at least 5 MiB. Retried, since the start
+        holds no state and the bucket expires an unused upload.
         """
         return self._http_client.fetch_json(
             "POST",
@@ -51,7 +50,7 @@ class FileUploadsResource(BaseResource):
         )
 
     def delete(self, *, app_id: str, sha256: str, upload_id: str) -> None:
-        """Aborts a multipart upload, discarding its parts."""
+        """Aborts a multipart upload and discards its parts."""
         self._http_client.fetch_status(
             "DELETE",
             resolve_path(

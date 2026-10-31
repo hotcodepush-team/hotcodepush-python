@@ -7,14 +7,17 @@ from ._base import BaseResource
 
 
 class NotificationPreferencesResource(BaseResource):
-    """The caller's notification preferences, one per category and medium, for the account or,
-    with `organization_id`, for that membership.
+    """Your notification preferences, one per category and medium.
+
+    They apply to your account, or to one membership when `organization_id` is set.
     """
 
     def list(self, *, organization_id: str | NotGiven = NOT_GIVEN) -> list[NotificationPreference]:
-        """One preference per category and each medium its notifications reach, the defaults
-        included, in the catalog's order and email first: the categories set for the account, or
-        with `organization_id` those set per membership.
+        """Lists your notification preferences, defaults included.
+
+        There is one preference per category and per medium the category uses, in catalog order
+        with email first. Without `organization_id`, it lists the categories set for the account,
+        with it those set per membership.
 
         An API token answers `forbidden`; sign in with a session.
         """
@@ -33,8 +36,9 @@ class NotificationPreferencesResource(BaseResource):
         medium: NotificationMedium,
         organization_id: str | NotGiven = NOT_GIVEN,
     ) -> NotificationPreference:
-        """Sets one preference, the category and the medium, and answers it; a mandatory
-        category's email is always on.
+        """Sets one preference for a category and medium, and returns it.
+
+        The email of a mandatory category is always on.
 
         An API token answers `forbidden`; sign in with a session.
         """

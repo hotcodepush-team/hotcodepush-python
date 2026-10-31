@@ -1,4 +1,4 @@
-"""The client against a running API, by hand; see CLAUDE.md for the local setup."""
+# Runs by hand against a local API, set up as CLAUDE.md describes.
 
 import gzip
 import hashlib
@@ -14,8 +14,8 @@ from hotcodepush import App, Channel, HotCodePush, HotCodePushError, ManifestFil
 API_BASE_URL = os.environ.get("HOTCODEPUSH_API_BASE_URL")
 INDEX_HTML = b"<h1>Python client</h1>"
 MAIN_JS = b'console.log("parts");'
+# The API stores a pack without reading it. A real pack is the tar that the CLI builds.
 PACK_PLACEHOLDER = b"pack placeholder"
-"""The API stores a pack without reading it; a real pack is the CLI's tar of the bundle."""
 TOKEN = os.environ.get("HOTCODEPUSH_API_TOKEN")
 
 pytestmark = pytest.mark.skipif(

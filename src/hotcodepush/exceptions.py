@@ -1,5 +1,3 @@
-"""The error raised for an API answer outside 2xx."""
-
 from __future__ import annotations
 
 import json
@@ -8,9 +6,9 @@ import json
 class HotCodePushError(Exception):
     """Raised when the API answers with a status outside 2xx.
 
-    `code`, `message` and `details` are the API's, verbatim, from its one error shape;
-    a response outside that shape, such as a page of the platform in front of the API,
-    is `unexpected_response` with the status, its body left out.
+    `code`, `message` and `details` come verbatim from the API's error body. A response without
+    that shape, such as a page from a proxy in front of the API, raises `unexpected_response` with
+    the status and without the body.
     """
 
     def __init__(self, *, code: str, details: object, message: str, status: int) -> None:
@@ -37,7 +35,6 @@ def resolve_hot_code_push_error(status: int, text: str) -> HotCodePushError:
 
 
 def resolve_json_object(text: str) -> dict[str, object]:
-    """The JSON object the text holds; empty when it holds none, such as an HTML page."""
     try:
         body: object = json.loads(text)
     except ValueError:

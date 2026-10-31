@@ -7,7 +7,7 @@ from ._base import BaseResource
 
 class LimitsResource(BaseResource):
     def get(self, *, organization_id: str) -> dict[str, Limit]:
-        """Every limit in effect for the organization, keyed by name.
+        """Gets every limit in effect for the organization, keyed by name.
 
         An API token answers `forbidden`; sign in with a session.
         """
