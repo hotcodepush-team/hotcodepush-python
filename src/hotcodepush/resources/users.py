@@ -17,10 +17,10 @@ class UsersResource(BaseResource):
         self.tokens = UserTokensResource(http_client)
 
     def delete(self, *, password: str, user_id: str) -> None:
-        """Soft-deletes your account. It is gone at once and hard-deleted after seven days.
+        """Soft-deletes the caller's account. It is gone at once and hard-deleted after seven days.
 
-        `user_id` takes `me`. `password` is your password. A wrong password answers `forbidden`,
-        and so does an account without a password: set one first through
+        `user_id` takes `me`. `password` is the caller's password. A wrong password answers
+        `forbidden`, and so does an account without a password: set one first through
         `users.password.create`.
 
         An API token answers `forbidden`; sign in with a session.
@@ -34,8 +34,8 @@ class UsersResource(BaseResource):
     def get(self, *, relations: list[UserRelation] | NotGiven = NOT_GIVEN, user_id: str) -> User:
         """Gets the user behind the token.
 
-        `user_id` takes `me`. Any other user answers `forbidden`. `relations` embeds your sign-in
-        identities, `accounts`, and your member rows in live organizations, `members`. Add
+        `user_id` takes `me`. Any other user answers `forbidden`. `relations` embeds the caller's
+        sign-in identities, `accounts`, and member rows in live organizations, `members`. Add
         `members.organization` to embed the organization of each row.
         """
         return self._http_client.fetch_json(

@@ -6,9 +6,9 @@ from ._base import BaseResource
 
 class UserTokensResource(BaseResource):
     def delete_many(self, *, ids: list[str], user_id: str) -> None:
-        """Deletes your API tokens named by `ids`, 1 to 100.
+        """Deletes the caller's API tokens named by `ids`, 1 to 100.
 
-        An id that is not yours is skipped.
+        An id that is not the caller's is skipped.
 
         An API token answers `forbidden`; sign in with a session.
         """

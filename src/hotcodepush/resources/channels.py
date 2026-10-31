@@ -74,7 +74,7 @@ class ChannelsResource(BaseResource):
         """Deletes the channels of the app named by `ids`, 1 to 100.
 
         An id of another app is skipped. The whole request is refused if it names the default
-        channel, or a protected channel while you are a Member.
+        channel, or a protected channel while the caller is a Member.
         """
         self._http_client.fetch_status(
             "DELETE",

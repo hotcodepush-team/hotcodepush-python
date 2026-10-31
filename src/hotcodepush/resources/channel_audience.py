@@ -21,7 +21,7 @@ class ChannelAudienceResource(BaseResource):
     ) -> Audience:
         """Gets the devices that a release with these conditions would reach in the channel.
 
-        Use it before you create the release. Each condition can repeat, and all conditions must
+        Use it before creating the release. Each condition can repeat, and all conditions must
         match. An `attribute` is `key=value`, and a `device` is a device id.
         """
         return self._http_client.fetch_json(

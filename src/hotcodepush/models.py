@@ -1,7 +1,7 @@
 """The types that resource methods take and return, derived from the OpenAPI snapshot.
 
 Fields are the API's camelCase names in snake_case. A field the API adds later lands in
-`model_extra`, so it never breaks your code. The rows a `relations` argument names fill the
+`model_extra`, so it never breaks a caller. The rows a `relations` argument names fill the
 optional fields of the same name.
 """
 
@@ -436,7 +436,7 @@ class FleetStatistics(HotCodePushModel):
 class Invitation(HotCodePushModel):
     """An invitation to an organization.
 
-    `organization` is set on your own invitations when `relations` names it.
+    `organization` is set on the caller's own invitations when `relations` names it.
     """
 
     created_at: datetime
@@ -497,8 +497,8 @@ class NamedEmbed(HotCodePushModel):
 
 
 class Notification(HotCodePushModel):
-    """An in-app notification for you. `organization_id` is `None` when it is about your
-    account.
+    """An in-app notification for the caller. `organization_id` is `None` when it is about the
+    caller's account.
 
     `app`, `channel`, `member_user` and `release` are set when `relations` names them, and are
     `None` once the row is deleted.
@@ -522,9 +522,9 @@ class Notification(HotCodePushModel):
 
 
 class NotificationPreference(HotCodePushModel):
-    """Whether you receive the notifications of one category through one medium.
+    """Whether the caller receives the notifications of one category through one medium.
 
-    It applies to your account, or to one membership when `organization_id` is set.
+    It applies to the caller's account, or to one membership when `organization_id` is set.
     """
 
     category: NotificationCategory
@@ -816,7 +816,7 @@ class UsageStatistics(HotCodePushModel):
 
 
 class User(HotCodePushModel):
-    """You, the caller. `accounts` and `members` are set when `relations` names them."""
+    """The caller. `accounts` and `members` are set when `relations` names them."""
 
     accounts: list[Account] | None = None
     banned_at: datetime | None

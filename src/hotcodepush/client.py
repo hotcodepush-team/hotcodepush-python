@@ -62,7 +62,7 @@ class HotCodePush:
         self.users = UsersResource(self._http_client)
 
     def close(self) -> None:
-        """Closes the connection pool, unless you passed your own `http_client`."""
+        """Closes the connection pool, unless the caller passed its own `http_client`."""
         self._http_client.close()
 
     def __enter__(self) -> HotCodePush:

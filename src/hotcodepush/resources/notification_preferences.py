@@ -7,13 +7,13 @@ from ._base import BaseResource
 
 
 class NotificationPreferencesResource(BaseResource):
-    """Your notification preferences, one per category and medium.
+    """The caller's notification preferences, one per category and medium.
 
-    They apply to your account, or to one membership when `organization_id` is set.
+    They apply to the caller's account, or to one membership when `organization_id` is set.
     """
 
     def list(self, *, organization_id: str | NotGiven = NOT_GIVEN) -> list[NotificationPreference]:
-        """Lists your notification preferences, defaults included.
+        """Lists the caller's notification preferences, defaults included.
 
         There is one preference per category and per medium the category uses, in catalog order
         with email first. Without `organization_id`, it lists the categories set for the account,

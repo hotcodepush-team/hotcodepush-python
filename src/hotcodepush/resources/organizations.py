@@ -35,11 +35,11 @@ class OrganizationsResource(BaseResource):
         self.webhooks = WebhooksResource(http_client)
 
     def count(self) -> Count:
-        """Counts your organizations."""
+        """Counts the caller's organizations."""
         return self._http_client.fetch_json("GET", resolve_path("/v1/organizations/count"), Count)
 
     def create(self, *, idempotency_key: str | NotGiven = NOT_GIVEN, name: str) -> Organization:
-        """Creates an organization with you as its Owner.
+        """Creates an organization with the caller as its Owner.
 
         An API token answers `forbidden`; sign in with a session.
         """
@@ -72,9 +72,10 @@ class OrganizationsResource(BaseResource):
     def list(
         self, *, limit: int | NotGiven = NOT_GIVEN, offset: int | NotGiven = NOT_GIVEN
     ) -> list[Organization]:
-        """Lists your organizations, newest first.
+        """Lists the caller's organizations, newest first.
 
-        Your role in each is on your member rows: `users.get(relations=["members"], user_id="me")`.
+        The caller's role in each is on its member rows:
+        `users.get(relations=["members"], user_id="me")`.
         """
         return self._http_client.fetch_json(
             "GET",

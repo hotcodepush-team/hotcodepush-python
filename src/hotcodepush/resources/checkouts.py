@@ -9,8 +9,9 @@ class CheckoutsResource(BaseResource):
     def create(self, *, organization_id: str) -> Checkout:
         """Creates a Polar checkout that enables pay-as-you-go billing on a free organization.
 
-        Your email is pre-filled and can be changed on the Polar page. Once paid, the subscription
-        names the organization and starts at the $5 minimum spending cap, which you can raise later.
+        The caller's email is pre-filled and can be changed on the Polar page. Once paid, the
+        subscription names the organization and starts at the $5 minimum spending cap, which can
+        be raised later.
 
         Never retried, since each call creates another checkout and the API keeps no
         `Idempotency-Key` for it.

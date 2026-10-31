@@ -39,7 +39,7 @@ class AppsResource(BaseResource):
         )
 
     def transfer(self, *, app_id: str, organization_id: str) -> App:
-        """Moves an app to another organization in which you are an Admin.
+        """Moves an app to another organization the caller is an Admin of.
 
         Never retried, since a repeat answers `validation` once the app is in the target.
 
