@@ -12,6 +12,7 @@ The client is validated against the API's OpenAPI document, the contract; see [T
 ```
 openapi.json                    the snapshot of the API's OpenAPI document, committed
 scripts/sync_openapi.py         fetches the document into openapi.json
+scripts/check_openapi_drift.py  fails when the live API's operations differ from openapi.json's, CI's step after the tests
 src/hotcodepush/__init__.py     the public exports
 src/hotcodepush/client.py       HotCodePush: the options and one attribute per top-level resource
 src/hotcodepush/_http.py        the one place that sends a request: the headers, the timeout, send_with_retry, JSON in and out
@@ -30,7 +31,7 @@ tests/openapi_document.py       the snapshot's operations and the examples its s
 ```
 
 Resources mirror the paths: `/v1/organizations/{organizationId}/apps` is `organizations.apps`, `/v1/apps/{appId}/channels/{channelId}/releases` is `apps.channels.releases`; a resource nests on the one its path sits under, and a path collection is one class.
-The methods are the Node client's, their names in snake_case: `deleteMany` is `delete_many`, `downloadCsv` is `download_csv`, `countApps` is `count_apps`.
+The methods are the Node client's, their names in snake_case: `deleteMany` is `delete_many`, `downloadCsv` is `download_csv`.
 Module names are the Node file names in snake_case, `channel-releases.ts` being `resources/channel_releases.py`.
 
 Tests stub the transport through `tests/stub_api.py`, answering with the examples `tests/openapi_document.py` derives from the snapshot; nothing calls the real API but the integration test, run by hand.
@@ -104,16 +105,13 @@ The integration test runs by hand against that API, started with `ENVIRONMENT=de
 
 ## Releases
 
-Nothing is on PyPI yet: consumers install a commit, `pip install git+https://github.com/hotcodepush-team/hotcodepush-python@<sha>`, pinning it and bumping it on purpose, never `@main`.
+The package has been on PyPI since `0.1.0` and `0.2.0` shipped on 2026-10-25: consumers `pip install hotcodepush` and pin a version, bumping it on purpose.
+A release is the merge of release-please's release pull request, never a hand-made tag or upload.
 Commits are conventional commits, since release-please reads them; `main` is trunk and CI is the gate.
 `.github/workflows/release.yml` runs release-please on every push to `main`: it keeps a release pull request open, and merging it tags the release, builds the distributions and publishes them to PyPI through trusted publishing, with no API token anywhere.
 The version lives in `src/hotcodepush/_version.py`, which release-please bumps; the first release is `0.1.0`, the Python strategy's initial version, and `bump-minor-pre-major` with `bump-patch-for-minor-pre-major` keeps every release on `0.x` until `1.0.0` is decided.
 A release pull request opened with the workflow's own token starts no CI run; close and reopen it to run the checks.
 
-The owner's one-time steps before the first release pull request is merged:
-
-1. Create the GitHub environment `pypi` in the repository settings.
-2. On pypi.org, add a pending trusted publisher: the project `hotcodepush`, the owner `hotcodepush-team`, the repository `hotcodepush-python`, the workflow `release.yml`, the environment `pypi`.
 
 ## Comments
 

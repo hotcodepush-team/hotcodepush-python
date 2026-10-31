@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from .._http import resolve_path
 from .._types import NOT_GIVEN, NotGiven
-from ..models import Count, ReleaseDeviceEvent
+from ..models import Count, ReleaseDeviceEvent, ReleaseDeviceEventRelation
 from ._base import BaseResource
 
 
@@ -29,11 +29,13 @@ class DeviceEventsResource(BaseResource):
         device_id: str,
         limit: int | NotGiven = NOT_GIVEN,
         offset: int | NotGiven = NOT_GIVEN,
+        relations: list[ReleaseDeviceEventRelation] | NotGiven = NOT_GIVEN,
         release_id: str | NotGiven = NOT_GIVEN,
     ) -> list[ReleaseDeviceEvent]:
         """Lists the events of the device across the releases of the app, newest first.
 
-        `release_id` selects the events of one release.
+        `release_id` selects the events of one release. `relations=["release"]` embeds the release
+        of each event.
         """
         return self._http_client.fetch_json(
             "GET",
@@ -41,5 +43,10 @@ class DeviceEventsResource(BaseResource):
                 "/v1/apps/{appId}/devices/{deviceId}/events", appId=app_id, deviceId=device_id
             ),
             list[ReleaseDeviceEvent],
-            query={"limit": limit, "offset": offset, "releaseId": release_id},
+            query={
+                "limit": limit,
+                "offset": offset,
+                "relations": relations,
+                "releaseId": release_id,
+            },
         )

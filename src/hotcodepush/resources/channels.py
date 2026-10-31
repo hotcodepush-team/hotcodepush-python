@@ -7,7 +7,7 @@ from .._types import NOT_GIVEN, NotGiven
 from ..models import Channel, Count, FailureAction
 from ._base import BaseResource
 from .channel_audience import ChannelAudienceResource
-from .channel_qr import ChannelQrResource
+from .channel_qr_code import ChannelQrCodeResource
 from .channel_releases import ChannelReleasesResource
 from .rollbacks import RollbacksResource
 
@@ -16,7 +16,7 @@ class ChannelsResource(BaseResource):
     def __init__(self, http_client: HttpClient) -> None:
         super().__init__(http_client)
         self.audience = ChannelAudienceResource(http_client)
-        self.qr = ChannelQrResource(http_client)
+        self.qr_code = ChannelQrCodeResource(http_client)
         self.releases = ChannelReleasesResource(http_client)
         self.rollbacks = RollbacksResource(http_client)
 

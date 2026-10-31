@@ -1,34 +1,12 @@
 from __future__ import annotations
 
-import builtins
-
 from .._http import resolve_path
 from .._types import NOT_GIVEN, NotGiven
-from ..models import (
-    Count,
-    FailureAction,
-    Release,
-    ReleaseCondition,
-    ReleaseProgression,
-    ReleaseRelation,
-)
+from ..models import FailureAction, Release, ReleaseCondition, ReleaseProgression
 from ._base import BaseResource
 
 
 class ChannelReleasesResource(BaseResource):
-    def count(self, *, app_id: str, channel_id: str, number: int | NotGiven = NOT_GIVEN) -> Count:
-        """Counts the releases in the channel log that match the filter."""
-        return self._http_client.fetch_json(
-            "GET",
-            resolve_path(
-                "/v1/apps/{appId}/channels/{channelId}/releases/count",
-                appId=app_id,
-                channelId=channel_id,
-            ),
-            Count,
-            query={"number": number},
-        )
-
     def create(
         self,
         *,
@@ -44,7 +22,7 @@ class ChannelReleasesResource(BaseResource):
         is_mandatory: bool | NotGiven = NOT_GIVEN,
         notes: str | None | NotGiven = NOT_GIVEN,
         progression: ReleaseProgression | None | NotGiven = NOT_GIVEN,
-        rollout_percentage: int | NotGiven = NOT_GIVEN,
+        rollout_percent: int | NotGiven = NOT_GIVEN,
     ) -> Release:
         """Creates a release in the channel with the next number.
 
@@ -68,31 +46,9 @@ class ChannelReleasesResource(BaseResource):
                 "isMandatory": is_mandatory,
                 "notes": notes,
                 "progression": progression,
-                "rolloutPercentage": rollout_percentage,
+                "rolloutPercent": rollout_percent,
             },
             idempotency_key=idempotency_key,
-        )
-
-    def list(
-        self,
-        *,
-        app_id: str,
-        channel_id: str,
-        limit: int | NotGiven = NOT_GIVEN,
-        number: int | NotGiven = NOT_GIVEN,
-        offset: int | NotGiven = NOT_GIVEN,
-        relations: list[ReleaseRelation] | NotGiven = NOT_GIVEN,
-    ) -> list[Release]:
-        """Lists the release log of the channel, newest first, or the one release `number` names."""
-        return self._http_client.fetch_json(
-            "GET",
-            resolve_path(
-                "/v1/apps/{appId}/channels/{channelId}/releases",
-                appId=app_id,
-                channelId=channel_id,
-            ),
-            list[Release],
-            query={"limit": limit, "number": number, "offset": offset, "relations": relations},
         )
 
     def revoke(
@@ -101,8 +57,8 @@ class ChannelReleasesResource(BaseResource):
         app_id: str,
         channel_id: str,
         from_number: int | NotGiven = NOT_GIVEN,
-        release_ids: builtins.list[str] | NotGiven = NOT_GIVEN,
-    ) -> builtins.list[Release]:
+        release_ids: list[str] | NotGiven = NOT_GIVEN,
+    ) -> list[Release]:
         """Revokes several releases of the channel at once.
 
         It revokes the releases in `release_ids`, or every release numbered `from_number` or above.
@@ -115,7 +71,7 @@ class ChannelReleasesResource(BaseResource):
                 appId=app_id,
                 channelId=channel_id,
             ),
-            builtins.list[Release],
+            list[Release],
             body={"fromNumber": from_number, "releaseIds": release_ids},
             is_retryable=True,
         )

@@ -25,6 +25,8 @@ jobs:
       - run: uv run ruff check .
       - run: uv run mypy
       - run: uv run pytest
+      - name: Check openapi.json against the live API
+        run: uv run scripts/check_openapi_drift.py
 
   build:
     name: Build and check the distributions

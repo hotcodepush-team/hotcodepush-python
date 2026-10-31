@@ -7,7 +7,7 @@ from .._types import NOT_GIVEN, NotGiven
 from ._base import BaseResource
 
 
-class ChannelQrResource(BaseResource):
+class ChannelQrCodeResource(BaseResource):
     def get(
         self,
         *,
@@ -18,12 +18,14 @@ class ChannelQrResource(BaseResource):
         """Gets the deep link of the channel as a QR image, SVG unless `format` is `png`.
 
         The link comes from the app's `channel_link_template`. Answers `not_found` while the
-        template is unset.
+        template is unset. Needs no token, since the channel id is the capability.
         """
         return self._http_client.fetch_bytes(
             "GET",
             resolve_path(
-                "/v1/apps/{appId}/channels/{channelId}/qr", appId=app_id, channelId=channel_id
+                "/v1/apps/{appId}/channels/{channelId}/qr-code",
+                appId=app_id,
+                channelId=channel_id,
             ),
             query={"format": format},
         )

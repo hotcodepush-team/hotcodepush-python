@@ -31,7 +31,7 @@ The resources mirror the API's paths, `/v1/apps/{appId}/channels` being `apps.ch
 Every method takes keyword arguments and returns pydantic models with snake_case fields; an argument left out stays out of the request, and `None` sends `null`.
 Uploads take `bytes` or a file object with its `content_length` and stream it.
 Creating calls send an `Idempotency-Key` and are retried; pass `idempotency_key` to reuse one across your own retries.
-A failed request raises a `HotCodePushError` with the API's `code`, `message`, `details` and the HTTP `status`.
+A failed request raises a `HotCodePushError` with the API's `code`, `message`, `details` and the HTTP `status`; `code` is typed as `ErrorCode`, the error catalog, so a misspelled code fails the type check.
 
 ## Documentation
 

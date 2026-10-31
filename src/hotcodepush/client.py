@@ -12,6 +12,7 @@ from .resources.invitations import InvitationsResource
 from .resources.notification_preferences import NotificationPreferencesResource
 from .resources.notifications import NotificationsResource
 from .resources.organizations import OrganizationsResource
+from .resources.qr_codes import QrCodesResource
 from .resources.users import UsersResource
 
 TOKEN_ENVIRONMENT_VARIABLE = "HOTCODEPUSH_TOKEN"
@@ -59,6 +60,7 @@ class HotCodePush:
         self.notification_preferences = NotificationPreferencesResource(self._http_client)
         self.notifications = NotificationsResource(self._http_client)
         self.organizations = OrganizationsResource(self._http_client)
+        self.qr_codes = QrCodesResource(self._http_client)
         self.users = UsersResource(self._http_client)
 
     def close(self) -> None:
