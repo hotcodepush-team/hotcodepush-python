@@ -7,12 +7,13 @@ from ._base import BaseResource
 
 class SsoProviderVerificationsResource(BaseResource):
     def create(self, *, organization_id: str) -> SsoProvider:
-        """Looks up the domain's TXT record for the provider's `domain_verification_token` and
-        sets `domain_verified` when the record carries it; the answer is the provider, verified or
-        still waiting for the record, and a resolver that cannot be asked answers
-        `dns_lookup_failed`.
+        """Verifies the domain of the SSO provider.
 
-        A verified provider answers unchanged without a lookup, so the call is retried.
+        The API looks up the TXT record of the domain. If the record carries the
+        `domain_verification_token`, the API sets `domain_verified`. Either way, it answers the
+        provider. It answers `dns_lookup_failed` when it cannot reach a DNS resolver.
+
+        Retried, since a verified provider answers unchanged without a lookup.
 
         An API token answers `forbidden`; sign in with a session.
         """

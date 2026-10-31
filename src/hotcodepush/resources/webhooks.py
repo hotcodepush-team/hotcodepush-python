@@ -11,8 +11,9 @@ from .webhook_deliveries import WebhookDeliveriesResource
 
 
 class WebhooksResource(BaseResource):
-    """The organization's webhooks, for Admins and Owners on a plan that includes them; any
-    other plan answers `plan_required`.
+    """The webhooks of the organization, for Admins and Owners.
+
+    The plan must include webhooks, otherwise the API answers `plan_required`.
     """
 
     def __init__(self, http_client: HttpClient) -> None:
@@ -20,7 +21,7 @@ class WebhooksResource(BaseResource):
         self.deliveries = WebhookDeliveriesResource(http_client)
 
     def count(self, *, organization_id: str) -> Count:
-        """The number of the organization's webhooks.
+        """Counts the webhooks of the organization.
 
         An API token answers `forbidden`; sign in with a session.
         """
@@ -42,11 +43,11 @@ class WebhooksResource(BaseResource):
         organization_id: str,
         url: str,
     ) -> CreatedWebhook:
-        """Creates a webhook, its name unique in the organization, `webhook_name_taken`
-        otherwise; a `raw` webhook answers its secret this once.
+        """Creates a webhook. A `raw` webhook returns its secret only this once.
 
-        The API keeps no `Idempotency-Key` for it and a repeat answers `webhook_name_taken`, so
-        the call is never retried.
+        The name must be unique in the organization, otherwise the API answers `webhook_name_taken`.
+        Never retried, since the API keeps no `Idempotency-Key` for it and a repeat answers
+        `webhook_name_taken`.
 
         An API token answers `forbidden`; sign in with a session.
         """
@@ -74,7 +75,10 @@ class WebhooksResource(BaseResource):
         )
 
     def get(self, *, organization_id: str, webhook_id: str) -> Webhook:
-        """An API token answers `forbidden`; sign in with a session."""
+        """Gets a webhook.
+
+        An API token answers `forbidden`; sign in with a session.
+        """
         return self._http_client.fetch_json(
             "GET",
             resolve_path(
@@ -92,7 +96,7 @@ class WebhooksResource(BaseResource):
         offset: int | NotGiven = NOT_GIVEN,
         organization_id: str,
     ) -> list[Webhook]:
-        """The organization's webhooks, newest first.
+        """Lists the webhooks of the organization, newest first.
 
         An API token answers `forbidden`; sign in with a session.
         """
@@ -106,10 +110,10 @@ class WebhooksResource(BaseResource):
         )
 
     def test(self, *, organization_id: str, webhook_id: str) -> WebhookDelivery:
-        """Sends one sample event, `webhook.test`, through the webhook's delivery path within the
-        request and answers the settled delivery.
+        """Sends one sample event, `webhook.test`, and returns the settled delivery.
 
-        Each call sends another sample event, so the call is never retried.
+        The event takes the normal delivery path within the request. Never retried, since each
+        call sends another sample event.
 
         An API token answers `forbidden`; sign in with a session.
         """
@@ -134,9 +138,10 @@ class WebhooksResource(BaseResource):
         url: str | NotGiven = NOT_GIVEN,
         webhook_id: str,
     ) -> Webhook:
-        """Changes the name, the URL, the subscribed `events`, the app filter or `is_enabled`; the
-        format and the secret never change. Setting `is_enabled` on a webhook disabled after fifty
-        consecutive failed deliveries starts its count again.
+        """Changes the name, the URL, the `events`, the app filter or `is_enabled`.
+
+        The format and the secret never change. Enabling a webhook that was turned off after fifty
+        failed deliveries in a row resets its failure count.
 
         An API token answers `forbidden`; sign in with a session.
         """

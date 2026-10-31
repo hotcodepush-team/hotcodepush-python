@@ -8,16 +8,16 @@ from ._base import BaseResource
 
 class SigningKeysResource(BaseResource):
     def count(self, *, app_id: str) -> Count:
-        """The number of the app's signing keys."""
+        """Counts the signing keys of the app."""
         return self._http_client.fetch_json(
             "GET", resolve_path("/v1/apps/{appId}/signing-keys/count", appId=app_id), Count
         )
 
     def create(self, *, app_id: str, public_key: str) -> SigningKey:
-        """Registers a public key, `rsa-v1_5-sha256:` and the base64 of an RSA key's SPKI DER, of
-        at least 2048 bits; from then on the app releases only signed bundles.
+        """Registers a public key. From then on, the app releases only signed bundles.
 
-        A key the app already holds answers its row unchanged, so the call is retried.
+        The key is `rsa-v1_5-sha256:` followed by the base64 SPKI DER of an RSA key with at least
+        2048 bits. Retried, since a key the app already holds answers its row unchanged.
         """
         return self._http_client.fetch_json(
             "POST",
@@ -44,7 +44,7 @@ class SigningKeysResource(BaseResource):
         limit: int | NotGiven = NOT_GIVEN,
         offset: int | NotGiven = NOT_GIVEN,
     ) -> list[SigningKey]:
-        """The app's signing keys, newest first."""
+        """Lists the signing keys of the app, newest first."""
         return self._http_client.fetch_json(
             "GET",
             resolve_path("/v1/apps/{appId}/signing-keys", appId=app_id),

@@ -8,7 +8,7 @@ from ._base import BaseResource
 
 class OrganizationAppsResource(BaseResource):
     def count(self, *, organization_id: str, query: str | NotGiven = NOT_GIVEN) -> Count:
-        """The number of the organization's apps under the list's filters."""
+        """Counts the apps of the organization that match the filters."""
         return self._http_client.fetch_json(
             "GET",
             resolve_path(
@@ -26,7 +26,7 @@ class OrganizationAppsResource(BaseResource):
         name: str,
         organization_id: str,
     ) -> App:
-        """Creates an app with its default channel `production`."""
+        """Creates an app with the default channel `production`."""
         return self._http_client.fetch_creating_post(
             resolve_path("/v1/organizations/{organizationId}/apps", organizationId=organization_id),
             App,
@@ -42,7 +42,10 @@ class OrganizationAppsResource(BaseResource):
         organization_id: str,
         query: str | NotGiven = NOT_GIVEN,
     ) -> list[App]:
-        """The organization's apps, newest first; `query` selects those whose name contains it."""
+        """Lists the apps of the organization, newest first.
+
+        `query` selects the apps whose name contains it.
+        """
         return self._http_client.fetch_json(
             "GET",
             resolve_path("/v1/organizations/{organizationId}/apps", organizationId=organization_id),

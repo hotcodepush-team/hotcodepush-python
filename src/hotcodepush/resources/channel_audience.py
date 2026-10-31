@@ -19,10 +19,10 @@ class ChannelAudienceResource(BaseResource):
         os: list[str] | NotGiven = NOT_GIVEN,
         rollout_percentage: int | NotGiven = NOT_GIVEN,
     ) -> Audience:
-        """The devices a release's conditions would reach in the channel before it exists; each
-        condition repeats, and repeated conditions combine with AND.
+        """Gets the devices that a release with these conditions would reach in the channel.
 
-        An `attribute` is `key=value`, a `device` a device id.
+        Use it before creating the release. Each condition can repeat, and all conditions must
+        match. An `attribute` is `key=value`, and a `device` is a device id.
         """
         return self._http_client.fetch_json(
             "GET",

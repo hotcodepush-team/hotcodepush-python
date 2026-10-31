@@ -16,7 +16,7 @@ class StatisticsUsageResource(BaseResource):
         period_since: date | NotGiven = NOT_GIVEN,
         period_until: date | NotGiven = NOT_GIVEN,
     ) -> UsageStatistics:
-        """The usage statistics of the period, `period_since` to `period_until` inclusive."""
+        """Gets the usage statistics from `period_since` to `period_until`, both inclusive."""
         return self._http_client.fetch_json(
             "GET",
             resolve_path("/v1/apps/{appId}/statistics/usage", appId=app_id),

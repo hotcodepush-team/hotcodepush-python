@@ -27,7 +27,7 @@ class AppsResource(BaseResource):
         self.statistics = StatisticsResource(http_client)
 
     def delete(self, *, app_id: str) -> None:
-        """Soft-deletes an app: gone at once, hard-deleted after seven days.
+        """Soft-deletes an app. It is gone at once and hard-deleted after seven days.
 
         An API token answers `forbidden`; sign in with a session.
         """
@@ -41,8 +41,7 @@ class AppsResource(BaseResource):
     def transfer(self, *, app_id: str, organization_id: str) -> App:
         """Moves an app to another organization the caller is an Admin of.
 
-        A repeat answers `validation`, the app being in the target already, so the call is
-        never retried.
+        Never retried, since a repeat answers `validation` once the app is in the target.
 
         An API token answers `forbidden`; sign in with a session.
         """
@@ -62,8 +61,10 @@ class AppsResource(BaseResource):
         framework: Framework | NotGiven = NOT_GIVEN,
         name: str | NotGiven = NOT_GIVEN,
     ) -> App:
-        """Edits the name, the framework, the default channel or the deep-link template behind
-        the QR surfaces, a URI with a scheme and `{channelId}` exactly once.
+        """Updates the name, the framework, the default channel or the channel link template.
+
+        The template is the deep link behind the QR codes: a URI with a scheme that holds
+        `{channelId}` exactly once.
         """
         return self._http_client.fetch_json(
             "PATCH",

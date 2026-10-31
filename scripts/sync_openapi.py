@@ -1,5 +1,3 @@
-"""Fetches the API's OpenAPI document into `openapi.json`, the snapshot the contract test reads."""
-
 import json
 import os
 from pathlib import Path

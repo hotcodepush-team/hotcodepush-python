@@ -7,13 +7,14 @@ from ._base import BaseResource
 
 class CheckoutsResource(BaseResource):
     def create(self, *, organization_id: str) -> Checkout:
-        """Enables billing on a free organization: the Polar checkout for pay-as-you-go, the
-        caller's email pre-filled and editable on Polar's page; the subscription arrives once it
-        is paid, names the organization, and starts at the $5 minimum spending cap, which the
-        customer raises afterwards.
+        """Creates a Polar checkout that enables pay-as-you-go billing on a free organization.
 
-        Each call creates another checkout and the API keeps no `Idempotency-Key` for it, so the
-        call is never retried.
+        The caller's email is pre-filled and can be changed on the Polar page. Once paid, the
+        subscription names the organization and starts at the $5 minimum spending cap, which can
+        be raised later.
+
+        Never retried, since each call creates another checkout and the API keeps no
+        `Idempotency-Key` for it.
 
         An API token answers `forbidden`; sign in with a session.
         """

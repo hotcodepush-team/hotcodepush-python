@@ -10,7 +10,7 @@ class BundleFilesResource(BaseResource):
     def count(
         self, *, app_id: str, bundle_id: str, is_stored: bool | NotGiven = NOT_GIVEN
     ) -> Count:
-        """The number of the bundle's files under the list's filters."""
+        """Counts the files of the bundle that match the filters."""
         return self._http_client.fetch_json(
             "GET",
             resolve_path(
@@ -29,10 +29,10 @@ class BundleFilesResource(BaseResource):
         limit: int | NotGiven = NOT_GIVEN,
         offset: int | NotGiven = NOT_GIVEN,
     ) -> list[BundleFile]:
-        """The bundle's files, ordered by path; an embedded bundle answers the files its binary
-        was created with.
+        """Lists the files of the bundle, ordered by path.
 
-        `is_stored=False` selects the files still to upload after the bundle's create.
+        For an embedded bundle, these are the files its binary was created with. `is_stored=False`
+        selects the files that still need an upload after the bundle is created.
         """
         return self._http_client.fetch_json(
             "GET",

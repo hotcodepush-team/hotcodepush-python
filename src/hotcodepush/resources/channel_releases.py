@@ -17,7 +17,7 @@ from ._base import BaseResource
 
 class ChannelReleasesResource(BaseResource):
     def count(self, *, app_id: str, channel_id: str, number: int | NotGiven = NOT_GIVEN) -> Count:
-        """The number of releases in the channel's log under the list's filter."""
+        """Counts the releases in the channel log that match the filter."""
         return self._http_client.fetch_json(
             "GET",
             resolve_path(
@@ -46,8 +46,10 @@ class ChannelReleasesResource(BaseResource):
         progression: ReleaseProgression | None | NotGiven = NOT_GIVEN,
         rollout_percentage: int | NotGiven = NOT_GIVEN,
     ) -> Release:
-        """Releases a ready bundle, `bundle_id`, or what another channel serves,
-        `from_channel_id`, in the channel, numbered next in the channel.
+        """Creates a release in the channel with the next number.
+
+        It releases either a ready bundle, `bundle_id`, or what another channel serves,
+        `from_channel_id`.
         """
         return self._http_client.fetch_creating_post(
             resolve_path(
@@ -81,7 +83,7 @@ class ChannelReleasesResource(BaseResource):
         offset: int | NotGiven = NOT_GIVEN,
         relations: list[ReleaseRelation] | NotGiven = NOT_GIVEN,
     ) -> list[Release]:
-        """The channel's release log, newest first, or the one release `number` names."""
+        """Lists the release log of the channel, newest first, or the one release `number` names."""
         return self._http_client.fetch_json(
             "GET",
             resolve_path(
@@ -101,10 +103,10 @@ class ChannelReleasesResource(BaseResource):
         from_number: int | NotGiven = NOT_GIVEN,
         release_ids: builtins.list[str] | NotGiven = NOT_GIVEN,
     ) -> builtins.list[Release]:
-        """Revokes several releases of the channel at once, the ones of `release_ids` or every
-        one numbered at or above `from_number`.
+        """Revokes several releases of the channel at once.
 
-        A release already revoked is a no-op, so the call is retried.
+        It revokes the releases in `release_ids`, or every release numbered `from_number` or above.
+        Retried, since revoking a revoked release changes nothing.
         """
         return self._http_client.fetch_json(
             "POST",

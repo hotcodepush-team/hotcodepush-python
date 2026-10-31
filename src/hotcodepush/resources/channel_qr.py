@@ -15,8 +15,10 @@ class ChannelQrResource(BaseResource):
         channel_id: str,
         format: Literal["png", "svg"] | NotGiven = NOT_GIVEN,
     ) -> bytes:
-        """The channel's deep link from the app's `channel_link_template` as a QR image, SVG
-        unless `format` is `png`; `not_found` while the template is unset.
+        """Gets the deep link of the channel as a QR image, SVG unless `format` is `png`.
+
+        The link comes from the app's `channel_link_template`. Answers `not_found` while the
+        template is unset.
         """
         return self._http_client.fetch_bytes(
             "GET",

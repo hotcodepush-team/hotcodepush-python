@@ -1,5 +1,3 @@
-"""The OpenAPI snapshot, its operations and the examples its schemas describe."""
-
 import json
 import re
 from pathlib import Path
@@ -17,7 +15,6 @@ HTTP_METHODS = ("delete", "get", "patch", "post", "put")
 
 
 def resolve_branches(schema: dict[str, Any]) -> list[dict[str, Any]]:
-    """The branches of a union, `anyOf` or `oneOf`, or the schema itself."""
     branches: list[dict[str, Any]] = schema.get("anyOf") or schema.get("oneOf") or [schema]
     return branches
 
@@ -37,7 +34,6 @@ def resolve_operation(method: str, template: str) -> dict[str, Any]:
 
 
 def resolve_path_template(path: str) -> str | None:
-    """The template of the snapshot a concrete path fills, `/v1/apps/{appId}` for `/v1/apps/a`."""
     return next(
         (
             template
@@ -49,7 +45,6 @@ def resolve_path_template(path: str) -> str | None:
 
 
 def resolve_response_example(method: str, template: str) -> object:
-    """The body the operation's 2xx JSON response schema describes, every property set."""
     responses = resolve_operation(method, template)["responses"]
     schema = next(
         response["content"]["application/json"]["schema"]
@@ -60,11 +55,6 @@ def resolve_response_example(method: str, template: str) -> object:
 
 
 def resolve_schema_example(schema: dict[str, Any]) -> object:
-    """A value of the schema with every property set: the first branch of a union but `null`,
-    the first value of an enum, an array of one item per branch of its items' union, and a map
-    of one entry per name its `propertyNames` enumerates, or of one `key`, when
-    `additionalProperties` types its values; `{}`, any value, adds no entry.
-    """
     branches = [branch for branch in resolve_branches(schema) if branch.get("type") != "null"]
     if branches != [schema]:
         return resolve_schema_example(branches[0])
@@ -81,6 +71,7 @@ def resolve_schema_example(schema: dict[str, Any]) -> object:
             for name, property_schema in schema.get("properties", {}).items()
         }
         value_schema = schema.get("additionalProperties")
+        # An empty schema allows any value and adds no entry.
         if isinstance(value_schema, dict) and value_schema:
             names = schema.get("propertyNames", {}).get("enum", ["key"])
             example |= {name: resolve_schema_example(value_schema) for name in names}

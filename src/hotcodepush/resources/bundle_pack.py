@@ -20,10 +20,10 @@ class BundlePackResource(BaseResource):
         bundle_id: str,
         content_length: int | None = None,
     ) -> UploadedBundlePack:
-        """Uploads the bundle's full pack, a tar, before the bundle is completed.
+        """Uploads the full pack of the bundle, a tar, before the bundle is completed.
 
-        Bytes above `SINGLE_UPLOAD_LIMIT_BYTES` go up in parts; a file object goes up in one
-        request, so it stays within the limit, and needs its `content_length`.
+        Bytes above `SINGLE_UPLOAD_LIMIT_BYTES` go up in parts. A file object goes up in one
+        request, so it must stay within that limit and needs its `content_length`.
         """
         if is_above_single_upload_limit(body):
             return upload_in_parts(

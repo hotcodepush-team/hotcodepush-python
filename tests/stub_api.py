@@ -1,5 +1,3 @@
-"""The API's side of a test: a transport that answers the client and records its requests."""
-
 import json
 import re
 
@@ -10,10 +8,6 @@ from hotcodepush._http import DEFAULT_BASE_URL, DEFAULT_CLIENT, HttpClient
 
 
 class StubApi:
-    """Answers each request with the next of its responses, the last one repeating, and records
-    every request with its body read.
-    """
-
     def __init__(self, *responses: httpx.Response) -> None:
         self.http_client = httpx.Client(transport=httpx.MockTransport(self._handle_request))
         self.requests: list[httpx.Request] = []
@@ -42,6 +36,7 @@ class StubApi:
         )
 
     def respond(self, request: httpx.Request) -> httpx.Response:
+        # The last response repeats once the others are used up.
         response = self._responses[min(len(self.requests), len(self._responses)) - 1]
         return httpx.Response(
             response.status_code, content=response.content, headers=response.headers
@@ -54,11 +49,6 @@ class StubApi:
 
 
 class MultipartUploadStubApi(StubApi):
-    """The API's side of a multipart upload: the upload id on its start, each part's number in
-    its etag, `upload_incomplete` for the failed part, `not_found` on its deletion and the
-    completed body on its completion.
-    """
-
     def __init__(self, completed_body: object, failed_part_number: int | None = None) -> None:
         super().__init__()
         self._completed_body = completed_body

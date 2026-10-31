@@ -1,5 +1,3 @@
-"""The one place that sends a request: the headers, the timeout, the retry, JSON in and out."""
-
 from __future__ import annotations
 
 import re
@@ -25,19 +23,19 @@ IDEMPOTENT_METHODS = frozenset({"DELETE", "GET", "PUT"})
 INITIAL_RETRY_DELAY_SECONDS = 0.5
 JSON_TIMEOUT_SECONDS = 60.0
 MAX_ATTEMPTS = 3
+# The API counts its rate limits in sixty-second windows.
 MAX_RETRY_AFTER_SECONDS = 60.0
-"""The longest wait a `Retry-After` is followed for: the API's rate limits count in sixty-second
-windows."""
 PATH_PARAMETER_PATTERN = re.compile(r"\{(\w+)\}")
 RETRY_AFTER_STATUSES = frozenset({429, 503})
+# Enough for the single-upload limit at about 100 kB a second.
 UPLOAD_TIMEOUT_SECONDS = 600.0
-"""Ten minutes per attempt: the single-upload limit at about a hundred kilobytes a second."""
 
 HttpMethod = Literal["DELETE", "GET", "PATCH", "POST", "PUT"]
 JsonBody = Mapping[str, object]
 Query = Mapping[str, bool | date | datetime | int | str | Sequence[str] | NotGiven]
 UploadBody = bytes | BinaryIO
-"""Bytes, read again when a retry needs them, or a file object, read once and never retried."""
+"""The body of an upload: bytes, which a failed attempt sends again, or a file object, read once
+and never retried."""
 
 T = TypeVar("T")
 
@@ -60,14 +58,10 @@ class HttpClient:
         self._json_timeout_seconds = JSON_TIMEOUT_SECONDS if timeout is None else timeout
 
     def close(self) -> None:
-        """Closes the connection pool, unless the caller passed its own `http_client`."""
         if self._is_httpx_client_owned:
             self._httpx_client.close()
 
     def fetch_bytes(self, method: HttpMethod, path: str, *, query: Query | None = None) -> bytes:
-        """A request answered with a binary body, such as a CSV download or a channel's QR image,
-        read whole.
-        """
         return self._fetch_response(method, path, query=query).content
 
     def fetch_creating_post(
@@ -78,12 +72,10 @@ class HttpClient:
         body: JsonBody,
         idempotency_key: str | NotGiven,
     ) -> T:
-        """A creating `POST`, sent with an `Idempotency-Key`: the caller's, or one generated
-        for this call and kept across its retries, which the API answers with the first result.
-        """
         resolved_idempotency_key = (
             str(uuid4()) if isinstance(idempotency_key, NotGiven) else idempotency_key
         )
+        # The API answers a repeated key with the first result, so a retry is safe.
         return self.fetch_json(
             "POST",
             path,
@@ -104,12 +96,6 @@ class HttpClient:
         is_retryable: bool | None = None,
         query: Query | None = None,
     ) -> T:
-        """A request answered with JSON, validated into `response_type`.
-
-        `is_retryable` defaults to true for `DELETE`, `GET` and `PUT`, false for `PATCH` and
-        `POST`; a `POST` sets it where the API makes a repeat safe, through a stored idempotency
-        key or a transition that answers a repeat unchanged.
-        """
         response = self._fetch_response(
             method, path, body=body, headers=headers, is_retryable=is_retryable, query=query
         )
@@ -124,9 +110,6 @@ class HttpClient:
         is_retryable: bool | None = None,
         query: Query | None = None,
     ) -> None:
-        """A request whose status is the whole answer: the body, such as `/health`'s
-        plain-text `ok`, is discarded. `is_retryable` defaults as `fetch_json`'s does.
-        """
         self._fetch_response(method, path, body=body, is_retryable=is_retryable, query=query)
 
     def fetch_upload(
@@ -138,9 +121,6 @@ class HttpClient:
         content_length: int | None,
         content_type: str,
     ) -> T:
-        """A binary `PUT`, streamed as it is read; a file object is read once, so only bytes
-        are retried.
-        """
         request = self._httpx_client.build_request(
             "PUT",
             self._base_url + path,
@@ -210,9 +190,6 @@ def resolve_headers(*, client: str, token: str | None, user_agent: str | None) -
 
 
 def resolve_json_body(body: JsonBody) -> dict[str, object]:
-    """The body without its `NOT_GIVEN` values, models by their API names without their `None`
-    fields, since no nested field of the API takes `null`, and timestamps in UTC.
-    """
     return {
         name: resolve_json_value(value)
         for name, value in body.items()
@@ -222,6 +199,7 @@ def resolve_json_body(body: JsonBody) -> dict[str, object]:
 
 def resolve_json_value(value: object) -> object:
     if isinstance(value, BaseModel):
+        # No nested field of the API takes `null`.
         return value.model_dump(by_alias=True, exclude_none=True, mode="json")
     if isinstance(value, datetime):
         return resolve_utc_timestamp(value)
@@ -231,10 +209,6 @@ def resolve_json_value(value: object) -> object:
 
 
 def resolve_path(template: str, **parameters: int | str) -> str:
-    """Fills a path template of the OpenAPI snapshot, `/v1/apps/{appId}`, with its encoded
-    parameters.
-    """
-
     def resolve_parameter(match: re.Match[str]) -> str:
         name = match.group(1)
         if name not in parameters:
@@ -245,15 +219,12 @@ def resolve_path(template: str, **parameters: int | str) -> str:
 
 
 def resolve_query_params(query: Query) -> tuple[tuple[str, str], ...]:
-    """The query as name and value pairs: `NOT_GIVEN`, empty strings and empty lists are left
-    out; `ids` and `relations` are the API's comma lists, and every other list repeats its
-    parameter, `?binary=…&binary=…`, since its values may hold a comma.
-    """
     params: list[tuple[str, str]] = []
     for name, value in query.items():
         if isinstance(value, NotGiven) or value == "" or value == []:
             continue
         if isinstance(value, list):
+            # Other lists repeat their parameter, since their values may hold a comma.
             values = [",".join(value)] if name in COMMA_LIST_QUERY_NAMES else value
             params.extend((name, item) for item in values)
         elif isinstance(value, bool):
@@ -266,10 +237,6 @@ def resolve_query_params(query: Query) -> tuple[tuple[str, str], ...]:
 
 
 def resolve_retry_after_seconds(response: httpx.Response) -> float | None:
-    """The wait a 429 or a 503 asks for in `Retry-After`, delay seconds or an HTTP date, capped
-    at `MAX_RETRY_AFTER_SECONDS`; None for any other status, a missing header or one that does
-    not parse.
-    """
     retry_after = response.headers.get("Retry-After", "").strip()
     if response.status_code not in RETRY_AFTER_STATUSES or not retry_after:
         return None
@@ -285,15 +252,11 @@ def resolve_retry_after_seconds(response: httpx.Response) -> float | None:
 
 
 def resolve_utc_timestamp(value: datetime) -> str:
-    """ISO 8601 in UTC with a `Z`, the only offset the API accepts."""
+    # The API accepts only the `Z` offset.
     return value.astimezone(UTC).isoformat(timespec="milliseconds").replace("+00:00", "Z")
 
 
 def send_with_retry(send: Callable[[], httpx.Response]) -> httpx.Response:
-    """Sends up to `MAX_ATTEMPTS` times on a transport error, 408, 429 and 5xx, backing off
-    exponentially from `INITIAL_RETRY_DELAY_SECONDS`, or waiting a 429's or a 503's
-    `Retry-After`; the last attempt's response or error is the call's.
-    """
     attempt = 1
     while True:
         is_last_attempt = attempt == MAX_ATTEMPTS

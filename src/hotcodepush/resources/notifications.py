@@ -9,11 +9,12 @@ from ._base import BaseResource
 
 
 class NotificationsResource(BaseResource):
-    """The caller's in-app notifications across every organization."""
+    """The caller's in-app notifications across all organizations."""
 
     def count(self, *, is_read: bool | NotGiven = NOT_GIVEN) -> Count:
-        """The number of the caller's notifications under the list's filters; `is_read=False` is
-        the bell's badge.
+        """Counts the caller's notifications that match the filters.
+
+        `is_read=False` gives the number on the notification bell.
 
         An API token answers `forbidden`; sign in with a session.
         """
@@ -29,7 +30,7 @@ class NotificationsResource(BaseResource):
         offset: int | NotGiven = NOT_GIVEN,
         relations: list[NotificationRelation] | NotGiven = NOT_GIVEN,
     ) -> list[Notification]:
-        """The caller's notifications, newest first.
+        """Lists the caller's notifications, newest first.
 
         An API token answers `forbidden`; sign in with a session.
         """
@@ -41,7 +42,7 @@ class NotificationsResource(BaseResource):
         )
 
     def update(self, *, is_read: Literal[True], notification_id: str) -> Notification:
-        """Marks one of the caller's notifications read.
+        """Marks one of the caller's notifications as read.
 
         An API token answers `forbidden`; sign in with a session.
         """
@@ -53,7 +54,7 @@ class NotificationsResource(BaseResource):
         )
 
     def update_many(self, *, is_read: Literal[True]) -> None:
-        """Marks every unread notification of the caller read.
+        """Marks all unread notifications of the caller as read.
 
         An API token answers `forbidden`; sign in with a session.
         """

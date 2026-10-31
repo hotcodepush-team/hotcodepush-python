@@ -10,7 +10,7 @@ class DeviceEventsResource(BaseResource):
     def count(
         self, *, app_id: str, device_id: str, release_id: str | NotGiven = NOT_GIVEN
     ) -> Count:
-        """The number of the device's events under the list's filter."""
+        """Counts the events of the device that match the filter."""
         return self._http_client.fetch_json(
             "GET",
             resolve_path(
@@ -31,8 +31,9 @@ class DeviceEventsResource(BaseResource):
         offset: int | NotGiven = NOT_GIVEN,
         release_id: str | NotGiven = NOT_GIVEN,
     ) -> list[ReleaseDeviceEvent]:
-        """The device's events across the app's releases, newest first, filtered by
-        `release_id`.
+        """Lists the events of the device across the releases of the app, newest first.
+
+        `release_id` selects the events of one release.
         """
         return self._http_client.fetch_json(
             "GET",

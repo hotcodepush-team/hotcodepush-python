@@ -15,7 +15,7 @@ class MembersResource(BaseResource):
         role: Role | NotGiven = NOT_GIVEN,
         user_id: str | NotGiven = NOT_GIVEN,
     ) -> Count:
-        """The number of the organization's members under the list's filters."""
+        """Counts the members of the organization that match the filters."""
         return self._http_client.fetch_json(
             "GET",
             resolve_path(
@@ -26,7 +26,7 @@ class MembersResource(BaseResource):
         )
 
     def delete(self, *, member_id: str, organization_id: str) -> None:
-        """Removes a member; any member may remove themselves, which is leaving the organization.
+        """Removes a member. Any member may remove themselves to leave the organization.
 
         An API token answers `forbidden`; sign in with a session.
         """
@@ -40,8 +40,10 @@ class MembersResource(BaseResource):
         )
 
     def delete_many(self, *, ids: list[str], organization_id: str) -> None:
-        """Removes the organization's members named by `ids`, one to 100; an id of another
-        organization is skipped, and the Owner refuses the whole set.
+        """Removes the members of the organization named by `ids`, 1 to 100.
+
+        An id of another organization is skipped. The whole request is refused if it names the
+        Owner.
 
         An API token answers `forbidden`; sign in with a session.
         """
@@ -60,8 +62,10 @@ class MembersResource(BaseResource):
         organization_id: str,
         relations: list[MemberRelation] | NotGiven = NOT_GIVEN,
     ) -> Member:
-        """A member; `relations=["user"]` embeds its user, and `["user", "user.accounts"]` the
-        user's sign-in identities under it.
+        """Gets a member.
+
+        `relations=["user"]` embeds its user, and `["user", "user.accounts"]` also embeds the
+        sign-in identities of the user.
         """
         return self._http_client.fetch_json(
             "GET",
@@ -85,8 +89,9 @@ class MembersResource(BaseResource):
         role: Role | NotGiven = NOT_GIVEN,
         user_id: str | NotGiven = NOT_GIVEN,
     ) -> list[Member]:
-        """The organization's members, newest first; `query` selects those whose user's email
-        contains it.
+        """Lists the members of the organization, newest first.
+
+        `query` selects the members whose email contains it.
         """
         return self._http_client.fetch_json(
             "GET",
@@ -105,7 +110,7 @@ class MembersResource(BaseResource):
         )
 
     def update(self, *, member_id: str, organization_id: str, role: Role) -> Member:
-        """Changes a member's role; setting `owner` transfers the ownership.
+        """Changes the role of a member. Setting `owner` transfers the ownership.
 
         An API token answers `forbidden`; sign in with a session.
         """

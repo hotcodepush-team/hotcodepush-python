@@ -1,5 +1,3 @@
-"""The single-or-parts rule of an upload: bytes above the single-upload limit go up in parts."""
-
 from __future__ import annotations
 
 from collections.abc import Callable
@@ -10,17 +8,16 @@ from ._http import UploadBody
 from .models import MultipartUpload, UploadedPart
 
 PART_SIZE_BYTES = 10 * 1024 * 1024
-"""Every part but the last is this size: at least five mebibytes and all of one size, the bucket's
-rule."""
+"""The size of every part but the last. The bucket needs parts of one size, at least 5 MiB."""
 SINGLE_UPLOAD_LIMIT_BYTES = 64 * 1024 * 1024
-"""Bytes go up in one request up to this size and in parts above it, well under the request-body
-cap of the API's plan."""
+"""The largest bytes body sent in one request; a larger one goes up in parts. It stays well under
+the API's request body limit."""
 
 T = TypeVar("T")
 
 
 def is_above_single_upload_limit(body: UploadBody) -> TypeGuard[bytes]:
-    """A file object is read once and cannot be split, so only bytes go up in parts."""
+    # A file object is read once and cannot be split.
     return isinstance(body, bytes) and len(body) > SINGLE_UPLOAD_LIMIT_BYTES
 
 
@@ -32,12 +29,6 @@ def upload_in_parts(
     delete: Callable[[str], None],
     upload_part: Callable[[str, int, bytes], UploadedPart],
 ) -> T:
-    """Uploads bytes in parts of `PART_SIZE_BYTES`, numbered from 1, then completes the upload;
-    a failed part or completion deletes the upload and re-raises.
-
-    Each callable is one call of the multipart upload the files and the pack share, bound to the
-    path parameters of its target.
-    """
     upload_id = create().upload_id
     try:
         uploaded_parts = [

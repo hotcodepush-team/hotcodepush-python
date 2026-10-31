@@ -19,10 +19,10 @@ class BundlesResource(BaseResource):
         self.pack = BundlePackResource(http_client)
 
     def complete(self, *, app_id: str, bundle_id: str) -> Bundle:
-        """Checks every listed file and the pack are uploaded, writes the manifest and sets the
-        bundle `ready`.
+        """Completes a bundle and sets it `ready`.
 
-        A completed bundle answers itself again, so the call is retried.
+        The API checks that every listed file and the pack are uploaded, then writes the manifest.
+        Retried, since a completed bundle answers itself again.
         """
         return self._http_client.fetch_json(
             "POST",
@@ -45,7 +45,7 @@ class BundlesResource(BaseResource):
         status: Literal["ready", "uploading"] | NotGiven = NOT_GIVEN,
         version: str | NotGiven = NOT_GIVEN,
     ) -> Count:
-        """The number of the app's bundles under the list's filters."""
+        """Counts the bundles of the app that match the filters."""
         return self._http_client.fetch_json(
             "GET",
             resolve_path("/v1/apps/{appId}/bundles/count", appId=app_id),
@@ -77,10 +77,10 @@ class BundlesResource(BaseResource):
         signature: BundleSignature | None | NotGiven = NOT_GIVEN,
         version: str,
     ) -> Bundle:
-        """Creates a bundle from its manifest; it stays `uploading` until completed.
+        """Creates a bundle from its manifest. It stays `uploading` until it is completed.
 
-        `apps.bundles.files.list` with `is_stored=False` names the files the app lacks, each
-        uploaded through `apps.files.upload`; the pack goes up through `apps.bundles.pack.upload`.
+        `apps.bundles.files.list` with `is_stored=False` names the files the app lacks. Upload each
+        through `apps.files.upload`, and the pack through `apps.bundles.pack.upload`.
         """
         return self._http_client.fetch_creating_post(
             resolve_path("/v1/apps/{appId}/bundles", appId=app_id),
@@ -101,7 +101,10 @@ class BundlesResource(BaseResource):
         )
 
     def delete(self, *, app_id: str, bundle_id: str) -> None:
-        """Deletes a bundle now; one a release serves or a store build embeds is refused."""
+        """Deletes a bundle at once.
+
+        A bundle that a release serves or a store build embeds is refused.
+        """
         self._http_client.fetch_status(
             "DELETE",
             resolve_path("/v1/apps/{appId}/bundles/{bundleId}", appId=app_id, bundleId=bundle_id),
@@ -128,7 +131,7 @@ class BundlesResource(BaseResource):
         status: Literal["ready", "uploading"] | NotGiven = NOT_GIVEN,
         version: str | NotGiven = NOT_GIVEN,
     ) -> list[Bundle]:
-        """The app's bundles, newest first."""
+        """Lists the bundles of the app, newest first."""
         return self._http_client.fetch_json(
             "GET",
             resolve_path("/v1/apps/{appId}/bundles", appId=app_id),

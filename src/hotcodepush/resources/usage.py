@@ -8,7 +8,10 @@ from ._base import BaseResource
 
 class UsageResource(BaseResource):
     def count_apps(self, *, month: str | NotGiven = NOT_GIVEN, organization_id: str) -> Count:
-        """The number of apps with usage in `month`, `YYYY-MM`, which `list_apps` pages through."""
+        """Counts the apps with usage in `month`, `YYYY-MM`.
+
+        `list_apps` pages through them.
+        """
         return self._http_client.fetch_json(
             "GET",
             resolve_path(
@@ -22,7 +25,10 @@ class UsageResource(BaseResource):
     def download_apps_csv(
         self, *, month: str | NotGiven = NOT_GIVEN, organization_id: str
     ) -> bytes:
-        """Every app's usage in `month`, `YYYY-MM`, as `text/csv` with the app's name, read whole."""
+        """Downloads the usage of every app in `month`, `YYYY-MM`, as `text/csv`.
+
+        The CSV includes the app names.
+        """
         return self._http_client.fetch_bytes(
             "GET",
             resolve_path(
@@ -32,8 +38,9 @@ class UsageResource(BaseResource):
         )
 
     def get(self, *, month: str | NotGiven = NOT_GIVEN, organization_id: str) -> Usage:
-        """The organization's usage in `month`, `YYYY-MM`, the current one by default, read from
-        the stored months.
+        """Gets the usage of the organization in `month`, `YYYY-MM`, by default the current month.
+
+        The API reads it from the stored months.
         """
         return self._http_client.fetch_json(
             "GET",
@@ -53,8 +60,9 @@ class UsageResource(BaseResource):
         organization_id: str,
         relations: list[AppUsageMonthRelation] | NotGiven = NOT_GIVEN,
     ) -> list[AppUsageMonth]:
-        """The usage of each live app in `month`, `YYYY-MM`, the most monthly active devices
-        first; `relations=["app"]` embeds the app's id and name.
+        """Lists the usage of each live app in `month`, `YYYY-MM`.
+
+        The app with the most monthly active devices comes first. `relations=["app"]` embeds the id and name of each app.
         """
         return self._http_client.fetch_json(
             "GET",

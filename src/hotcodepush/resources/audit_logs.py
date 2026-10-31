@@ -21,7 +21,7 @@ class AuditLogsResource(BaseResource):
         type: str | NotGiven = NOT_GIVEN,
         user_id: str | NotGiven = NOT_GIVEN,
     ) -> Count:
-        """The number of the audit log's rows under the list's filters.
+        """Counts the rows of the audit log that match the filters.
 
         An API token answers `forbidden`; sign in with a session.
         """
@@ -53,7 +53,7 @@ class AuditLogsResource(BaseResource):
         type: str | NotGiven = NOT_GIVEN,
         user_id: str | NotGiven = NOT_GIVEN,
     ) -> bytes:
-        """The audit log under the list's filters as `text/csv`, every matching row, read whole.
+        """Downloads every row of the audit log that matches the filters as `text/csv`.
 
         An API token answers `forbidden`; sign in with a session.
         """
@@ -87,8 +87,10 @@ class AuditLogsResource(BaseResource):
         type: str | NotGiven = NOT_GIVEN,
         user_id: str | NotGiven = NOT_GIVEN,
     ) -> list[AuditLog]:
-        """The organization's audit log, newest first, on a plan that includes it, `plan_required`
-        otherwise; `type` takes `channel.*` for every action on an object.
+        """Lists the audit log of the organization, newest first.
+
+        The plan must include the audit log, otherwise the API answers `plan_required`. `type`
+        takes `channel.*` for every action on an object type.
 
         An API token answers `forbidden`; sign in with a session.
         """

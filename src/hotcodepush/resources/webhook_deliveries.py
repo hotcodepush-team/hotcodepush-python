@@ -10,7 +10,7 @@ from ._base import BaseResource
 
 
 class WebhookDeliveriesResource(BaseResource):
-    """A webhook's delivery log, each delivery kept for 30 days."""
+    """The delivery log of a webhook. Each delivery is kept for 30 days."""
 
     def count(
         self,
@@ -21,7 +21,7 @@ class WebhookDeliveriesResource(BaseResource):
         status: Literal["failed", "pending", "succeeded"] | NotGiven = NOT_GIVEN,
         webhook_id: str,
     ) -> Count:
-        """The number of the webhook's deliveries under the list's filters.
+        """Counts the deliveries of the webhook that match the filters.
 
         An API token answers `forbidden`; sign in with a session.
         """
@@ -47,8 +47,10 @@ class WebhookDeliveriesResource(BaseResource):
         status: Literal["failed", "pending", "succeeded"] | NotGiven = NOT_GIVEN,
         webhook_id: str,
     ) -> list[WebhookDelivery]:
-        """The webhook's deliveries, newest first, filtered by `status` and by `created_since` and
-        `created_until`, both inclusive.
+        """Lists the deliveries of the webhook, newest first.
+
+        `status` filters by status. `created_since` and `created_until` filter by creation time,
+        both inclusive.
 
         An API token answers `forbidden`; sign in with a session.
         """
@@ -72,10 +74,10 @@ class WebhookDeliveriesResource(BaseResource):
     def redeliver(
         self, *, delivery_id: str, organization_id: str, webhook_id: str
     ) -> WebhookDelivery:
-        """Delivers the event again, once, within the request, and answers the settled delivery,
-        its attempt count carried on.
+        """Delivers the event again, once, and returns the settled delivery.
 
-        Each call makes another attempt, so the call is never retried.
+        The attempt runs within the request, and the attempt count goes on from before. Never
+        retried, since each call makes another attempt.
 
         An API token answers `forbidden`; sign in with a session.
         """
