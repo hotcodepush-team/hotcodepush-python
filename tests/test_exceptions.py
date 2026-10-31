@@ -41,3 +41,11 @@ def test_answers_unexpected_response_when_the_json_lacks_the_error_shape() -> No
     resolved_error = resolve_hot_code_push_error(404, '{"error":"Not Found"}')
 
     assert (resolved_error.code, resolved_error.status) == ("unexpected_response", 404)
+
+
+def test_answers_unexpected_response_when_the_code_is_outside_the_catalog() -> None:
+    body = json.dumps({"code": "host_not_allowed", "details": None, "message": "Not allowed."})
+
+    resolved_error = resolve_hot_code_push_error(400, body)
+
+    assert (resolved_error.code, resolved_error.status) == ("unexpected_response", 400)

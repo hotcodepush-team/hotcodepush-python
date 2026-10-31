@@ -3,7 +3,7 @@ import io
 from collections.abc import Callable
 from datetime import UTC, date, datetime
 from functools import reduce
-from typing import Any
+from typing import Any, get_args
 
 import httpx
 import pytest
@@ -12,6 +12,7 @@ from pydantic import BaseModel
 from hotcodepush import (
     BinaryCondition,
     BundleSignature,
+    ErrorCode,
     HotCodePush,
     ManifestFile,
     OidcConfig,
@@ -21,6 +22,7 @@ from hotcodepush import (
 )
 from hotcodepush.resources._base import BaseResource
 from tests.openapi_document import (
+    OPENAPI_DOCUMENT,
     resolve_branches,
     resolve_documented_operation_names,
     resolve_operation,
@@ -163,7 +165,7 @@ CALLS: dict[str, Callable[[HotCodePush], object]] = {
         device=[DEVICE_ID],
         fingerprint=[f"fp1:{SHA256}"],
         os=[">=17"],
-        rollout_percentage=10,
+        rollout_percent=10,
     ),
     "apps.channels.count": lambda hot_code_push: hot_code_push.apps.channels.count(
         app_id=APP_ID, query="stag"
@@ -194,11 +196,8 @@ CALLS: dict[str, Callable[[HotCodePush], object]] = {
     "apps.channels.pause": lambda hot_code_push: hot_code_push.apps.channels.pause(
         app_id=APP_ID, channel_id=CHANNEL_ID
     ),
-    "apps.channels.qr.get": lambda hot_code_push: hot_code_push.apps.channels.qr.get(
+    "apps.channels.qr_code.get": lambda hot_code_push: hot_code_push.apps.channels.qr_code.get(
         app_id=APP_ID, channel_id=CHANNEL_ID, format="png"
-    ),
-    "apps.channels.releases.count": lambda hot_code_push: (
-        hot_code_push.apps.channels.releases.count(app_id=APP_ID, channel_id=CHANNEL_ID, number=1)
     ),
     "apps.channels.releases.create": lambda hot_code_push: (
         hot_code_push.apps.channels.releases.create(
@@ -214,18 +213,10 @@ CALLS: dict[str, Callable[[HotCodePush], object]] = {
             is_mandatory=True,
             notes="Fixes the login.",
             progression=ReleaseProgression(
-                percentages=[25, 50], step_minimum_seconds=3600, step_minimum_update_count=100
+                rollout_percents=[25, 50], step_minimum_seconds=3600, step_minimum_update_count=100
             ),
-            rollout_percentage=10,
+            rollout_percent=10,
         )
-    ),
-    "apps.channels.releases.list": lambda hot_code_push: hot_code_push.apps.channels.releases.list(
-        app_id=APP_ID,
-        channel_id=CHANNEL_ID,
-        limit=10,
-        number=1,
-        offset=10,
-        relations=["bundle", "channel", "releaseCounters"],
     ),
     "apps.channels.releases.revoke": lambda hot_code_push: (
         hot_code_push.apps.channels.releases.revoke(
@@ -278,7 +269,12 @@ CALLS: dict[str, Callable[[HotCodePush], object]] = {
         app_id=APP_ID, device_id=DEVICE_ID, release_id=RELEASE_ID
     ),
     "apps.devices.events.list": lambda hot_code_push: hot_code_push.apps.devices.events.list(
-        app_id=APP_ID, device_id=DEVICE_ID, limit=10, offset=10, release_id=RELEASE_ID
+        app_id=APP_ID,
+        device_id=DEVICE_ID,
+        limit=10,
+        offset=10,
+        relations=["release"],
+        release_id=RELEASE_ID,
     ),
     "apps.devices.get": lambda hot_code_push: hot_code_push.apps.devices.get(
         app_id=APP_ID, device_id=DEVICE_ID, relations=["channel", "currentRelease"]
@@ -327,6 +323,7 @@ CALLS: dict[str, Callable[[HotCodePush], object]] = {
         bundle_id=BUNDLE_ID,
         channel_id=CHANNEL_ID,
         git_commit="main",
+        number=1,
         status="active",
     ),
     "apps.releases.get": lambda hot_code_push: hot_code_push.apps.releases.get(
@@ -338,6 +335,7 @@ CALLS: dict[str, Callable[[HotCodePush], object]] = {
         channel_id=CHANNEL_ID,
         git_commit="main",
         limit=10,
+        number=1,
         offset=10,
         relations=["bundle", "channel", "releaseCounters"],
         status="active",
@@ -359,10 +357,10 @@ CALLS: dict[str, Callable[[HotCodePush], object]] = {
         is_mandatory=True,
         notes="Fixes the login.",
         progression=ReleaseProgression(
-            percentages=[75, 100], step_minimum_seconds=3600, step_minimum_update_count=100
+            rollout_percents=[75, 100], step_minimum_seconds=3600, step_minimum_update_count=100
         ),
         release_id=RELEASE_ID,
-        rollout_percentage=50,
+        rollout_percent=50,
     ),
     "apps.signing_keys.count": lambda hot_code_push: hot_code_push.apps.signing_keys.count(
         app_id=APP_ID
@@ -563,8 +561,8 @@ CALLS: dict[str, Callable[[HotCodePush], object]] = {
     "organizations.sso_provider.get": lambda hot_code_push: (
         hot_code_push.organizations.sso_provider.get(organization_id=ORGANIZATION_ID)
     ),
-    "organizations.sso_provider.put": lambda hot_code_push: (
-        hot_code_push.organizations.sso_provider.put(
+    "organizations.sso_provider.set": lambda hot_code_push: (
+        hot_code_push.organizations.sso_provider.set(
             domain="example.com",
             oidc=OidcConfig(
                 client_id="client",
@@ -606,27 +604,27 @@ CALLS: dict[str, Callable[[HotCodePush], object]] = {
         organization_id=ORGANIZATION_ID,
         spending_cap_cents=50_000,
     ),
-    "organizations.usage.count_apps": lambda hot_code_push: (
-        hot_code_push.organizations.usage.count_apps(
+    "organizations.usage.apps.count": lambda hot_code_push: (
+        hot_code_push.organizations.usage.apps.count(
             month="2026-09", organization_id=ORGANIZATION_ID
         )
     ),
-    "organizations.usage.download_apps_csv": lambda hot_code_push: (
-        hot_code_push.organizations.usage.download_apps_csv(
+    "organizations.usage.apps.download_csv": lambda hot_code_push: (
+        hot_code_push.organizations.usage.apps.download_csv(
             month="2026-09", organization_id=ORGANIZATION_ID
         )
     ),
-    "organizations.usage.get": lambda hot_code_push: hot_code_push.organizations.usage.get(
-        month="2026-09", organization_id=ORGANIZATION_ID
-    ),
-    "organizations.usage.list_apps": lambda hot_code_push: (
-        hot_code_push.organizations.usage.list_apps(
+    "organizations.usage.apps.list": lambda hot_code_push: (
+        hot_code_push.organizations.usage.apps.list(
             limit=10,
             month="2026-09",
             offset=10,
             organization_id=ORGANIZATION_ID,
             relations=["app"],
         )
+    ),
+    "organizations.usage.get": lambda hot_code_push: hot_code_push.organizations.usage.get(
+        month="2026-09", organization_id=ORGANIZATION_ID
     ),
     "organizations.webhooks.count": lambda hot_code_push: (
         hot_code_push.organizations.webhooks.count(organization_id=ORGANIZATION_ID)
@@ -690,6 +688,9 @@ CALLS: dict[str, Callable[[HotCodePush], object]] = {
             url="https://example.com/hooks/releases",
             webhook_id=WEBHOOK_ID,
         )
+    ),
+    "qr_codes.get": lambda hot_code_push: hot_code_push.qr_codes.get(
+        format="png", size=256, url="https://hotcodepush.com/docs"
     ),
     "users.delete": lambda hot_code_push: hot_code_push.users.delete(
         password=PASSWORD, user_id="me"
@@ -811,6 +812,12 @@ def test_notes_the_refusal_of_an_api_token_exactly_where_the_operation_is_sessio
     )
     method = reduce(getattr, name.split("."), api.client)
     assert (SESSION_ONLY_NOTE in (inspect.getdoc(method) or "")) == is_session_only
+
+
+def test_types_the_error_code_as_the_catalog_of_the_snapshot_and_unexpected_response() -> None:
+    documented_codes = OPENAPI_DOCUMENT["components"]["schemas"]["Error"]["properties"]["code"]
+
+    assert sorted(get_args(ErrorCode)) == sorted([*documented_codes["enum"], "unexpected_response"])
 
 
 def resolve_resource_method_names(resource: BaseResource, path: str) -> list[str]:

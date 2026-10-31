@@ -117,7 +117,7 @@
   ],
   "servers": [
     {
-      "url": "https://api.hotcodepush.com"
+      "url": "https://api.hotcodepush.test"
     }
   ],
   "paths": {
@@ -180,9 +180,7 @@
                         "type": "string",
                         "enum": [
                           "accepted",
-                          "canceled",
-                          "pending",
-                          "rejected"
+                          "pending"
                         ]
                       },
                       "updatedAt": {
@@ -1131,6 +1129,12 @@
                           }
                         ]
                       },
+                      "organizationName": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
                       "readAt": {
                         "anyOf": [
                           {
@@ -1274,6 +1278,7 @@
                       "id",
                       "memberUserId",
                       "organizationId",
+                      "organizationName",
                       "readAt",
                       "releaseId",
                       "type",
@@ -1365,7 +1370,7 @@
             "description": "`maintenance`"
           }
         },
-        "description": "The caller's in-app notifications across every organization, newest first, filtered by `isRead`. Each row carries the ids of the app, channel, release and member user it is about, null where its type is about none or the row is gone; `?relations=app,channel,memberUser,release` embeds each one's id and name, the release's id and number, null once it is deleted.",
+        "description": "The caller's in-app notifications across every organization, newest first, filtered by `isRead`. Each row carries the ids of the app, channel, release and member user it is about, null where its type is about none or the row is gone; `?relations=app,channel,memberUser,release` embeds each one's id and name, the release's id and number, null in the moment before a hard delete's cascade. A row is listed while what it is about is live: its organization, but for `organization_deleted` itself, its app and its member user; the count follows the same rule.",
         "summary": "List notifications",
         "tags": [
           "Notifications"
@@ -1748,6 +1753,12 @@
                         }
                       ]
                     },
+                    "organizationName": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
                     "readAt": {
                       "anyOf": [
                         {
@@ -1793,6 +1804,7 @@
                     "id",
                     "memberUserId",
                     "organizationId",
+                    "organizationName",
                     "readAt",
                     "releaseId",
                     "type",
@@ -2558,24 +2570,6 @@
                           "user"
                         ]
                       },
-                      "address": {
-                        "type": [
-                          "string",
-                          "null"
-                        ]
-                      },
-                      "apiKeyId": {
-                        "anyOf": [
-                          {
-                            "type": "string",
-                            "format": "uuid",
-                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      },
                       "app": {
                         "type": "object",
                         "properties": {
@@ -2633,6 +2627,12 @@
                         "format": "uuid",
                         "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
                       },
+                      "ipAddress": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
                       "objectId": {
                         "anyOf": [
                           {
@@ -2675,6 +2675,18 @@
                           "type": "string"
                         },
                         "additionalProperties": {}
+                      },
+                      "tokenId": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "format": "uuid",
+                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
                       },
                       "type": {
                         "type": "string"
@@ -2755,17 +2767,17 @@
                     },
                     "required": [
                       "actorType",
-                      "address",
-                      "apiKeyId",
                       "appId",
                       "country",
                       "createdAt",
                       "dispatchedAt",
                       "id",
+                      "ipAddress",
                       "objectId",
                       "organizationId",
                       "sessionId",
                       "snapshot",
+                      "tokenId",
                       "type",
                       "updatedAt",
                       "userAgent",
@@ -3500,9 +3512,7 @@
                         "type": "string",
                         "enum": [
                           "accepted",
-                          "canceled",
-                          "pending",
-                          "rejected"
+                          "pending"
                         ]
                       },
                       "updatedAt": {
@@ -3733,9 +3743,7 @@
                       "type": "string",
                       "enum": [
                         "accepted",
-                        "canceled",
-                        "pending",
-                        "rejected"
+                        "pending"
                       ]
                     },
                     "updatedAt": {
@@ -7747,7 +7755,7 @@
             "description": "`maintenance`"
           }
         },
-        "description": "On a plan that includes webhooks, creates a webhook: a name unique per organization case-insensitively, `webhook_name_taken` otherwise; the `format`, `raw` for our JSON payload or `slack`, `discord` or `teams` for a message posted to that target's incoming-webhook URL; an https URL, never a loopback, private or HotCodePush host, refused under `https_required`, `host_forbidden` or `credentials_forbidden`; the audit `events` subscribed to, by type; and an optional app filter, one of the organization's live apps, refused under `invalid_value` otherwise. A `raw` webhook answers its signing `secret` this once, never again.",
+        "description": "On a plan that includes webhooks, creates a webhook: a name unique per organization case-insensitively, `webhook_name_taken` otherwise; the `format`, `raw` for our JSON payload or `slack`, `discord` or `teams` for a message posted to that target's incoming-webhook URL; an https URL, never a loopback, private or HotCodePush host, refused under `https_required`, `host_not_allowed` or `credentials_forbidden`; the audit `events` subscribed to, by type; and an optional app filter, one of the organization's live apps, refused under `invalid_value` otherwise. A `raw` webhook answers its signing `secret` this once, never again.",
         "summary": "Create a webhook",
         "tags": [
           "Webhooks"
@@ -11911,6 +11919,150 @@
         ]
       }
     },
+    "/v1/qr-codes": {
+      "get": {
+        "operationId": "getV1QrCodes",
+        "description": "Renders an `https:` URL on hotcodepush.com, one of its subdomains or our workers.dev subdomain as a QR image — SVG by default, PNG with `format=png`, `size` pixels wide — cached an hour; a URL on another host answers `validation` with the rule `host_not_allowed` on `url`, and a render not answered from the cache counts against a per-IP limit. No auth.",
+        "responses": {
+          "200": {
+            "content": {
+              "image/png": {
+                "schema": {
+                  "format": "binary",
+                  "type": "string"
+                }
+              },
+              "image/svg+xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "The QR image."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "`validation`, with the field, the rule and the target in `details`, or `client_update_required`"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "`unauthenticated`"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "`forbidden`, `account_banned`, `origin_untrusted` on a cookie-authenticated write from an untrusted origin, or `ip_not_allowed`, `country_not_allowed` or `two_factor_required` inside an organization whose security settings refuse the request"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "`not_found`"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "`rate_limited`",
+            "headers": {
+              "Retry-After": {
+                "description": "The seconds until the window opens, as `details.retryAfterSeconds` says.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "`internal`"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "`maintenance`"
+          }
+        },
+        "security": [],
+        "summary": "Get a QR code",
+        "tags": [
+          "Utilities"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "format",
+            "schema": {
+              "default": "svg",
+              "type": "string",
+              "enum": [
+                "png",
+                "svg"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "schema": {
+              "default": 256,
+              "type": "integer",
+              "minimum": 128,
+              "maximum": 512
+            }
+          },
+          {
+            "in": "query",
+            "name": "url",
+            "schema": {
+              "type": "string",
+              "maxLength": 2048,
+              "format": "uri"
+            },
+            "required": true
+          },
+          {
+            "$ref": "#/components/parameters/ClientHeader"
+          }
+        ]
+      }
+    },
     "/v1/apps/{appId}/binaries": {
       "get": {
         "operationId": "getV1AppsByAppIdBinaries",
@@ -13853,7 +14005,7 @@
     "/v1/apps/{appId}/bundles/{bundleId}": {
       "get": {
         "operationId": "getV1AppsByAppIdBundlesByBundleId",
-        "description": "One bundle; while it is in use nowhere, `expiresAt` is `unusedSince` plus the organization's retention, written with it; its delta packs are the `deltas` list beside it.",
+        "description": "One bundle; while it is in use nowhere, `expiresAt` is `unusedSince` plus the organization's retention, written with it; its deltas are the `deltas` list beside it.",
         "responses": {
           "200": {
             "content": {
@@ -14151,7 +14303,7 @@
       },
       "delete": {
         "operationId": "deleteV1AppsByAppIdBundlesByBundleId",
-        "description": "Deletes the bundle now, not by retention: refused while a release serves it or a binary ships it; its manifest, pack and delta packs go with it, and the files no other bundle of the app lists.",
+        "description": "Deletes the bundle now, not by retention: refused while a release serves it or a binary ships it; its manifest, pack and deltas go with it, and the files no other bundle of the app lists.",
         "responses": {
           "204": {
             "description": "The bundle is gone."
@@ -14277,7 +14429,7 @@
     "/v1/apps/{appId}/bundles/{bundleId}/complete": {
       "post": {
         "operationId": "postV1AppsByAppIdBundlesByBundleIdComplete",
-        "description": "Verifies every listed file is stored and the pack is present, rebuilds the signed manifest from the rows and checks its signature against the app's keys again, writes the envelope at the bundle's key — the manifest, the signature and, unsigned beside them, the bundle's id and creation time and the pack with its URL and stored size, the delta list empty since the platform builds the delta packs and devices reach them through the delta route — and sets `ready`; a completed bundle answers itself again.",
+        "description": "Verifies every listed file is stored and the pack is present, rebuilds the signed manifest from the rows and checks its signature against the app's keys again, writes the envelope at the bundle's key — the manifest, the signature and, unsigned beside them, the bundle's id and creation time and the pack with its URL and stored size, the delta list empty since the platform builds the deltas and devices reach them through the delta route — and sets `ready`; a completed bundle answers itself again.",
         "responses": {
           "200": {
             "content": {
@@ -14587,7 +14739,7 @@
     "/v1/apps/{appId}/bundles/{bundleId}/deltas": {
       "get": {
         "operationId": "getV1AppsByAppIdBundlesByBundleIdDeltas",
-        "description": "The bundle's delta packs, one per base its devices run, newest first, each with its status — `requested`, `built` or `failed` — and, once built, its size and its patch count; `?relations=baseBundle` embeds the base, whose number is null for a binary's bundle.",
+        "description": "The bundle's deltas, one per base its devices run, newest first, each with its status — `requested`, `built` or `failed` — and, once built, its size and its patch count; `?relations=baseBundle` embeds the base, whose number is null for a binary's bundle.",
         "responses": {
           "200": {
             "content": {
@@ -14849,7 +15001,7 @@
                 }
               }
             },
-            "description": "The delta packs."
+            "description": "The deltas."
           },
           "400": {
             "content": {
@@ -14930,7 +15082,7 @@
             "description": "`maintenance`"
           }
         },
-        "summary": "List the delta packs of a bundle",
+        "summary": "List the deltas of a bundle",
         "tags": [
           "Bundles"
         ],
@@ -14995,7 +15147,7 @@
     "/v1/apps/{appId}/bundles/{bundleId}/deltas/count": {
       "get": {
         "operationId": "getV1AppsByAppIdBundlesByBundleIdDeltasCount",
-        "description": "The number of the bundle's delta packs, which the list pages through.",
+        "description": "The number of the bundle's deltas, which the list pages through.",
         "responses": {
           "200": {
             "content": {
@@ -15096,7 +15248,7 @@
             "description": "`maintenance`"
           }
         },
-        "summary": "Count the delta packs of a bundle",
+        "summary": "Count the deltas of a bundle",
         "tags": [
           "Bundles"
         ],
@@ -15128,7 +15280,7 @@
     "/v1/apps/{appId}/bundles/{bundleId}/files": {
       "get": {
         "operationId": "getV1AppsByAppIdBundlesByBundleIdFiles",
-        "description": "The bundle's files, ordered by path, each with its content hash, its uncompressed size and `storedAt`, when the app's store held the hash; an embedded bundle answers the files its binary was created with. `isStored=false` selects the files still to upload after the bundle's create. `limit` goes up to 1000, beyond every other list's 100, since a tool reads the whole list of each base bundle it builds a delta pack against.",
+        "description": "The bundle's files, ordered by path, each with its content hash, its uncompressed size and `storedAt`, when the app's store held the hash; an embedded bundle answers the files its binary was created with. `isStored=false` selects the files still to upload after the bundle's create. `limit` goes up to 1000, beyond every other list's 100, since a tool reads the whole list of each base bundle it builds a delta against.",
         "responses": {
           "200": {
             "content": {
@@ -16290,9 +16442,9 @@
         ]
       }
     },
-    "/v1/apps/{appId}/channels/{channelId}/qr": {
+    "/v1/apps/{appId}/channels/{channelId}/qr-code": {
       "get": {
-        "operationId": "getV1AppsByAppIdChannelsByChannelIdQr",
+        "operationId": "getV1AppsByAppIdChannelsByChannelIdQrCode",
         "description": "The channel's deep link, the app's `channelLinkTemplate` with the channel id substituted, rendered as a QR image — SVG by default, PNG with `format=png` — cached an hour. No auth: the channel id is the capability and the content is never caller-chosen. `not_found` while the template is unset.",
         "responses": {
           "200": {
@@ -18456,916 +18608,6 @@
       }
     },
     "/v1/apps/{appId}/channels/{channelId}/releases": {
-      "get": {
-        "operationId": "getV1AppsByAppIdChannelsByChannelIdReleases",
-        "description": "The channel's release log, newest first, filtered by `number`, a release's number in the channel; `?relations=channel,bundle,releaseCounters` embeds the linked rows.",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "autoPausedAt": {
-                        "anyOf": [
-                          {
-                            "type": "string",
-                            "format": "date-time",
-                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      },
-                      "bundleId": {
-                        "type": "string",
-                        "format": "uuid",
-                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-                      },
-                      "channelId": {
-                        "type": "string",
-                        "format": "uuid",
-                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-                      },
-                      "conditions": {
-                        "type": "array",
-                        "items": {
-                          "oneOf": [
-                            {
-                              "type": "object",
-                              "properties": {
-                                "key": {
-                                  "type": "string",
-                                  "minLength": 1
-                                },
-                                "type": {
-                                  "type": "string",
-                                  "const": "attribute"
-                                },
-                                "valueSha256": {
-                                  "type": "string",
-                                  "pattern": "^[0-9a-f]{64}$"
-                                }
-                              },
-                              "required": [
-                                "key",
-                                "type",
-                                "valueSha256"
-                              ],
-                              "additionalProperties": false
-                            },
-                            {
-                              "type": "object",
-                              "properties": {
-                                "range": {
-                                  "type": "string",
-                                  "minLength": 1
-                                },
-                                "type": {
-                                  "type": "string",
-                                  "const": "binary"
-                                }
-                              },
-                              "required": [
-                                "range",
-                                "type"
-                              ],
-                              "additionalProperties": false
-                            },
-                            {
-                              "type": "object",
-                              "properties": {
-                                "hashedIds": {
-                                  "type": "array",
-                                  "items": {
-                                    "type": "string",
-                                    "pattern": "^[0-9a-f]{64}$"
-                                  }
-                                },
-                                "type": {
-                                  "type": "string",
-                                  "const": "device"
-                                }
-                              },
-                              "required": [
-                                "hashedIds",
-                                "type"
-                              ],
-                              "additionalProperties": false
-                            },
-                            {
-                              "type": "object",
-                              "properties": {
-                                "fingerprint": {
-                                  "type": "string",
-                                  "minLength": 1
-                                },
-                                "type": {
-                                  "type": "string",
-                                  "const": "fingerprint"
-                                }
-                              },
-                              "required": [
-                                "fingerprint",
-                                "type"
-                              ],
-                              "additionalProperties": false
-                            },
-                            {
-                              "type": "object",
-                              "properties": {
-                                "range": {
-                                  "type": "string",
-                                  "minLength": 1
-                                },
-                                "type": {
-                                  "type": "string",
-                                  "const": "os"
-                                }
-                              },
-                              "required": [
-                                "range",
-                                "type"
-                              ],
-                              "additionalProperties": false
-                            }
-                          ]
-                        }
-                      },
-                      "createdAt": {
-                        "type": "string",
-                        "format": "date-time",
-                        "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-                      },
-                      "createdFromReleaseId": {
-                        "anyOf": [
-                          {
-                            "type": "string",
-                            "format": "uuid",
-                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      },
-                      "failureAction": {
-                        "anyOf": [
-                          {
-                            "type": "string",
-                            "enum": [
-                              "none",
-                              "notify",
-                              "pause",
-                              "revoke"
-                            ],
-                            "description": "What auto-pause does when a release fails above the threshold: `pause` stops offering it, and devices running it keep it; `revoke` also moves those devices to the newest eligible release or the embedded bundle; `notify` only notifies; `none` evaluates the rule but acts on nothing and sends nothing, while a progression still stops widening."
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      },
-                      "failureMinimumUpdateCount": {
-                        "anyOf": [
-                          {
-                            "type": "integer",
-                            "minimum": 1,
-                            "maximum": 2147483647
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      },
-                      "failureNotifiedAt": {
-                        "anyOf": [
-                          {
-                            "type": "string",
-                            "format": "date-time",
-                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      },
-                      "failureThresholdPercent": {
-                        "anyOf": [
-                          {
-                            "type": "integer",
-                            "minimum": 1,
-                            "maximum": 100
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      },
-                      "id": {
-                        "type": "string",
-                        "format": "uuid",
-                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-                      },
-                      "isMandatory": {
-                        "type": "boolean"
-                      },
-                      "liveAt": {
-                        "anyOf": [
-                          {
-                            "type": "string",
-                            "format": "date-time",
-                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      },
-                      "notes": {
-                        "type": [
-                          "string",
-                          "null"
-                        ]
-                      },
-                      "number": {
-                        "type": "integer",
-                        "minimum": -9007199254740991,
-                        "maximum": 9007199254740991
-                      },
-                      "pausedAt": {
-                        "anyOf": [
-                          {
-                            "type": "string",
-                            "format": "date-time",
-                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      },
-                      "progression": {
-                        "anyOf": [
-                          {
-                            "type": "object",
-                            "properties": {
-                              "percentages": {
-                                "minItems": 2,
-                                "maxItems": 10,
-                                "type": "array",
-                                "items": {
-                                  "type": "integer",
-                                  "minimum": 1,
-                                  "maximum": 100
-                                }
-                              },
-                              "stepMinimumSeconds": {
-                                "type": "integer",
-                                "minimum": 0,
-                                "maximum": 2592000
-                              },
-                              "stepMinimumUpdateCount": {
-                                "type": "integer",
-                                "minimum": 1,
-                                "maximum": 9007199254740991
-                              }
-                            },
-                            "required": [
-                              "percentages",
-                              "stepMinimumSeconds",
-                              "stepMinimumUpdateCount"
-                            ]
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      },
-                      "progressionStepStartedAt": {
-                        "anyOf": [
-                          {
-                            "type": "string",
-                            "format": "date-time",
-                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      },
-                      "purgedAt": {
-                        "anyOf": [
-                          {
-                            "type": "string",
-                            "format": "date-time",
-                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      },
-                      "rolledBackFromReleaseId": {
-                        "anyOf": [
-                          {
-                            "type": "string",
-                            "format": "uuid",
-                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      },
-                      "rolloutPercentage": {
-                        "type": "integer",
-                        "minimum": -9007199254740991,
-                        "maximum": 9007199254740991
-                      },
-                      "status": {
-                        "type": "string",
-                        "enum": [
-                          "active",
-                          "paused",
-                          "revoked"
-                        ]
-                      },
-                      "stepStartAppliedUpdateCount": {
-                        "type": "integer",
-                        "minimum": -9007199254740991,
-                        "maximum": 9007199254740991
-                      },
-                      "updatedAt": {
-                        "type": "string",
-                        "format": "date-time",
-                        "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-                      },
-                      "windowStartAppliedUpdateCount": {
-                        "type": "integer",
-                        "minimum": -9007199254740991,
-                        "maximum": 9007199254740991
-                      },
-                      "windowStartFailureCount": {
-                        "type": "integer",
-                        "minimum": -9007199254740991,
-                        "maximum": 9007199254740991
-                      },
-                      "bundle": {
-                        "type": "object",
-                        "properties": {
-                          "appId": {
-                            "type": "string",
-                            "format": "uuid",
-                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-                          },
-                          "createdAt": {
-                            "type": "string",
-                            "format": "date-time",
-                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-                          },
-                          "expiresAt": {
-                            "anyOf": [
-                              {
-                                "type": "string",
-                                "format": "date-time",
-                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
-                          },
-                          "fingerprint": {
-                            "type": [
-                              "string",
-                              "null"
-                            ]
-                          },
-                          "framework": {
-                            "type": "string",
-                            "enum": [
-                              "capacitor",
-                              "cordova",
-                              "expo",
-                              "react_native"
-                            ]
-                          },
-                          "gitMessage": {
-                            "type": [
-                              "string",
-                              "null"
-                            ]
-                          },
-                          "gitRef": {
-                            "type": [
-                              "string",
-                              "null"
-                            ]
-                          },
-                          "gitRemote": {
-                            "type": [
-                              "string",
-                              "null"
-                            ]
-                          },
-                          "gitSha": {
-                            "type": [
-                              "string",
-                              "null"
-                            ]
-                          },
-                          "id": {
-                            "type": "string",
-                            "format": "uuid",
-                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-                          },
-                          "isGitDirty": {
-                            "type": [
-                              "boolean",
-                              "null"
-                            ]
-                          },
-                          "manifestSha256": {
-                            "type": [
-                              "string",
-                              "null"
-                            ]
-                          },
-                          "number": {
-                            "anyOf": [
-                              {
-                                "type": "integer",
-                                "minimum": -9007199254740991,
-                                "maximum": 9007199254740991
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
-                          },
-                          "platforms": {
-                            "type": "array",
-                            "items": {
-                              "type": "string",
-                              "enum": [
-                                "android",
-                                "ios"
-                              ]
-                            }
-                          },
-                          "signature": {
-                            "type": [
-                              "string",
-                              "null"
-                            ]
-                          },
-                          "signatureKeyId": {
-                            "type": [
-                              "string",
-                              "null"
-                            ]
-                          },
-                          "sizeBytes": {
-                            "type": "integer",
-                            "minimum": -9007199254740991,
-                            "maximum": 9007199254740991
-                          },
-                          "source": {
-                            "type": "string",
-                            "enum": [
-                              "binary",
-                              "upload"
-                            ]
-                          },
-                          "status": {
-                            "type": "string",
-                            "enum": [
-                              "ready",
-                              "uploading"
-                            ]
-                          },
-                          "unusedSince": {
-                            "anyOf": [
-                              {
-                                "type": "string",
-                                "format": "date-time",
-                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
-                          },
-                          "updatedAt": {
-                            "type": "string",
-                            "format": "date-time",
-                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-                          },
-                          "version": {
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "appId",
-                          "createdAt",
-                          "expiresAt",
-                          "fingerprint",
-                          "framework",
-                          "gitMessage",
-                          "gitRef",
-                          "gitRemote",
-                          "gitSha",
-                          "id",
-                          "isGitDirty",
-                          "manifestSha256",
-                          "number",
-                          "platforms",
-                          "signature",
-                          "signatureKeyId",
-                          "sizeBytes",
-                          "source",
-                          "status",
-                          "unusedSince",
-                          "updatedAt",
-                          "version"
-                        ]
-                      },
-                      "channel": {
-                        "type": "object",
-                        "properties": {
-                          "appId": {
-                            "type": "string",
-                            "format": "uuid",
-                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-                          },
-                          "createdAt": {
-                            "type": "string",
-                            "format": "date-time",
-                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-                          },
-                          "expiresAt": {
-                            "anyOf": [
-                              {
-                                "type": "string",
-                                "format": "date-time",
-                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
-                          },
-                          "failureAction": {
-                            "anyOf": [
-                              {
-                                "type": "string",
-                                "enum": [
-                                  "none",
-                                  "notify",
-                                  "pause",
-                                  "revoke"
-                                ],
-                                "description": "What auto-pause does when a release fails above the threshold: `pause` stops offering it, and devices running it keep it; `revoke` also moves those devices to the newest eligible release or the embedded bundle; `notify` only notifies; `none` evaluates the rule but acts on nothing and sends nothing, while a progression still stops widening."
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
-                          },
-                          "failureMinimumUpdateCount": {
-                            "anyOf": [
-                              {
-                                "type": "integer",
-                                "minimum": -9007199254740991,
-                                "maximum": 9007199254740991
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
-                          },
-                          "failureThresholdPercent": {
-                            "anyOf": [
-                              {
-                                "type": "integer",
-                                "minimum": -9007199254740991,
-                                "maximum": 9007199254740991
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
-                          },
-                          "id": {
-                            "type": "string",
-                            "format": "uuid",
-                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-                          },
-                          "isDiscoverable": {
-                            "type": "boolean"
-                          },
-                          "isProtected": {
-                            "type": "boolean"
-                          },
-                          "name": {
-                            "type": "string"
-                          },
-                          "nextReleaseNumber": {
-                            "type": "integer",
-                            "minimum": -9007199254740991,
-                            "maximum": 9007199254740991
-                          },
-                          "pausedAt": {
-                            "anyOf": [
-                              {
-                                "type": "string",
-                                "format": "date-time",
-                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
-                          },
-                          "updatedAt": {
-                            "type": "string",
-                            "format": "date-time",
-                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-                          }
-                        },
-                        "required": [
-                          "appId",
-                          "createdAt",
-                          "expiresAt",
-                          "failureAction",
-                          "failureMinimumUpdateCount",
-                          "failureThresholdPercent",
-                          "id",
-                          "isDiscoverable",
-                          "isProtected",
-                          "name",
-                          "nextReleaseNumber",
-                          "pausedAt",
-                          "updatedAt"
-                        ]
-                      },
-                      "releaseCounters": {
-                        "type": "object",
-                        "properties": {
-                          "appliedUpdateCount": {
-                            "type": "integer",
-                            "minimum": -9007199254740991,
-                            "maximum": 9007199254740991
-                          },
-                          "confirmedUpdateCount": {
-                            "type": "integer",
-                            "minimum": -9007199254740991,
-                            "maximum": 9007199254740991
-                          },
-                          "crashFailureCount": {
-                            "type": "integer",
-                            "minimum": -9007199254740991,
-                            "maximum": 9007199254740991
-                          },
-                          "createdAt": {
-                            "type": "string",
-                            "format": "date-time",
-                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-                          },
-                          "downloadFailureCount": {
-                            "type": "integer",
-                            "minimum": -9007199254740991,
-                            "maximum": 9007199254740991
-                          },
-                          "readinessTimeoutFailureCount": {
-                            "type": "integer",
-                            "minimum": -9007199254740991,
-                            "maximum": 9007199254740991
-                          },
-                          "releaseId": {
-                            "type": "string",
-                            "format": "uuid",
-                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-                          },
-                          "reportedFailureCount": {
-                            "type": "integer",
-                            "minimum": -9007199254740991,
-                            "maximum": 9007199254740991
-                          },
-                          "updatedAt": {
-                            "type": "string",
-                            "format": "date-time",
-                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-                          },
-                          "verificationFailureCount": {
-                            "type": "integer",
-                            "minimum": -9007199254740991,
-                            "maximum": 9007199254740991
-                          }
-                        },
-                        "required": [
-                          "appliedUpdateCount",
-                          "confirmedUpdateCount",
-                          "crashFailureCount",
-                          "createdAt",
-                          "downloadFailureCount",
-                          "readinessTimeoutFailureCount",
-                          "releaseId",
-                          "reportedFailureCount",
-                          "updatedAt",
-                          "verificationFailureCount"
-                        ]
-                      }
-                    },
-                    "required": [
-                      "autoPausedAt",
-                      "bundleId",
-                      "channelId",
-                      "conditions",
-                      "createdAt",
-                      "createdFromReleaseId",
-                      "failureAction",
-                      "failureMinimumUpdateCount",
-                      "failureNotifiedAt",
-                      "failureThresholdPercent",
-                      "id",
-                      "isMandatory",
-                      "liveAt",
-                      "notes",
-                      "number",
-                      "pausedAt",
-                      "progression",
-                      "progressionStepStartedAt",
-                      "purgedAt",
-                      "rolledBackFromReleaseId",
-                      "rolloutPercentage",
-                      "status",
-                      "stepStartAppliedUpdateCount",
-                      "updatedAt",
-                      "windowStartAppliedUpdateCount",
-                      "windowStartFailureCount"
-                    ]
-                  }
-                }
-              }
-            },
-            "description": "The releases."
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "`validation`, with the field, the rule and the target in `details`, or `client_update_required`"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "`unauthenticated`"
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "`forbidden`, `account_banned`, `origin_untrusted` on a cookie-authenticated write from an untrusted origin, or `ip_not_allowed`, `country_not_allowed` or `two_factor_required` inside an organization whose security settings refuse the request"
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "`not_found`"
-          },
-          "429": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "`rate_limited`",
-            "headers": {
-              "Retry-After": {
-                "description": "The seconds until the window opens, as `details.retryAfterSeconds` says.",
-                "schema": {
-                  "type": "integer"
-                }
-              }
-            }
-          },
-          "500": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "`internal`"
-          },
-          "503": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "`maintenance`"
-          }
-        },
-        "summary": "List the releases of a channel",
-        "tags": [
-          "Releases"
-        ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "limit",
-            "schema": {
-              "default": 50,
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 100
-            }
-          },
-          {
-            "in": "query",
-            "name": "offset",
-            "schema": {
-              "default": 0,
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
-            }
-          },
-          {
-            "in": "query",
-            "name": "number",
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 2147483647
-            }
-          },
-          {
-            "in": "query",
-            "name": "relations",
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "enum": [
-                  "bundle",
-                  "channel",
-                  "releaseCounters"
-                ]
-              }
-            }
-          },
-          {
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "in": "path",
-            "name": "appId",
-            "required": true
-          },
-          {
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "in": "path",
-            "name": "channelId",
-            "required": true
-          },
-          {
-            "$ref": "#/components/parameters/ClientHeader"
-          }
-        ]
-      },
       "post": {
         "operationId": "postV1AppsByAppIdChannelsByChannelIdReleases",
         "description": "Creates a release in the channel of a ready bundle, `bundleId`, or of what another channel's newest active release serves, `fromChannelId`, recorded as the provenance, with its conditions, rollout, mandatory flag, notes, the nullable auto-pause overrides and the nullable progression schedule, whose last percentage lies above the rollout, numbered next in the channel; refused on a protected channel below Admin, past `release_count_per_app_per_day_limit` and, once the app has a signing key, for an unsigned bundle; an `Idempotency-Key` answers the same release again for 24 hours. The audience preview, `GET …/channels/{channelId}/audience`, answers the warnings for the same conditions before the create.",
@@ -19655,7 +18897,7 @@
                         {
                           "type": "object",
                           "properties": {
-                            "percentages": {
+                            "rolloutPercents": {
                               "minItems": 2,
                               "maxItems": 10,
                               "type": "array",
@@ -19677,7 +18919,7 @@
                             }
                           },
                           "required": [
-                            "percentages",
+                            "rolloutPercents",
                             "stepMinimumSeconds",
                             "stepMinimumUpdateCount"
                           ]
@@ -19723,7 +18965,7 @@
                         }
                       ]
                     },
-                    "rolloutPercentage": {
+                    "rolloutPercent": {
                       "type": "integer",
                       "minimum": -9007199254740991,
                       "maximum": 9007199254740991
@@ -19751,7 +18993,7 @@
                       "minimum": -9007199254740991,
                       "maximum": 9007199254740991
                     },
-                    "windowStartFailureCount": {
+                    "windowStartFailedUpdateCount": {
                       "type": "integer",
                       "minimum": -9007199254740991,
                       "maximum": 9007199254740991
@@ -19778,12 +19020,12 @@
                     "progressionStepStartedAt",
                     "purgedAt",
                     "rolledBackFromReleaseId",
-                    "rolloutPercentage",
+                    "rolloutPercent",
                     "status",
                     "stepStartAppliedUpdateCount",
                     "updatedAt",
                     "windowStartAppliedUpdateCount",
-                    "windowStartFailureCount"
+                    "windowStartFailedUpdateCount"
                   ]
                 }
               }
@@ -20083,7 +19325,7 @@
                       {
                         "type": "object",
                         "properties": {
-                          "percentages": {
+                          "rolloutPercents": {
                             "minItems": 2,
                             "maxItems": 10,
                             "type": "array",
@@ -20105,7 +19347,7 @@
                           }
                         },
                         "required": [
-                          "percentages",
+                          "rolloutPercents",
                           "stepMinimumSeconds",
                           "stepMinimumUpdateCount"
                         ]
@@ -20115,7 +19357,7 @@
                       }
                     ]
                   },
-                  "rolloutPercentage": {
+                  "rolloutPercent": {
                     "default": 100,
                     "type": "integer",
                     "minimum": 0,
@@ -20126,148 +19368,6 @@
             }
           }
         }
-      }
-    },
-    "/v1/apps/{appId}/channels/{channelId}/releases/count": {
-      "get": {
-        "operationId": "getV1AppsByAppIdChannelsByChannelIdReleasesCount",
-        "description": "The number of releases in the channel's release log under the list's filter, `number`, which the list pages through.",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "count": {
-                      "type": "integer",
-                      "minimum": 0,
-                      "maximum": 9007199254740991
-                    }
-                  },
-                  "required": [
-                    "count"
-                  ]
-                }
-              }
-            },
-            "description": "The number of rows the list's filters match."
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "`validation`, with the field, the rule and the target in `details`, or `client_update_required`"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "`unauthenticated`"
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "`forbidden`, `account_banned`, `origin_untrusted` on a cookie-authenticated write from an untrusted origin, or `ip_not_allowed`, `country_not_allowed` or `two_factor_required` inside an organization whose security settings refuse the request"
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "`not_found`"
-          },
-          "429": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "`rate_limited`",
-            "headers": {
-              "Retry-After": {
-                "description": "The seconds until the window opens, as `details.retryAfterSeconds` says.",
-                "schema": {
-                  "type": "integer"
-                }
-              }
-            }
-          },
-          "500": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "`internal`"
-          },
-          "503": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            },
-            "description": "`maintenance`"
-          }
-        },
-        "summary": "Count the releases of a channel",
-        "tags": [
-          "Releases"
-        ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "number",
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 2147483647
-            }
-          },
-          {
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "in": "path",
-            "name": "appId",
-            "required": true
-          },
-          {
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "in": "path",
-            "name": "channelId",
-            "required": true
-          },
-          {
-            "$ref": "#/components/parameters/ClientHeader"
-          }
-        ]
       }
     },
     "/v1/apps/{appId}/channels/{channelId}/rollbacks": {
@@ -20560,7 +19660,7 @@
                         {
                           "type": "object",
                           "properties": {
-                            "percentages": {
+                            "rolloutPercents": {
                               "minItems": 2,
                               "maxItems": 10,
                               "type": "array",
@@ -20582,7 +19682,7 @@
                             }
                           },
                           "required": [
-                            "percentages",
+                            "rolloutPercents",
                             "stepMinimumSeconds",
                             "stepMinimumUpdateCount"
                           ]
@@ -20628,7 +19728,7 @@
                         }
                       ]
                     },
-                    "rolloutPercentage": {
+                    "rolloutPercent": {
                       "type": "integer",
                       "minimum": -9007199254740991,
                       "maximum": 9007199254740991
@@ -20656,7 +19756,7 @@
                       "minimum": -9007199254740991,
                       "maximum": 9007199254740991
                     },
-                    "windowStartFailureCount": {
+                    "windowStartFailedUpdateCount": {
                       "type": "integer",
                       "minimum": -9007199254740991,
                       "maximum": 9007199254740991
@@ -20683,12 +19783,12 @@
                     "progressionStepStartedAt",
                     "purgedAt",
                     "rolledBackFromReleaseId",
-                    "rolloutPercentage",
+                    "rolloutPercent",
                     "status",
                     "stepStartAppliedUpdateCount",
                     "updatedAt",
                     "windowStartAppliedUpdateCount",
-                    "windowStartFailureCount"
+                    "windowStartFailedUpdateCount"
                   ]
                 }
               }
@@ -21087,7 +20187,7 @@
                           {
                             "type": "object",
                             "properties": {
-                              "percentages": {
+                              "rolloutPercents": {
                                 "minItems": 2,
                                 "maxItems": 10,
                                 "type": "array",
@@ -21109,7 +20209,7 @@
                               }
                             },
                             "required": [
-                              "percentages",
+                              "rolloutPercents",
                               "stepMinimumSeconds",
                               "stepMinimumUpdateCount"
                             ]
@@ -21155,7 +20255,7 @@
                           }
                         ]
                       },
-                      "rolloutPercentage": {
+                      "rolloutPercent": {
                         "type": "integer",
                         "minimum": -9007199254740991,
                         "maximum": 9007199254740991
@@ -21183,7 +20283,7 @@
                         "minimum": -9007199254740991,
                         "maximum": 9007199254740991
                       },
-                      "windowStartFailureCount": {
+                      "windowStartFailedUpdateCount": {
                         "type": "integer",
                         "minimum": -9007199254740991,
                         "maximum": 9007199254740991
@@ -21210,12 +20310,12 @@
                       "progressionStepStartedAt",
                       "purgedAt",
                       "rolledBackFromReleaseId",
-                      "rolloutPercentage",
+                      "rolloutPercent",
                       "status",
                       "stepStartAppliedUpdateCount",
                       "updatedAt",
                       "windowStartAppliedUpdateCount",
-                      "windowStartFailureCount"
+                      "windowStartFailedUpdateCount"
                     ]
                   }
                 }
@@ -21361,7 +20461,7 @@
     "/v1/apps/{appId}/channels/{channelId}/audience": {
       "get": {
         "operationId": "getV1AppsByAppIdChannelsByChannelIdAudience",
-        "description": "The channel's devices seen in the last thirty days that a release's conditions would reach, each condition evaluated exactly over the registry the way the device evaluates it: `binary` and `os` ranges in the shared subset, refused under `range_syntax` otherwise, `fingerprint` values, `device` ids and `attribute` as `key=value`, each repeatable and all of them required; `rolloutPercentage`, 100 by default, estimated as its share of the reached devices, since a bucket is a hash of the release id. `warnings` carries `unsupported_condition_share` with the share of the channel's active devices whose SDK does not know a condition type asked for, and `fingerprint_unknown` for each `fingerprint` no binary of the app carries once the app has a binary.",
+        "description": "The channel's devices seen in the last thirty days that a release's conditions would reach, each condition evaluated exactly over the registry the way the device evaluates it: `binary` and `os` ranges in the shared subset, refused under `range_syntax` otherwise, `fingerprint` values, `device` ids and `attribute` as `key=value`, each repeatable and all of them required; `rolloutPercent`, 100 by default, estimated as its share of the reached devices, since a bucket is a hash of the release id. `warnings` carries `unsupported_condition_share` with the share of the channel's active devices whose SDK does not know a condition type asked for, and `fingerprint_unknown` for each `fingerprint` no binary of the app carries once the app has a binary.",
         "responses": {
           "200": {
             "content": {
@@ -21369,30 +20469,7 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "byBinaryVersion": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "deviceCount": {
-                            "type": "integer",
-                            "minimum": -9007199254740991,
-                            "maximum": 9007199254740991
-                          },
-                          "value": {
-                            "type": [
-                              "string",
-                              "null"
-                            ]
-                          }
-                        },
-                        "required": [
-                          "deviceCount",
-                          "value"
-                        ]
-                      }
-                    },
-                    "byPlatform": {
+                    "binaryVersion": {
                       "type": "array",
                       "items": {
                         "type": "object",
@@ -21424,6 +20501,29 @@
                       "type": "integer",
                       "minimum": -9007199254740991,
                       "maximum": 9007199254740991
+                    },
+                    "platform": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "deviceCount": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "value": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "deviceCount",
+                          "value"
+                        ]
+                      }
                     },
                     "reachedDeviceCount": {
                       "type": "integer",
@@ -21469,10 +20569,10 @@
                     }
                   },
                   "required": [
-                    "byBinaryVersion",
-                    "byPlatform",
+                    "binaryVersion",
                     "deviceCount",
                     "estimatedDeviceCount",
+                    "platform",
                     "reachedDeviceCount",
                     "warnings"
                   ]
@@ -21620,7 +20720,7 @@
           },
           {
             "in": "query",
-            "name": "rolloutPercentage",
+            "name": "rolloutPercent",
             "schema": {
               "default": 100,
               "type": "integer",
@@ -22082,7 +21182,7 @@
                               {
                                 "type": "object",
                                 "properties": {
-                                  "percentages": {
+                                  "rolloutPercents": {
                                     "minItems": 2,
                                     "maxItems": 10,
                                     "type": "array",
@@ -22104,7 +21204,7 @@
                                   }
                                 },
                                 "required": [
-                                  "percentages",
+                                  "rolloutPercents",
                                   "stepMinimumSeconds",
                                   "stepMinimumUpdateCount"
                                 ]
@@ -22150,7 +21250,7 @@
                               }
                             ]
                           },
-                          "rolloutPercentage": {
+                          "rolloutPercent": {
                             "type": "integer",
                             "minimum": -9007199254740991,
                             "maximum": 9007199254740991
@@ -22178,7 +21278,7 @@
                             "minimum": -9007199254740991,
                             "maximum": 9007199254740991
                           },
-                          "windowStartFailureCount": {
+                          "windowStartFailedUpdateCount": {
                             "type": "integer",
                             "minimum": -9007199254740991,
                             "maximum": 9007199254740991
@@ -22205,12 +21305,12 @@
                           "progressionStepStartedAt",
                           "purgedAt",
                           "rolledBackFromReleaseId",
-                          "rolloutPercentage",
+                          "rolloutPercent",
                           "status",
                           "stepStartAppliedUpdateCount",
                           "updatedAt",
                           "windowStartAppliedUpdateCount",
-                          "windowStartFailureCount"
+                          "windowStartFailedUpdateCount"
                         ]
                       },
                       "currentReleaseId": {
@@ -23248,7 +22348,7 @@
                             {
                               "type": "object",
                               "properties": {
-                                "percentages": {
+                                "rolloutPercents": {
                                   "minItems": 2,
                                   "maxItems": 10,
                                   "type": "array",
@@ -23270,7 +22370,7 @@
                                 }
                               },
                               "required": [
-                                "percentages",
+                                "rolloutPercents",
                                 "stepMinimumSeconds",
                                 "stepMinimumUpdateCount"
                               ]
@@ -23316,7 +22416,7 @@
                             }
                           ]
                         },
-                        "rolloutPercentage": {
+                        "rolloutPercent": {
                           "type": "integer",
                           "minimum": -9007199254740991,
                           "maximum": 9007199254740991
@@ -23344,7 +22444,7 @@
                           "minimum": -9007199254740991,
                           "maximum": 9007199254740991
                         },
-                        "windowStartFailureCount": {
+                        "windowStartFailedUpdateCount": {
                           "type": "integer",
                           "minimum": -9007199254740991,
                           "maximum": 9007199254740991
@@ -23371,12 +22471,12 @@
                         "progressionStepStartedAt",
                         "purgedAt",
                         "rolledBackFromReleaseId",
-                        "rolloutPercentage",
+                        "rolloutPercent",
                         "status",
                         "stepStartAppliedUpdateCount",
                         "updatedAt",
                         "windowStartAppliedUpdateCount",
-                        "windowStartFailureCount"
+                        "windowStartFailedUpdateCount"
                       ]
                     },
                     "currentReleaseId": {
@@ -23701,7 +22801,7 @@
     "/v1/apps/{appId}/devices/{deviceId}/events": {
       "get": {
         "operationId": "getV1AppsByAppIdDevicesByDeviceIdEvents",
-        "description": "The device's events on releases, the first of each type per release, with their reasons, newest first, read from Postgres, filtered by `releaseId`; an event the same device id left on another app's release is left out.",
+        "description": "The device's events on releases, the first of each type per release, with their reasons, newest first, read from Postgres, filtered by `releaseId`; an event the same device id left on another app's release is left out. `?relations=release` embeds each event's release.",
         "responses": {
           "200": {
             "content": {
@@ -23725,6 +22825,385 @@
                         "type": [
                           "string",
                           "null"
+                        ]
+                      },
+                      "release": {
+                        "type": "object",
+                        "properties": {
+                          "autoPausedAt": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "bundleId": {
+                            "type": "string",
+                            "format": "uuid",
+                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                          },
+                          "channelId": {
+                            "type": "string",
+                            "format": "uuid",
+                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                          },
+                          "conditions": {
+                            "type": "array",
+                            "items": {
+                              "oneOf": [
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "key": {
+                                      "type": "string",
+                                      "minLength": 1
+                                    },
+                                    "type": {
+                                      "type": "string",
+                                      "const": "attribute"
+                                    },
+                                    "valueSha256": {
+                                      "type": "string",
+                                      "pattern": "^[0-9a-f]{64}$"
+                                    }
+                                  },
+                                  "required": [
+                                    "key",
+                                    "type",
+                                    "valueSha256"
+                                  ],
+                                  "additionalProperties": false
+                                },
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "range": {
+                                      "type": "string",
+                                      "minLength": 1
+                                    },
+                                    "type": {
+                                      "type": "string",
+                                      "const": "binary"
+                                    }
+                                  },
+                                  "required": [
+                                    "range",
+                                    "type"
+                                  ],
+                                  "additionalProperties": false
+                                },
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "hashedIds": {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "string",
+                                        "pattern": "^[0-9a-f]{64}$"
+                                      }
+                                    },
+                                    "type": {
+                                      "type": "string",
+                                      "const": "device"
+                                    }
+                                  },
+                                  "required": [
+                                    "hashedIds",
+                                    "type"
+                                  ],
+                                  "additionalProperties": false
+                                },
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "fingerprint": {
+                                      "type": "string",
+                                      "minLength": 1
+                                    },
+                                    "type": {
+                                      "type": "string",
+                                      "const": "fingerprint"
+                                    }
+                                  },
+                                  "required": [
+                                    "fingerprint",
+                                    "type"
+                                  ],
+                                  "additionalProperties": false
+                                },
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "range": {
+                                      "type": "string",
+                                      "minLength": 1
+                                    },
+                                    "type": {
+                                      "type": "string",
+                                      "const": "os"
+                                    }
+                                  },
+                                  "required": [
+                                    "range",
+                                    "type"
+                                  ],
+                                  "additionalProperties": false
+                                }
+                              ]
+                            }
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                          },
+                          "createdFromReleaseId": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "format": "uuid",
+                                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "failureAction": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "enum": [
+                                  "none",
+                                  "notify",
+                                  "pause",
+                                  "revoke"
+                                ],
+                                "description": "What auto-pause does when a release fails above the threshold: `pause` stops offering it, and devices running it keep it; `revoke` also moves those devices to the newest eligible release or the embedded bundle; `notify` only notifies; `none` evaluates the rule but acts on nothing and sends nothing, while a progression still stops widening."
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "failureMinimumUpdateCount": {
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 2147483647
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "failureNotifiedAt": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "failureThresholdPercent": {
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 100
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                          },
+                          "isMandatory": {
+                            "type": "boolean"
+                          },
+                          "liveAt": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "notes": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "number": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "pausedAt": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "progression": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "rolloutPercents": {
+                                    "minItems": 2,
+                                    "maxItems": 10,
+                                    "type": "array",
+                                    "items": {
+                                      "type": "integer",
+                                      "minimum": 1,
+                                      "maximum": 100
+                                    }
+                                  },
+                                  "stepMinimumSeconds": {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 2592000
+                                  },
+                                  "stepMinimumUpdateCount": {
+                                    "type": "integer",
+                                    "minimum": 1,
+                                    "maximum": 9007199254740991
+                                  }
+                                },
+                                "required": [
+                                  "rolloutPercents",
+                                  "stepMinimumSeconds",
+                                  "stepMinimumUpdateCount"
+                                ]
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "progressionStepStartedAt": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "purgedAt": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "rolledBackFromReleaseId": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "format": "uuid",
+                                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "rolloutPercent": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "active",
+                              "paused",
+                              "revoked"
+                            ]
+                          },
+                          "stepStartAppliedUpdateCount": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "updatedAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                          },
+                          "windowStartAppliedUpdateCount": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "windowStartFailedUpdateCount": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          }
+                        },
+                        "required": [
+                          "autoPausedAt",
+                          "bundleId",
+                          "channelId",
+                          "conditions",
+                          "createdAt",
+                          "createdFromReleaseId",
+                          "failureAction",
+                          "failureMinimumUpdateCount",
+                          "failureNotifiedAt",
+                          "failureThresholdPercent",
+                          "id",
+                          "isMandatory",
+                          "liveAt",
+                          "notes",
+                          "number",
+                          "pausedAt",
+                          "progression",
+                          "progressionStepStartedAt",
+                          "purgedAt",
+                          "rolledBackFromReleaseId",
+                          "rolloutPercent",
+                          "status",
+                          "stepStartAppliedUpdateCount",
+                          "updatedAt",
+                          "windowStartAppliedUpdateCount",
+                          "windowStartFailedUpdateCount"
                         ]
                       },
                       "releaseId": {
@@ -23872,6 +23351,19 @@
               "type": "string",
               "format": "uuid",
               "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            }
+          },
+          {
+            "in": "query",
+            "name": "relations",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "release"
+                ]
+              }
             }
           },
           {
@@ -24986,7 +24478,7 @@
     "/v1/apps/{appId}/releases": {
       "get": {
         "operationId": "getV1AppsByAppIdReleases",
-        "description": "Every release of the app, newest first, filtered by `channelId`, `bundleId`, `status` and `gitCommit`, the text the hash, ref or message of the bundle's Git commit contains, case-insensitively; `?relations=channel,bundle,releaseCounters` embeds the linked rows.",
+        "description": "Every release of the app, newest first, filtered by `channelId`, `bundleId`, `status`, `number`, a release's number in its channel and valid only beside `channelId`, and `gitCommit`, the text the hash, ref or message of the bundle's Git commit contains, case-insensitively; `?relations=channel,bundle,releaseCounters` embeds the linked rows.",
         "responses": {
           "200": {
             "content": {
@@ -25241,7 +24733,7 @@
                           {
                             "type": "object",
                             "properties": {
-                              "percentages": {
+                              "rolloutPercents": {
                                 "minItems": 2,
                                 "maxItems": 10,
                                 "type": "array",
@@ -25263,7 +24755,7 @@
                               }
                             },
                             "required": [
-                              "percentages",
+                              "rolloutPercents",
                               "stepMinimumSeconds",
                               "stepMinimumUpdateCount"
                             ]
@@ -25309,7 +24801,7 @@
                           }
                         ]
                       },
-                      "rolloutPercentage": {
+                      "rolloutPercent": {
                         "type": "integer",
                         "minimum": -9007199254740991,
                         "maximum": 9007199254740991
@@ -25337,7 +24829,7 @@
                         "minimum": -9007199254740991,
                         "maximum": 9007199254740991
                       },
-                      "windowStartFailureCount": {
+                      "windowStartFailedUpdateCount": {
                         "type": "integer",
                         "minimum": -9007199254740991,
                         "maximum": 9007199254740991
@@ -25730,12 +25222,12 @@
                       "progressionStepStartedAt",
                       "purgedAt",
                       "rolledBackFromReleaseId",
-                      "rolloutPercentage",
+                      "rolloutPercent",
                       "status",
                       "stepStartAppliedUpdateCount",
                       "updatedAt",
                       "windowStartAppliedUpdateCount",
-                      "windowStartFailureCount"
+                      "windowStartFailedUpdateCount"
                     ]
                   }
                 }
@@ -25874,6 +25366,15 @@
           },
           {
             "in": "query",
+            "name": "number",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            }
+          },
+          {
+            "in": "query",
             "name": "status",
             "schema": {
               "type": "string",
@@ -25917,7 +25418,7 @@
     "/v1/apps/{appId}/releases/count": {
       "get": {
         "operationId": "getV1AppsByAppIdReleasesCount",
-        "description": "The number of the app's releases under the list's filters, `channelId`, `bundleId`, `status` and `gitCommit`, which the list pages through.",
+        "description": "The number of the app's releases under the list's filters, `channelId`, `bundleId`, `status`, `number` and `gitCommit`, which the list pages through.",
         "responses": {
           "200": {
             "content": {
@@ -26046,6 +25547,15 @@
             "name": "gitCommit",
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "number",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
             }
           },
           {
@@ -26331,7 +25841,7 @@
                         {
                           "type": "object",
                           "properties": {
-                            "percentages": {
+                            "rolloutPercents": {
                               "minItems": 2,
                               "maxItems": 10,
                               "type": "array",
@@ -26353,7 +25863,7 @@
                             }
                           },
                           "required": [
-                            "percentages",
+                            "rolloutPercents",
                             "stepMinimumSeconds",
                             "stepMinimumUpdateCount"
                           ]
@@ -26399,7 +25909,7 @@
                         }
                       ]
                     },
-                    "rolloutPercentage": {
+                    "rolloutPercent": {
                       "type": "integer",
                       "minimum": -9007199254740991,
                       "maximum": 9007199254740991
@@ -26427,7 +25937,7 @@
                       "minimum": -9007199254740991,
                       "maximum": 9007199254740991
                     },
-                    "windowStartFailureCount": {
+                    "windowStartFailedUpdateCount": {
                       "type": "integer",
                       "minimum": -9007199254740991,
                       "maximum": 9007199254740991
@@ -26820,12 +26330,12 @@
                     "progressionStepStartedAt",
                     "purgedAt",
                     "rolledBackFromReleaseId",
-                    "rolloutPercentage",
+                    "rolloutPercent",
                     "status",
                     "stepStartAppliedUpdateCount",
                     "updatedAt",
                     "windowStartAppliedUpdateCount",
-                    "windowStartFailureCount"
+                    "windowStartFailedUpdateCount"
                   ]
                 }
               }
@@ -27209,7 +26719,7 @@
                         {
                           "type": "object",
                           "properties": {
-                            "percentages": {
+                            "rolloutPercents": {
                               "minItems": 2,
                               "maxItems": 10,
                               "type": "array",
@@ -27231,7 +26741,7 @@
                             }
                           },
                           "required": [
-                            "percentages",
+                            "rolloutPercents",
                             "stepMinimumSeconds",
                             "stepMinimumUpdateCount"
                           ]
@@ -27277,7 +26787,7 @@
                         }
                       ]
                     },
-                    "rolloutPercentage": {
+                    "rolloutPercent": {
                       "type": "integer",
                       "minimum": -9007199254740991,
                       "maximum": 9007199254740991
@@ -27305,7 +26815,7 @@
                       "minimum": -9007199254740991,
                       "maximum": 9007199254740991
                     },
-                    "windowStartFailureCount": {
+                    "windowStartFailedUpdateCount": {
                       "type": "integer",
                       "minimum": -9007199254740991,
                       "maximum": 9007199254740991
@@ -27332,12 +26842,12 @@
                     "progressionStepStartedAt",
                     "purgedAt",
                     "rolledBackFromReleaseId",
-                    "rolloutPercentage",
+                    "rolloutPercent",
                     "status",
                     "stepStartAppliedUpdateCount",
                     "updatedAt",
                     "windowStartAppliedUpdateCount",
-                    "windowStartFailureCount"
+                    "windowStartFailedUpdateCount"
                   ]
                 }
               }
@@ -27504,7 +27014,7 @@
                       {
                         "type": "object",
                         "properties": {
-                          "percentages": {
+                          "rolloutPercents": {
                             "minItems": 2,
                             "maxItems": 10,
                             "type": "array",
@@ -27526,7 +27036,7 @@
                           }
                         },
                         "required": [
-                          "percentages",
+                          "rolloutPercents",
                           "stepMinimumSeconds",
                           "stepMinimumUpdateCount"
                         ]
@@ -27536,7 +27046,7 @@
                       }
                     ]
                   },
-                  "rolloutPercentage": {
+                  "rolloutPercent": {
                     "type": "integer",
                     "minimum": 0,
                     "maximum": 100
@@ -27582,30 +27092,7 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "byBinaryVersion": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "deviceCount": {
-                            "type": "integer",
-                            "minimum": -9007199254740991,
-                            "maximum": 9007199254740991
-                          },
-                          "value": {
-                            "type": [
-                              "string",
-                              "null"
-                            ]
-                          }
-                        },
-                        "required": [
-                          "deviceCount",
-                          "value"
-                        ]
-                      }
-                    },
-                    "byPlatform": {
+                    "binaryVersion": {
                       "type": "array",
                       "items": {
                         "type": "object",
@@ -27637,6 +27124,29 @@
                       "type": "integer",
                       "minimum": -9007199254740991,
                       "maximum": 9007199254740991
+                    },
+                    "platform": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "deviceCount": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "value": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "deviceCount",
+                          "value"
+                        ]
+                      }
                     },
                     "reachedDeviceCount": {
                       "type": "integer",
@@ -27682,10 +27192,10 @@
                     }
                   },
                   "required": [
-                    "byBinaryVersion",
-                    "byPlatform",
+                    "binaryVersion",
                     "deviceCount",
                     "estimatedDeviceCount",
+                    "platform",
                     "reachedDeviceCount",
                     "warnings"
                   ]
@@ -28058,7 +27568,7 @@
                         {
                           "type": "object",
                           "properties": {
-                            "percentages": {
+                            "rolloutPercents": {
                               "minItems": 2,
                               "maxItems": 10,
                               "type": "array",
@@ -28080,7 +27590,7 @@
                             }
                           },
                           "required": [
-                            "percentages",
+                            "rolloutPercents",
                             "stepMinimumSeconds",
                             "stepMinimumUpdateCount"
                           ]
@@ -28126,7 +27636,7 @@
                         }
                       ]
                     },
-                    "rolloutPercentage": {
+                    "rolloutPercent": {
                       "type": "integer",
                       "minimum": -9007199254740991,
                       "maximum": 9007199254740991
@@ -28154,7 +27664,7 @@
                       "minimum": -9007199254740991,
                       "maximum": 9007199254740991
                     },
-                    "windowStartFailureCount": {
+                    "windowStartFailedUpdateCount": {
                       "type": "integer",
                       "minimum": -9007199254740991,
                       "maximum": 9007199254740991
@@ -28181,12 +27691,12 @@
                     "progressionStepStartedAt",
                     "purgedAt",
                     "rolledBackFromReleaseId",
-                    "rolloutPercentage",
+                    "rolloutPercent",
                     "status",
                     "stepStartAppliedUpdateCount",
                     "updatedAt",
                     "windowStartAppliedUpdateCount",
-                    "windowStartFailureCount"
+                    "windowStartFailedUpdateCount"
                   ]
                 }
               }
@@ -28567,7 +28077,7 @@
                         {
                           "type": "object",
                           "properties": {
-                            "percentages": {
+                            "rolloutPercents": {
                               "minItems": 2,
                               "maxItems": 10,
                               "type": "array",
@@ -28589,7 +28099,7 @@
                             }
                           },
                           "required": [
-                            "percentages",
+                            "rolloutPercents",
                             "stepMinimumSeconds",
                             "stepMinimumUpdateCount"
                           ]
@@ -28635,7 +28145,7 @@
                         }
                       ]
                     },
-                    "rolloutPercentage": {
+                    "rolloutPercent": {
                       "type": "integer",
                       "minimum": -9007199254740991,
                       "maximum": 9007199254740991
@@ -28663,7 +28173,7 @@
                       "minimum": -9007199254740991,
                       "maximum": 9007199254740991
                     },
-                    "windowStartFailureCount": {
+                    "windowStartFailedUpdateCount": {
                       "type": "integer",
                       "minimum": -9007199254740991,
                       "maximum": 9007199254740991
@@ -28690,12 +28200,12 @@
                     "progressionStepStartedAt",
                     "purgedAt",
                     "rolledBackFromReleaseId",
-                    "rolloutPercentage",
+                    "rolloutPercent",
                     "status",
                     "stepStartAppliedUpdateCount",
                     "updatedAt",
                     "windowStartAppliedUpdateCount",
-                    "windowStartFailureCount"
+                    "windowStartFailedUpdateCount"
                   ]
                 }
               }
@@ -29076,7 +28586,7 @@
                         {
                           "type": "object",
                           "properties": {
-                            "percentages": {
+                            "rolloutPercents": {
                               "minItems": 2,
                               "maxItems": 10,
                               "type": "array",
@@ -29098,7 +28608,7 @@
                             }
                           },
                           "required": [
-                            "percentages",
+                            "rolloutPercents",
                             "stepMinimumSeconds",
                             "stepMinimumUpdateCount"
                           ]
@@ -29144,7 +28654,7 @@
                         }
                       ]
                     },
-                    "rolloutPercentage": {
+                    "rolloutPercent": {
                       "type": "integer",
                       "minimum": -9007199254740991,
                       "maximum": 9007199254740991
@@ -29172,7 +28682,7 @@
                       "minimum": -9007199254740991,
                       "maximum": 9007199254740991
                     },
-                    "windowStartFailureCount": {
+                    "windowStartFailedUpdateCount": {
                       "type": "integer",
                       "minimum": -9007199254740991,
                       "maximum": 9007199254740991
@@ -29199,12 +28709,12 @@
                     "progressionStepStartedAt",
                     "purgedAt",
                     "rolledBackFromReleaseId",
-                    "rolloutPercentage",
+                    "rolloutPercent",
                     "status",
                     "stepStartAppliedUpdateCount",
                     "updatedAt",
                     "windowStartAppliedUpdateCount",
-                    "windowStartFailureCount"
+                    "windowStartFailedUpdateCount"
                   ]
                 }
               }
@@ -29332,7 +28842,7 @@
     "/v1/apps/{appId}/signing-keys": {
       "get": {
         "operationId": "getV1AppsByAppIdSigningKeys",
-        "description": "The app's accepted public keys, newest first, each with its fingerprint, the `keyId` a signature names.",
+        "description": "The app's accepted public keys, newest first, each with its `keyId`, the SHA-256 of the key a signature names it by.",
         "responses": {
           "200": {
             "content": {
@@ -29352,13 +28862,13 @@
                         "format": "date-time",
                         "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
                       },
-                      "fingerprint": {
-                        "type": "string"
-                      },
                       "id": {
                         "type": "string",
                         "format": "uuid",
                         "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                      },
+                      "keyId": {
+                        "type": "string"
                       },
                       "publicKey": {
                         "type": "string"
@@ -29372,8 +28882,8 @@
                     "required": [
                       "appId",
                       "createdAt",
-                      "fingerprint",
                       "id",
+                      "keyId",
                       "publicKey",
                       "updatedAt"
                     ]
@@ -29521,13 +29031,13 @@
                       "format": "date-time",
                       "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
                     },
-                    "fingerprint": {
-                      "type": "string"
-                    },
                     "id": {
                       "type": "string",
                       "format": "uuid",
                       "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    },
+                    "keyId": {
+                      "type": "string"
                     },
                     "publicKey": {
                       "type": "string"
@@ -29541,8 +29051,8 @@
                   "required": [
                     "appId",
                     "createdAt",
-                    "fingerprint",
                     "id",
+                    "keyId",
                     "publicKey",
                     "updatedAt"
                   ]
@@ -29567,13 +29077,13 @@
                       "format": "date-time",
                       "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
                     },
-                    "fingerprint": {
-                      "type": "string"
-                    },
                     "id": {
                       "type": "string",
                       "format": "uuid",
                       "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    },
+                    "keyId": {
+                      "type": "string"
                     },
                     "publicKey": {
                       "type": "string"
@@ -29587,8 +29097,8 @@
                   "required": [
                     "appId",
                     "createdAt",
-                    "fingerprint",
                     "id",
+                    "keyId",
                     "publicKey",
                     "updatedAt"
                   ]
@@ -30386,7 +29896,7 @@
                             "format": "date",
                             "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
                           },
-                          "failureCount": {
+                          "failedUpdateCount": {
                             "type": "integer",
                             "minimum": -9007199254740991,
                             "maximum": 9007199254740991
@@ -30401,7 +29911,7 @@
                           "activeDeviceCount",
                           "confirmedUpdateCount",
                           "day",
-                          "failureCount",
+                          "failedUpdateCount",
                           "rolledBackUpdateCount"
                         ]
                       }
@@ -30740,9 +30250,7 @@
                             "maximum": 9007199254740991
                           },
                           "month": {
-                            "type": "string",
-                            "format": "date",
-                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                            "type": "string"
                           },
                           "monthlyActiveDeviceCount": {
                             "type": "integer",
@@ -32878,7 +32386,7 @@
     "/v1/users/{userId}/password": {
       "post": {
         "operationId": "postV1UsersByUserIdPassword",
-        "description": "Sets the first password of an account that signed up through GitHub, Google or SSO, so it signs in with its email too; the account's other sessions and its OAuth grants end and the password-changed mail follows. An account with a password changes it through the auth slice, and a member behind a verified SSO domain answers `sso_required`. `me` or the caller's own id, any other user answering `forbidden`.",
+        "description": "Sets the first password of an account that signed up through GitHub, Google or SSO, so it signs in with its email too; the account's other sessions and its OAuth grants end and the password_changed mail follows. An account with a password changes it through the auth slice, and a member behind a verified SSO domain answers `sso_required`. `me` or the caller's own id, any other user answering `forbidden`.",
         "responses": {
           "204": {
             "description": "The password is set."

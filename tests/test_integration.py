@@ -143,12 +143,10 @@ def test_gets_lists_updates_pauses_and_resumes_the_created_channel(
 def test_lists_no_releases_for_a_new_channel(
     hot_code_push: HotCodePush, app: App, channel: Channel
 ) -> None:
-    fetched_channel_releases = hot_code_push.apps.channels.releases.list(
+    fetched_releases = hot_code_push.apps.releases.list(
         app_id=app.id, channel_id=channel.id, relations=["bundle"]
     )
-    fetched_releases = hot_code_push.apps.releases.list(app_id=app.id, channel_id=channel.id)
 
-    assert fetched_channel_releases == []
     assert fetched_releases == []
 
 

@@ -17,7 +17,7 @@ class ChannelAudienceResource(BaseResource):
         device: list[str] | NotGiven = NOT_GIVEN,
         fingerprint: list[str] | NotGiven = NOT_GIVEN,
         os: list[str] | NotGiven = NOT_GIVEN,
-        rollout_percentage: int | NotGiven = NOT_GIVEN,
+        rollout_percent: int | NotGiven = NOT_GIVEN,
     ) -> Audience:
         """Gets the devices that a release with these conditions would reach in the channel.
 
@@ -38,6 +38,6 @@ class ChannelAudienceResource(BaseResource):
                 "device": device,
                 "fingerprint": fingerprint,
                 "os": os,
-                "rolloutPercentage": rollout_percentage,
+                "rolloutPercent": rollout_percent,
             },
         )

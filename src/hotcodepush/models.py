@@ -36,6 +36,7 @@ NotificationCategory = Literal[
 NotificationMedium = Literal["email", "in_app"]
 NotificationRelation = Literal["app", "channel", "memberUser", "release"]
 Platform = Literal["android", "ios"]
+ReleaseDeviceEventRelation = Literal["release"]
 ReleaseRelation = Literal["bundle", "channel", "releaseCounters"]
 Role = Literal["admin", "billing", "member", "owner"]
 UserRelation = Literal["accounts", "members", "members.organization"]
@@ -152,13 +153,13 @@ class AttributeCondition(HotCodePushModel):
 
 class Audience(HotCodePushModel):
     """The active devices of a channel, the ones all conditions reach, and the estimate at the
-    rollout percentage.
+    rollout percent.
     """
 
-    by_binary_version: list[DeviceCount]
-    by_platform: list[DeviceCount]
+    binary_version: list[DeviceCount]
     device_count: int
     estimated_device_count: int
+    platform: list[DeviceCount]
     reached_device_count: int
     warnings: list[AudienceWarning]
 
@@ -180,18 +181,18 @@ class AuditLog(HotCodePushModel):
     """
 
     actor_type: Literal["system", "user"]
-    address: str | None
-    api_key_id: str | None
     app: NamedEmbed | None = None
     app_id: str | None
     country: str | None
     created_at: datetime
     dispatched_at: datetime | None
     id: str
+    ip_address: str | None
     object_id: str | None
     organization_id: str | None
     session_id: str | None
     snapshot: dict[str, object]
+    token_id: str | None
     type: str
     updated_at: datetime
     user: EmbeddedUser | None = None
@@ -288,7 +289,7 @@ class BundleFile(HotCodePushModel):
 
 
 class BundleSignature(HotCodePushModel):
-    """The signature of a bundle manifest: the fingerprint of the signing key and the value."""
+    """The signature of a bundle manifest: the key id of the signing key and the value."""
 
     key_id: str
     value: str
@@ -337,7 +338,7 @@ class DailyUpdateCounts(HotCodePushModel):
     active_device_count: int | None
     confirmed_update_count: int
     day: date
-    failure_count: int
+    failed_update_count: int
     rolled_back_update_count: int
 
 
@@ -447,7 +448,7 @@ class Invitation(HotCodePushModel):
     organization: NamedEmbed | None = None
     organization_id: str
     role: InvitationRole
-    status: Literal["accepted", "canceled", "pending", "rejected"]
+    status: Literal["accepted", "pending"]
     updated_at: datetime
 
 
@@ -498,7 +499,8 @@ class NamedEmbed(HotCodePushModel):
 
 class Notification(HotCodePushModel):
     """An in-app notification for the caller. `organization_id` is `None` when it is about the
-    caller's account.
+    caller's account. `organization_name` names the organization of a deletion notice, which
+    outlives it.
 
     `app`, `channel`, `member_user` and `release` are set when `relations` names them, and are
     `None` once the row is deleted.
@@ -513,6 +515,7 @@ class Notification(HotCodePushModel):
     member_user: NamedEmbed | None = None
     member_user_id: str | None
     organization_id: str | None
+    organization_name: str | None
     read_at: datetime | None
     release: EmbeddedRelease | None = None
     release_id: str | None
@@ -632,12 +635,12 @@ class Release(HotCodePushModel):
     purged_at: datetime | None
     release_counters: ReleaseCounters | None = None
     rolled_back_from_release_id: str | None
-    rollout_percentage: int
+    rollout_percent: int
     status: Literal["active", "paused", "revoked"]
     step_start_applied_update_count: int
     updated_at: datetime
     window_start_applied_update_count: int
-    window_start_failure_count: int
+    window_start_failed_update_count: int
 
 
 class ReleaseAdoption(HotCodePushModel):
@@ -681,23 +684,24 @@ class ReleaseCounters(HotCodePushModel):
 
 class ReleaseDeviceEvent(HotCodePushModel):
     """The first event of each type that a device reported on a release, with the reason of a
-    failure.
+    failure. `release` is set when `relations` names it.
     """
 
     created_at: datetime
     device_id: str
     reason: str | None
+    release: Release | None = None
     release_id: str
     type: Literal["applied", "checked", "confirmed", "failed"]
     updated_at: datetime
 
 
 class ReleaseProgression(HotCodePushModel):
-    """A schedule that raises the rollout of a release through `percentages`, one step at a
-    time.
+    """A schedule that raises the rollout of a release through `rollout_percents`, one step at
+    a time.
     """
 
-    percentages: list[int]
+    rollout_percents: list[int]
     step_minimum_seconds: int
     step_minimum_update_count: int
 
@@ -716,14 +720,14 @@ class SamlConfig(HotCodePushModel):
 
 
 class SigningKey(HotCodePushModel):
-    """A public key that verifies the bundles of an app. Its `fingerprint` is the `key_id`
+    """A public key that verifies the bundles of an app. Its `key_id` is the `sha256:` digest
     that a signature names.
     """
 
     app_id: str
     created_at: datetime
-    fingerprint: str
     id: str
+    key_id: str
     public_key: str
     updated_at: datetime
 
@@ -799,10 +803,12 @@ class UsageDay(HotCodePushModel):
 
 
 class UsageMonth(HotCodePushModel):
-    """The monthly active devices and data transfer of one month, as the invoice shows them."""
+    """The monthly active devices and data transfer of one month, as the invoice shows them.
+    `month` is `YYYY-MM`.
+    """
 
     data_transfer_bytes: int
-    month: date
+    month: str
     monthly_active_device_count: int
 
 

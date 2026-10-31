@@ -30,7 +30,7 @@ def test_gets_the_sso_provider() -> None:
 def test_puts_the_domain_and_the_oidc_provider_without_its_unset_fields() -> None:
     api = StubApi(httpx.Response(200, json=SSO_PROVIDER_ROW))
 
-    api.client.organizations.sso_provider.put(
+    api.client.organizations.sso_provider.set(
         domain="example.com",
         oidc=OidcConfig(
             client_id="client", client_secret="secret", issuer="https://idp.example.com"

@@ -5,7 +5,7 @@ from ._types import NOT_GIVEN, NotGiven
 from ._upload import PART_SIZE_BYTES, SINGLE_UPLOAD_LIMIT_BYTES
 from ._version import __version__
 from .client import HotCodePush
-from .exceptions import HotCodePushError
+from .exceptions import ErrorCode, HotCodePushError
 from .models import (
     Account,
     AdoptionPoint,
@@ -69,6 +69,7 @@ from .models import (
     ReleaseCount,
     ReleaseCounters,
     ReleaseDeviceEvent,
+    ReleaseDeviceEventRelation,
     ReleaseProgression,
     ReleaseRelation,
     Role,
@@ -125,6 +126,7 @@ __all__ = [
     "DeviceRelation",
     "EmbeddedRelease",
     "EmbeddedUser",
+    "ErrorCode",
     "FailureAction",
     "FingerprintCondition",
     "FleetStatistics",
@@ -159,6 +161,7 @@ __all__ = [
     "ReleaseCount",
     "ReleaseCounters",
     "ReleaseDeviceEvent",
+    "ReleaseDeviceEventRelation",
     "ReleaseProgression",
     "ReleaseRelation",
     "Role",

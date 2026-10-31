@@ -21,9 +21,13 @@ class ReleasesResource(BaseResource):
         bundle_id: str | NotGiven = NOT_GIVEN,
         channel_id: str | NotGiven = NOT_GIVEN,
         git_commit: str | NotGiven = NOT_GIVEN,
+        number: int | NotGiven = NOT_GIVEN,
         status: Literal["active", "paused", "revoked"] | NotGiven = NOT_GIVEN,
     ) -> Count:
-        """Counts the releases of the app that match the filters."""
+        """Counts the releases of the app that match the filters.
+
+        `number` needs `channel_id`, since release numbers count per channel.
+        """
         return self._http_client.fetch_json(
             "GET",
             resolve_path("/v1/apps/{appId}/releases/count", appId=app_id),
@@ -32,6 +36,7 @@ class ReleasesResource(BaseResource):
                 "bundleId": bundle_id,
                 "channelId": channel_id,
                 "gitCommit": git_commit,
+                "number": number,
                 "status": status,
             },
         )
@@ -64,6 +69,7 @@ class ReleasesResource(BaseResource):
         channel_id: str | NotGiven = NOT_GIVEN,
         git_commit: str | NotGiven = NOT_GIVEN,
         limit: int | NotGiven = NOT_GIVEN,
+        number: int | NotGiven = NOT_GIVEN,
         offset: int | NotGiven = NOT_GIVEN,
         relations: list[ReleaseRelation] | NotGiven = NOT_GIVEN,
         status: Literal["active", "paused", "revoked"] | NotGiven = NOT_GIVEN,
@@ -71,7 +77,8 @@ class ReleasesResource(BaseResource):
         """Lists every release of the app, newest first.
 
         `git_commit` selects the releases whose bundle has a commit hash, ref or message that
-        contains it.
+        contains it. `number` selects one release of the channel `channel_id`, since release
+        numbers count per channel; without `channel_id` the API answers `validation`.
         """
         return self._http_client.fetch_json(
             "GET",
@@ -82,6 +89,7 @@ class ReleasesResource(BaseResource):
                 "channelId": channel_id,
                 "gitCommit": git_commit,
                 "limit": limit,
+                "number": number,
                 "offset": offset,
                 "relations": relations,
                 "status": status,
@@ -141,11 +149,11 @@ class ReleasesResource(BaseResource):
         notes: str | None | NotGiven = NOT_GIVEN,
         progression: ReleaseProgression | None | NotGiven = NOT_GIVEN,
         release_id: str,
-        rollout_percentage: int | NotGiven = NOT_GIVEN,
+        rollout_percent: int | NotGiven = NOT_GIVEN,
     ) -> Release:
         """Changes the rollout, the progression, the mandatory flag, the notes or the auto-pause.
 
-        The rollout percentage can go up or down. `None` stops the progression schedule. `None` on
+        The rollout percent can go up or down. `None` stops the progression schedule. `None` on
         an auto-pause override inherits the channel's value.
         """
         return self._http_client.fetch_json(
@@ -161,6 +169,6 @@ class ReleasesResource(BaseResource):
                 "isMandatory": is_mandatory,
                 "notes": notes,
                 "progression": progression,
-                "rolloutPercentage": rollout_percentage,
+                "rolloutPercent": rollout_percent,
             },
         )

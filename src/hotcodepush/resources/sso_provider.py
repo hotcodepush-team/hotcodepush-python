@@ -41,7 +41,7 @@ class SsoProviderResource(BaseResource):
             SsoProvider,
         )
 
-    def put(
+    def set(
         self,
         *,
         domain: str,
