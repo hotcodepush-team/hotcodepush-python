@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.4.0](https://github.com/hotcodepush-team/hotcodepush-python/compare/v0.3.0...v0.4.0) (2026-11-01)
+
+
+### ⚠ BREAKING CHANGES
+
+* release conditions carry raw attribute values and device ids ([#7](https://github.com/hotcodepush-team/hotcodepush-python/issues/7))
+
+### Features
+
+* release conditions carry raw attribute values and device ids ([#7](https://github.com/hotcodepush-team/hotcodepush-python/issues/7)) ([e9c975e](https://github.com/hotcodepush-team/hotcodepush-python/commit/e9c975eef7840eea6b4e4d26409c56c00e06a756))
+
 ## [0.3.0](https://github.com/hotcodepush-team/hotcodepush-python/compare/v0.2.1...v0.3.0) (2026-10-31)
 
 
