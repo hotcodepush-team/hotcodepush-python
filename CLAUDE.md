@@ -102,16 +102,16 @@ The integration test runs by hand against that API, started with `ENVIRONMENT=de
 - Every value of a catalog is lowercase snake_case with no prefix, error codes included: `not_found`, `unexpected_response`; the API's are passed through verbatim, never renamed.
 - Never `cast` or `# type: ignore`; a real check.
 - Test titles read `test_<verb>_…`, the verb in the third person, conditions starting with `when`; one test per request and branch.
+- A test earns its place by catching a bug nothing else catches, at the lowest layer that can prove it; one test per branch, never per value, and nothing for what the types, the framework or a library guarantee.
+- A new test names the behaviour or the bug it proves; if deleting the production code would not fail it, it does not get in.
 
 ## Releases
 
 The package has been on PyPI since `0.1.0` and `0.2.0` shipped on 2026-10-25: consumers `pip install hotcodepush` and pin a version, bumping it on purpose.
 A release is the merge of release-please's release pull request, never a hand-made tag or upload.
-Commits are conventional commits, since release-please reads them; `main` is trunk and CI is the gate.
 `.github/workflows/release.yml` runs release-please on every push to `main`: it keeps a release pull request open, and merging it tags the release, builds the distributions and publishes them to PyPI through trusted publishing, with no API token anywhere.
 The version lives in `src/hotcodepush/_version.py`, which release-please bumps; the first release is `0.1.0`, the Python strategy's initial version, and `bump-minor-pre-major` with `bump-patch-for-minor-pre-major` keeps every release on `0.x` until `1.0.0` is decided.
 A release pull request opened with the workflow's own token starts no CI run; close and reopen it to run the checks.
-
 
 ## Comments
 
@@ -123,6 +123,7 @@ A release pull request opened with the workflow's own token starts no CI run; cl
 
 ## Agent workspace
 
-- No `.mcp.json` yet: the one server this repo's stack takes is HotCodePush's own, `https://mcp.hotcodepush.com/mcp`, which does not exist yet; it joins the day it does.
+- No `.mcp.json`: no server covers this repo's stack yet; the HotCodePush server joins when it exists.
 - `.claude/skills/` holds the developer skills copied from `hotcodepush-team/.github` with the skills CLI and pinned in `skills-lock.json`; update them with `npx skills update`.
 - `.github/copilot-instructions.md` holds the review criteria, the only Copilot-specific file.
+- Commits are conventional commits; `main` is trunk, CI is the gate, and a commit that lands an issue says `Closes #<n>`.
