@@ -16,8 +16,8 @@ class BundleFilesResource(BaseResource):
             resolve_path(
                 "/v1/apps/{appId}/bundles/{bundleId}/files/count", appId=app_id, bundleId=bundle_id
             ),
-            Count,
             query={"isStored": is_stored},
+            response_type=Count,
         )
 
     def list(
@@ -39,6 +39,6 @@ class BundleFilesResource(BaseResource):
             resolve_path(
                 "/v1/apps/{appId}/bundles/{bundleId}/files", appId=app_id, bundleId=bundle_id
             ),
-            list[BundleFile],
             query={"isStored": is_stored, "limit": limit, "offset": offset},
+            response_type=list[BundleFile],
         )

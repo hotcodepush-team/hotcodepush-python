@@ -31,9 +31,9 @@ class FileUploadsResource(BaseResource):
                 sha256=sha256,
                 uploadId=upload_id,
             ),
-            AppFile,
             body={"parts": parts},
             is_retryable=True,
+            response_type=AppFile,
         )
 
     def create(self, *, app_id: str, sha256: str) -> MultipartUpload:
@@ -45,8 +45,8 @@ class FileUploadsResource(BaseResource):
         return self._http_client.fetch_json(
             "POST",
             resolve_path("/v1/apps/{appId}/files/{sha256}/uploads", appId=app_id, sha256=sha256),
-            MultipartUpload,
             is_retryable=True,
+            response_type=MultipartUpload,
         )
 
     def delete(self, *, app_id: str, sha256: str, upload_id: str) -> None:

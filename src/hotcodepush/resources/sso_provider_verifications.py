@@ -23,6 +23,6 @@ class SsoProviderVerificationsResource(BaseResource):
                 "/v1/organizations/{organizationId}/sso-provider/verifications",
                 organizationId=organization_id,
             ),
-            SsoProvider,
             is_retryable=True,
+            response_type=SsoProvider,
         )

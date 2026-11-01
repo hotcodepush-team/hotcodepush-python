@@ -19,8 +19,8 @@ class InvitationsResource(BaseResource):
         return self._http_client.fetch_json(
             "POST",
             resolve_path("/v1/invitations/{invitationId}/accept", invitationId=invitation_id),
-            Member,
             body={"token": token},
+            response_type=Member,
         )
 
     def count(self) -> Count:
@@ -28,7 +28,9 @@ class InvitationsResource(BaseResource):
 
         An API token answers `forbidden`; sign in with a session.
         """
-        return self._http_client.fetch_json("GET", resolve_path("/v1/invitations/count"), Count)
+        return self._http_client.fetch_json(
+            "GET", resolve_path("/v1/invitations/count"), response_type=Count
+        )
 
     def list(
         self,
@@ -46,6 +48,6 @@ class InvitationsResource(BaseResource):
         return self._http_client.fetch_json(
             "GET",
             resolve_path("/v1/invitations"),
-            list[Invitation],
             query={"limit": limit, "offset": offset, "relations": relations},
+            response_type=list[Invitation],
         )

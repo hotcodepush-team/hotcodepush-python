@@ -29,8 +29,8 @@ class BundlesResource(BaseResource):
             resolve_path(
                 "/v1/apps/{appId}/bundles/{bundleId}/complete", appId=app_id, bundleId=bundle_id
             ),
-            Bundle,
             is_retryable=True,
+            response_type=Bundle,
         )
 
     def count(
@@ -49,7 +49,6 @@ class BundlesResource(BaseResource):
         return self._http_client.fetch_json(
             "GET",
             resolve_path("/v1/apps/{appId}/bundles/count", appId=app_id),
-            Count,
             query={
                 "fingerprint": fingerprint,
                 "isInUse": is_in_use,
@@ -59,6 +58,7 @@ class BundlesResource(BaseResource):
                 "status": status,
                 "version": version,
             },
+            response_type=Count,
         )
 
     def create(
@@ -84,7 +84,6 @@ class BundlesResource(BaseResource):
         """
         return self._http_client.fetch_creating_post(
             resolve_path("/v1/apps/{appId}/bundles", appId=app_id),
-            Bundle,
             body={
                 "files": files,
                 "fingerprint": fingerprint,
@@ -98,6 +97,7 @@ class BundlesResource(BaseResource):
                 "version": version,
             },
             idempotency_key=idempotency_key,
+            response_type=Bundle,
         )
 
     def delete(self, *, app_id: str, bundle_id: str) -> None:
@@ -114,7 +114,7 @@ class BundlesResource(BaseResource):
         return self._http_client.fetch_json(
             "GET",
             resolve_path("/v1/apps/{appId}/bundles/{bundleId}", appId=app_id, bundleId=bundle_id),
-            Bundle,
+            response_type=Bundle,
         )
 
     def list(
@@ -135,7 +135,6 @@ class BundlesResource(BaseResource):
         return self._http_client.fetch_json(
             "GET",
             resolve_path("/v1/apps/{appId}/bundles", appId=app_id),
-            list[Bundle],
             query={
                 "fingerprint": fingerprint,
                 "isInUse": is_in_use,
@@ -147,4 +146,5 @@ class BundlesResource(BaseResource):
                 "status": status,
                 "version": version,
             },
+            response_type=list[Bundle],
         )

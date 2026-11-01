@@ -31,7 +31,6 @@ class AuditLogsResource(BaseResource):
                 "/v1/organizations/{organizationId}/audit-logs/count",
                 organizationId=organization_id,
             ),
-            Count,
             query={
                 "actorType": actor_type,
                 "appId": app_id,
@@ -40,6 +39,7 @@ class AuditLogsResource(BaseResource):
                 "type": type,
                 "userId": user_id,
             },
+            response_type=Count,
         )
 
     def download_csv(
@@ -99,7 +99,6 @@ class AuditLogsResource(BaseResource):
             resolve_path(
                 "/v1/organizations/{organizationId}/audit-logs", organizationId=organization_id
             ),
-            list[AuditLog],
             query={
                 "actorType": actor_type,
                 "appId": app_id,
@@ -111,4 +110,5 @@ class AuditLogsResource(BaseResource):
                 "type": type,
                 "userId": user_id,
             },
+            response_type=list[AuditLog],
         )

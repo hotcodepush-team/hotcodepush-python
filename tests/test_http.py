@@ -120,7 +120,10 @@ def test_sends_the_body_as_json_without_its_not_given_values_when_a_body_is_set(
     api = StubApi(httpx.Response(200, json={"count": 1}))
 
     api.create_http_client().fetch_json(
-        "POST", "/v1/apps/app/channels", Count, body={"name": "production", "notes": NOT_GIVEN}
+        "POST",
+        "/v1/apps/app/channels",
+        body={"name": "production", "notes": NOT_GIVEN},
+        response_type=Count,
     )
 
     assert api.last_request.headers["Content-Type"] == "application/json"
@@ -131,7 +134,7 @@ def test_sends_none_in_the_body_as_null() -> None:
     api = StubApi(httpx.Response(200, json={"count": 1}))
 
     api.create_http_client().fetch_json(
-        "PATCH", "/v1/apps/app", Count, body={"channelLinkTemplate": None}
+        "PATCH", "/v1/apps/app", body={"channelLinkTemplate": None}, response_type=Count
     )
 
     assert resolve_sent_json(api.last_request) == {"channelLinkTemplate": None}
@@ -143,8 +146,8 @@ def test_sends_a_model_in_the_body_by_its_api_names() -> None:
     api.create_http_client().fetch_json(
         "POST",
         "/v1/apps/app/bundles",
-        Count,
         body={"files": [ManifestFile(path="index.html", sha256="a" * 64, size_bytes=5)]},
+        response_type=Count,
     )
 
     assert resolve_sent_json(api.last_request) == {
@@ -158,8 +161,8 @@ def test_sends_a_model_in_the_body_without_its_none_fields() -> None:
     api.create_http_client().fetch_json(
         "PUT",
         "/v1/organizations/organization/sso-provider",
-        Count,
         body={"oidc": OidcConfig(client_id="client", client_secret="secret", issuer="issuer")},
+        response_type=Count,
     )
 
     assert resolve_sent_json(api.last_request) == {
@@ -173,8 +176,8 @@ def test_sends_a_timestamp_in_the_body_in_utc_with_a_z() -> None:
     api.create_http_client().fetch_json(
         "PATCH",
         "/v1/apps/app/channels/channel",
-        Count,
         body={"expiresAt": datetime(2026, 10, 1, 14, tzinfo=timezone(timedelta(hours=2)))},
+        response_type=Count,
     )
 
     assert resolve_sent_json(api.last_request) == {"expiresAt": "2026-10-01T12:00:00.000Z"}
@@ -217,7 +220,9 @@ def test_sends_a_timestamp_in_the_query_in_utc_with_a_z() -> None:
 def test_returns_the_validated_body_when_the_response_has_one() -> None:
     api = StubApi(httpx.Response(200, json={"count": 3}))
 
-    fetched_count = api.create_http_client().fetch_json("GET", "/v1/organizations/count", Count)
+    fetched_count = api.create_http_client().fetch_json(
+        "GET", "/v1/organizations/count", response_type=Count
+    )
 
     assert fetched_count == Count(count=3)
 
@@ -241,7 +246,7 @@ def test_raises_a_hot_code_push_error_when_the_response_is_not_ok() -> None:
     )
 
     with pytest.raises(HotCodePushError) as raised:
-        api.create_http_client().fetch_json("GET", "/v1/users/me", Count)
+        api.create_http_client().fetch_json("GET", "/v1/users/me", response_type=Count)
 
     assert (raised.value.code, raised.value.status) == ("unauthenticated", 401)
 
@@ -271,7 +276,7 @@ def test_retries_a_post_when_the_api_is_unavailable_and_the_call_is_retryable() 
 
     with pytest.raises(HotCodePushError):
         api.create_http_client().fetch_json(
-            "POST", "/v1/apps/app/channels/channel/pause", Count, is_retryable=True
+            "POST", "/v1/apps/app/channels/channel/pause", is_retryable=True, response_type=Count
         )
 
     assert len(api.requests) == 3
@@ -317,7 +322,7 @@ def test_sends_the_given_idempotency_key_when_one_is_set() -> None:
     api = StubApi(httpx.Response(201, json={"count": 1}))
 
     api.create_http_client().fetch_creating_post(
-        "/v1/organizations", Count, body={"name": "Acme"}, idempotency_key="key"
+        "/v1/organizations", body={"name": "Acme"}, idempotency_key="key", response_type=Count
     )
 
     assert api.last_request.method == "POST"
@@ -329,7 +334,7 @@ def test_sends_one_generated_idempotency_key_on_every_attempt_when_none_is_set()
     api = StubApi(httpx.Response(503), httpx.Response(201, json={"count": 1}))
 
     api.create_http_client().fetch_creating_post(
-        "/v1/organizations", Count, body={"name": "Acme"}, idempotency_key=NOT_GIVEN
+        "/v1/organizations", body={"name": "Acme"}, idempotency_key=NOT_GIVEN, response_type=Count
     )
 
     first_key, second_key = (request.headers["Idempotency-Key"] for request in api.requests)
@@ -342,10 +347,10 @@ def test_puts_bytes_with_their_size_as_the_content_length() -> None:
 
     api.create_http_client().fetch_upload(
         "/v1/apps/app/files/sha256",
-        Count,
         body=b"gzip bytes",
         content_length=None,
         content_type="application/gzip",
+        response_type=Count,
     )
 
     assert api.last_request.method == "PUT"
@@ -359,10 +364,10 @@ def test_streams_a_file_object_with_the_given_content_length() -> None:
 
     api.create_http_client().fetch_upload(
         "/v1/apps/app/bundles/bundle/pack",
-        Count,
         body=io.BytesIO(b"tar bytes"),
         content_length=9,
         content_type="application/x-tar",
+        response_type=Count,
     )
 
     assert api.last_request.content == b"tar bytes"
@@ -376,10 +381,10 @@ def test_raises_when_a_file_object_comes_without_its_content_length() -> None:
     with pytest.raises(ValueError, match="content_length"):
         api.create_http_client().fetch_upload(
             "/v1/apps/app/bundles/bundle/pack",
-            Count,
             body=io.BytesIO(b"tar bytes"),
             content_length=None,
             content_type="application/x-tar",
+            response_type=Count,
         )
 
 
@@ -388,10 +393,10 @@ def test_gives_each_upload_attempt_ten_minutes() -> None:
 
     api.create_http_client().fetch_upload(
         "/v1/apps/app/bundles/bundle/pack",
-        Count,
         body=b"tar bytes",
         content_length=None,
         content_type="application/x-tar",
+        response_type=Count,
     )
 
     assert api.last_request.extensions["timeout"]["write"] == 600.0
@@ -402,10 +407,10 @@ def test_retries_bytes_when_the_status_is_retryable() -> None:
 
     uploaded_count = api.create_http_client().fetch_upload(
         "/v1/apps/app/bundles/bundle/pack",
-        Count,
         body=b"tar bytes",
         content_length=None,
         content_type="application/x-tar",
+        response_type=Count,
     )
 
     assert uploaded_count == Count(count=9)
@@ -418,10 +423,10 @@ def test_does_not_retry_a_file_object_which_is_read_once() -> None:
     with pytest.raises(HotCodePushError) as raised:
         api.create_http_client().fetch_upload(
             "/v1/apps/app/bundles/bundle/pack",
-            Count,
             body=io.BytesIO(b"tar bytes"),
             content_length=9,
             content_type="application/x-tar",
+            response_type=Count,
         )
 
     assert raised.value.status == 503

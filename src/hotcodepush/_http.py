@@ -67,10 +67,10 @@ class HttpClient:
     def fetch_creating_post(
         self,
         path: str,
-        response_type: type[T],
         *,
         body: JsonBody,
         idempotency_key: str | NotGiven,
+        response_type: type[T],
     ) -> T:
         resolved_idempotency_key = (
             str(uuid4()) if isinstance(idempotency_key, NotGiven) else idempotency_key
@@ -79,22 +79,22 @@ class HttpClient:
         return self.fetch_json(
             "POST",
             path,
-            response_type,
             body=body,
             headers={"Idempotency-Key": resolved_idempotency_key},
             is_retryable=True,
+            response_type=response_type,
         )
 
     def fetch_json(
         self,
         method: HttpMethod,
         path: str,
-        response_type: type[T],
         *,
         body: JsonBody | None = None,
         headers: Mapping[str, str] | None = None,
         is_retryable: bool | None = None,
         query: Query | None = None,
+        response_type: type[T],
     ) -> T:
         response = self._fetch_response(
             method, path, body=body, headers=headers, is_retryable=is_retryable, query=query
@@ -115,11 +115,11 @@ class HttpClient:
     def fetch_upload(
         self,
         path: str,
-        response_type: type[T],
         *,
         body: UploadBody,
         content_length: int | None,
         content_type: str,
+        response_type: type[T],
     ) -> T:
         request = self._httpx_client.build_request(
             "PUT",

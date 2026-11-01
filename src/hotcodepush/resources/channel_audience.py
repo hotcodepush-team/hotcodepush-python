@@ -31,7 +31,6 @@ class ChannelAudienceResource(BaseResource):
                 appId=app_id,
                 channelId=channel_id,
             ),
-            Audience,
             query={
                 "attribute": attribute,
                 "binary": binary,
@@ -40,4 +39,5 @@ class ChannelAudienceResource(BaseResource):
                 "os": os,
                 "rolloutPercent": rollout_percent,
             },
+            response_type=Audience,
         )

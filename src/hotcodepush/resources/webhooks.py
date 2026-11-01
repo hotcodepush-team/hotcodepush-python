@@ -30,7 +30,7 @@ class WebhooksResource(BaseResource):
             resolve_path(
                 "/v1/organizations/{organizationId}/webhooks/count", organizationId=organization_id
             ),
-            Count,
+            response_type=Count,
         )
 
     def create(
@@ -56,8 +56,8 @@ class WebhooksResource(BaseResource):
             resolve_path(
                 "/v1/organizations/{organizationId}/webhooks", organizationId=organization_id
             ),
-            CreatedWebhook,
             body={"appId": app_id, "events": events, "format": format, "name": name, "url": url},
+            response_type=CreatedWebhook,
         )
 
     def delete(self, *, organization_id: str, webhook_id: str) -> None:
@@ -86,7 +86,7 @@ class WebhooksResource(BaseResource):
                 organizationId=organization_id,
                 webhookId=webhook_id,
             ),
-            Webhook,
+            response_type=Webhook,
         )
 
     def list(
@@ -105,8 +105,8 @@ class WebhooksResource(BaseResource):
             resolve_path(
                 "/v1/organizations/{organizationId}/webhooks", organizationId=organization_id
             ),
-            list[Webhook],
             query={"limit": limit, "offset": offset},
+            response_type=list[Webhook],
         )
 
     def test(self, *, organization_id: str, webhook_id: str) -> WebhookDelivery:
@@ -124,7 +124,7 @@ class WebhooksResource(BaseResource):
                 organizationId=organization_id,
                 webhookId=webhook_id,
             ),
-            WebhookDelivery,
+            response_type=WebhookDelivery,
         )
 
     def update(
@@ -152,7 +152,6 @@ class WebhooksResource(BaseResource):
                 organizationId=organization_id,
                 webhookId=webhook_id,
             ),
-            Webhook,
             body={
                 "appId": app_id,
                 "events": events,
@@ -160,4 +159,5 @@ class WebhooksResource(BaseResource):
                 "name": name,
                 "url": url,
             },
+            response_type=Webhook,
         )

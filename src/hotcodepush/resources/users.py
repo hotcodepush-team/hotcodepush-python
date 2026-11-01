@@ -41,6 +41,6 @@ class UsersResource(BaseResource):
         return self._http_client.fetch_json(
             "GET",
             resolve_path("/v1/users/{userId}", userId=user_id),
-            User,
             query={"relations": relations},
+            response_type=User,
         )

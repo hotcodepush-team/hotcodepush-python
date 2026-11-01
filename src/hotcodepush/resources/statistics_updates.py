@@ -26,11 +26,11 @@ class StatisticsUpdatesResource(BaseResource):
         return self._http_client.fetch_json(
             "GET",
             resolve_path("/v1/apps/{appId}/statistics/updates", appId=app_id),
-            UpdateStatistics,
             query={
                 "channelId": channel_id,
                 "periodSince": period_since,
                 "periodUntil": period_until,
                 "releaseId": release_id,
             },
+            response_type=UpdateStatistics,
         )

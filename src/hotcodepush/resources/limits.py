@@ -16,5 +16,5 @@ class LimitsResource(BaseResource):
             resolve_path(
                 "/v1/organizations/{organizationId}/limits", organizationId=organization_id
             ),
-            dict[str, Limit],
+            response_type=dict[str, Limit],
         )

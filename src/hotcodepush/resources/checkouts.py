@@ -23,5 +23,5 @@ class CheckoutsResource(BaseResource):
             resolve_path(
                 "/v1/organizations/{organizationId}/checkouts", organizationId=organization_id
             ),
-            Checkout,
+            response_type=Checkout,
         )

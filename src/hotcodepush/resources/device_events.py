@@ -18,8 +18,8 @@ class DeviceEventsResource(BaseResource):
                 appId=app_id,
                 deviceId=device_id,
             ),
-            Count,
             query={"releaseId": release_id},
+            response_type=Count,
         )
 
     def list(
@@ -42,11 +42,11 @@ class DeviceEventsResource(BaseResource):
             resolve_path(
                 "/v1/apps/{appId}/devices/{deviceId}/events", appId=app_id, deviceId=device_id
             ),
-            list[ReleaseDeviceEvent],
             query={
                 "limit": limit,
                 "offset": offset,
                 "relations": relations,
                 "releaseId": release_id,
             },
+            response_type=list[ReleaseDeviceEvent],
         )

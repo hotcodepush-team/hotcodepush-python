@@ -23,5 +23,5 @@ class CustomerPortalSessionsResource(BaseResource):
                 "/v1/organizations/{organizationId}/customer-portal-sessions",
                 organizationId=organization_id,
             ),
-            CustomerPortalSession,
+            response_type=CustomerPortalSession,
         )

@@ -24,8 +24,8 @@ class NotificationPreferencesResource(BaseResource):
         return self._http_client.fetch_json(
             "GET",
             resolve_path("/v1/notification-preferences"),
-            list[NotificationPreference],
             query={"organizationId": organization_id},
+            response_type=list[NotificationPreference],
         )
 
     def update(
@@ -45,11 +45,11 @@ class NotificationPreferencesResource(BaseResource):
         return self._http_client.fetch_json(
             "PATCH",
             resolve_path("/v1/notification-preferences"),
-            NotificationPreference,
             body={
                 "category": category,
                 "isEnabled": is_enabled,
                 "medium": medium,
                 "organizationId": organization_id,
             },
+            response_type=NotificationPreference,
         )

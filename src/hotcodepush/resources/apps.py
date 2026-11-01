@@ -35,7 +35,7 @@ class AppsResource(BaseResource):
 
     def get(self, *, app_id: str) -> App:
         return self._http_client.fetch_json(
-            "GET", resolve_path("/v1/apps/{appId}", appId=app_id), App
+            "GET", resolve_path("/v1/apps/{appId}", appId=app_id), response_type=App
         )
 
     def transfer(self, *, app_id: str, organization_id: str) -> App:
@@ -48,8 +48,8 @@ class AppsResource(BaseResource):
         return self._http_client.fetch_json(
             "POST",
             resolve_path("/v1/apps/{appId}/transfer", appId=app_id),
-            App,
             body={"organizationId": organization_id},
+            response_type=App,
         )
 
     def update(
@@ -69,11 +69,11 @@ class AppsResource(BaseResource):
         return self._http_client.fetch_json(
             "PATCH",
             resolve_path("/v1/apps/{appId}", appId=app_id),
-            App,
             body={
                 "channelLinkTemplate": channel_link_template,
                 "defaultChannelId": default_channel_id,
                 "framework": framework,
                 "name": name,
             },
+            response_type=App,
         )

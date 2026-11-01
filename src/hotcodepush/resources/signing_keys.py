@@ -10,7 +10,9 @@ class SigningKeysResource(BaseResource):
     def count(self, *, app_id: str) -> Count:
         """Counts the signing keys of the app."""
         return self._http_client.fetch_json(
-            "GET", resolve_path("/v1/apps/{appId}/signing-keys/count", appId=app_id), Count
+            "GET",
+            resolve_path("/v1/apps/{appId}/signing-keys/count", appId=app_id),
+            response_type=Count,
         )
 
     def create(self, *, app_id: str, public_key: str) -> SigningKey:
@@ -22,9 +24,9 @@ class SigningKeysResource(BaseResource):
         return self._http_client.fetch_json(
             "POST",
             resolve_path("/v1/apps/{appId}/signing-keys", appId=app_id),
-            SigningKey,
             body={"publicKey": public_key},
             is_retryable=True,
+            response_type=SigningKey,
         )
 
     def delete(self, *, app_id: str, signing_key_id: str) -> None:
@@ -48,6 +50,6 @@ class SigningKeysResource(BaseResource):
         return self._http_client.fetch_json(
             "GET",
             resolve_path("/v1/apps/{appId}/signing-keys", appId=app_id),
-            list[SigningKey],
             query={"limit": limit, "offset": offset},
+            response_type=list[SigningKey],
         )

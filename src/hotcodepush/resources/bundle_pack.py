@@ -47,8 +47,8 @@ class BundlePackResource(BaseResource):
             resolve_path(
                 "/v1/apps/{appId}/bundles/{bundleId}/pack", appId=app_id, bundleId=bundle_id
             ),
-            UploadedBundlePack,
             body=body,
             content_length=content_length,
             content_type="application/x-tar",
+            response_type=UploadedBundlePack,
         )

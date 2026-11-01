@@ -27,8 +27,8 @@ class OrganizationInvitationsResource(BaseResource):
                 "/v1/organizations/{organizationId}/invitations/count",
                 organizationId=organization_id,
             ),
-            Count,
             query={"query": query, "role": role, "status": status},
+            response_type=Count,
         )
 
     def create(
@@ -49,9 +49,9 @@ class OrganizationInvitationsResource(BaseResource):
             resolve_path(
                 "/v1/organizations/{organizationId}/invitations", organizationId=organization_id
             ),
-            Invitation,
             body={"email": email, "role": role},
             idempotency_key=idempotency_key,
+            response_type=Invitation,
         )
 
     def delete(self, *, invitation_id: str, organization_id: str) -> None:
@@ -105,7 +105,6 @@ class OrganizationInvitationsResource(BaseResource):
             resolve_path(
                 "/v1/organizations/{organizationId}/invitations", organizationId=organization_id
             ),
-            list[Invitation],
             query={
                 "limit": limit,
                 "offset": offset,
@@ -113,4 +112,5 @@ class OrganizationInvitationsResource(BaseResource):
                 "role": role,
                 "status": status,
             },
+            response_type=list[Invitation],
         )

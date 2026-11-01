@@ -25,8 +25,8 @@ class ChannelsResource(BaseResource):
         return self._http_client.fetch_json(
             "GET",
             resolve_path("/v1/apps/{appId}/channels/count", appId=app_id),
-            Count,
             query={"query": query},
+            response_type=Count,
         )
 
     def create(
@@ -48,7 +48,6 @@ class ChannelsResource(BaseResource):
         """
         return self._http_client.fetch_creating_post(
             resolve_path("/v1/apps/{appId}/channels", appId=app_id),
-            Channel,
             body={
                 "expiresAt": expires_at,
                 "failureAction": failure_action,
@@ -59,6 +58,7 @@ class ChannelsResource(BaseResource):
                 "name": name,
             },
             idempotency_key=idempotency_key,
+            response_type=Channel,
         )
 
     def delete(self, *, app_id: str, channel_id: str) -> None:
@@ -92,7 +92,7 @@ class ChannelsResource(BaseResource):
             resolve_path(
                 "/v1/apps/{appId}/channels/{channelId}", appId=app_id, channelId=channel_id
             ),
-            Channel,
+            response_type=Channel,
         )
 
     def list(
@@ -110,8 +110,8 @@ class ChannelsResource(BaseResource):
         return self._http_client.fetch_json(
             "GET",
             resolve_path("/v1/apps/{appId}/channels", appId=app_id),
-            list[Channel],
             query={"limit": limit, "offset": offset, "query": query},
+            response_type=list[Channel],
         )
 
     def pause(self, *, app_id: str, channel_id: str) -> Channel:
@@ -124,8 +124,8 @@ class ChannelsResource(BaseResource):
             resolve_path(
                 "/v1/apps/{appId}/channels/{channelId}/pause", appId=app_id, channelId=channel_id
             ),
-            Channel,
             is_retryable=True,
+            response_type=Channel,
         )
 
     def resume(self, *, app_id: str, channel_id: str) -> Channel:
@@ -138,8 +138,8 @@ class ChannelsResource(BaseResource):
             resolve_path(
                 "/v1/apps/{appId}/channels/{channelId}/resume", appId=app_id, channelId=channel_id
             ),
-            Channel,
             is_retryable=True,
+            response_type=Channel,
         )
 
     def update(
@@ -164,7 +164,6 @@ class ChannelsResource(BaseResource):
             resolve_path(
                 "/v1/apps/{appId}/channels/{channelId}", appId=app_id, channelId=channel_id
             ),
-            Channel,
             body={
                 "expiresAt": expires_at,
                 "failureAction": failure_action,
@@ -174,4 +173,5 @@ class ChannelsResource(BaseResource):
                 "isProtected": is_protected,
                 "name": name,
             },
+            response_type=Channel,
         )

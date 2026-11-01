@@ -109,7 +109,7 @@ def test_creates_lists_and_withdraws_an_invitation(
 
 
 def test_gets_lists_and_updates_the_created_app(
-    hot_code_push: HotCodePush, app: App, organization: Organization
+    hot_code_push: HotCodePush, *, app: App, organization: Organization
 ) -> None:
     fetched_app = hot_code_push.apps.get(app_id=app.id)
     fetched_apps = hot_code_push.organizations.apps.list(organization_id=organization.id)
@@ -123,7 +123,7 @@ def test_gets_lists_and_updates_the_created_app(
 
 
 def test_gets_lists_updates_pauses_and_resumes_the_created_channel(
-    hot_code_push: HotCodePush, app: App, channel: Channel
+    hot_code_push: HotCodePush, *, app: App, channel: Channel
 ) -> None:
     fetched_channel = hot_code_push.apps.channels.get(app_id=app.id, channel_id=channel.id)
     fetched_channels = hot_code_push.apps.channels.list(app_id=app.id)
@@ -141,7 +141,7 @@ def test_gets_lists_updates_pauses_and_resumes_the_created_channel(
 
 
 def test_lists_no_releases_for_a_new_channel(
-    hot_code_push: HotCodePush, app: App, channel: Channel
+    hot_code_push: HotCodePush, *, app: App, channel: Channel
 ) -> None:
     fetched_releases = hot_code_push.apps.releases.list(
         app_id=app.id, channel_id=channel.id, relations=["bundle"]
@@ -151,7 +151,7 @@ def test_lists_no_releases_for_a_new_channel(
 
 
 def test_passes_the_apis_error_through_when_there_is_nothing_to_roll_back(
-    hot_code_push: HotCodePush, app: App, channel: Channel
+    hot_code_push: HotCodePush, *, app: App, channel: Channel
 ) -> None:
     with pytest.raises(HotCodePushError) as raised:
         hot_code_push.apps.channels.rollbacks.create(app_id=app.id, channel_id=channel.id)
@@ -316,7 +316,7 @@ def test_creates_a_binary_and_reads_it_with_its_bundle(
     assert fetched_bundle.number is None
 
 
-def test_deletes_the_channel(hot_code_push: HotCodePush, app: App, channel: Channel) -> None:
+def test_deletes_the_channel(hot_code_push: HotCodePush, *, app: App, channel: Channel) -> None:
     hot_code_push.apps.channels.delete(app_id=app.id, channel_id=channel.id)
 
     with pytest.raises(HotCodePushError) as raised:
@@ -326,7 +326,7 @@ def test_deletes_the_channel(hot_code_push: HotCodePush, app: App, channel: Chan
 
 
 def test_transfers_the_app_to_another_organization(
-    hot_code_push: HotCodePush, app: App, target_organization: Organization
+    hot_code_push: HotCodePush, *, app: App, target_organization: Organization
 ) -> None:
     transferred_app = hot_code_push.apps.transfer(
         app_id=app.id, organization_id=target_organization.id
