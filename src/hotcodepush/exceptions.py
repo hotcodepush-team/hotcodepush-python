@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from typing import Literal, TypeGuard, get_args
+from typing import Literal
 
 ErrorCode = Literal[
     "account_banned",
@@ -50,19 +50,19 @@ ErrorCode = Literal[
     "validation",
     "webhook_name_taken",
 ]
-"""A code of the API's error catalog, or `unexpected_response` for a body without its shape."""
+"""A known code: one of the API's error catalog, or `unexpected_response` for a body without its shape."""
 
 
 class HotCodePushError(Exception):
     """Raised when the API answers with a status outside 2xx.
 
-    `code`, `message` and `details` come verbatim from the API's error body. A response without
-    that shape, such as a page from a proxy in front of the API, raises `unexpected_response` with
-    the status and without the body; a code outside the catalog, from a newer API, raises
-    `unexpected_response` with the API's message and details kept.
+    `code`, `message` and `details` come verbatim from the API's error body, so `code` is a `str`:
+    a code newer than this client passes through, and `ErrorCode` lists the known ones. A response
+    without that shape, such as a page from a proxy in front of the API, raises
+    `unexpected_response` with the status and without the body.
     """
 
-    def __init__(self, *, code: ErrorCode, details: object, message: str, status: int) -> None:
+    def __init__(self, *, code: str, details: object, message: str, status: int) -> None:
         super().__init__(message)
         self.code = code
         self.details = details
@@ -75,7 +75,7 @@ def resolve_hot_code_push_error(status: int, text: str) -> HotCodePushError:
     code, message = body.get("code"), body.get("message")
     if isinstance(code, str) and isinstance(message, str):
         return HotCodePushError(
-            code=code if is_error_code(code) else "unexpected_response",
+            code=code,
             details=body.get("details"),
             message=message,
             status=status,
@@ -86,10 +86,6 @@ def resolve_hot_code_push_error(status: int, text: str) -> HotCodePushError:
         message=f"Request failed with status {status}.",
         status=status,
     )
-
-
-def is_error_code(value: object) -> TypeGuard[ErrorCode]:
-    return value in get_args(ErrorCode)
 
 
 def resolve_json_object(text: str) -> dict[str, object]:
