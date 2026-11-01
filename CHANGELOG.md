@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.5.0](https://github.com/hotcodepush-team/hotcodepush-python/compare/v0.4.0...v0.5.0) (2026-11-01)
+
+
+### ⚠ BREAKING CHANGES
+
+* HotCodePushError.code carries a code newer than the client as it is instead of unexpected_response, and is typed str.
+
+### Features
+
+* pass an unknown API error code through ([#10](https://github.com/hotcodepush-team/hotcodepush-python/issues/10)) ([5e86b60](https://github.com/hotcodepush-team/hotcodepush-python/commit/5e86b606d20833720d011a5e90c3b7002e3571a0))
+
+
+### Documentation
+
+* align CLAUDE.md with the handbook's shared lines ([#11](https://github.com/hotcodepush-team/hotcodepush-python/issues/11)) ([1e956d9](https://github.com/hotcodepush-team/hotcodepush-python/commit/1e956d91ef957a8084fa4b9efd706038b35aba65))
+
 ## [0.4.0](https://github.com/hotcodepush-team/hotcodepush-python/compare/v0.3.0...v0.4.0) (2026-11-01)
 
 
