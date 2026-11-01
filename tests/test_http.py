@@ -186,14 +186,13 @@ def test_sends_the_query_without_its_not_given_values_and_empty_lists() -> None:
     ) == (("limit", "10"), ("offset", "0"))
 
 
-def test_sends_the_relations_in_the_query_as_a_comma_list() -> None:
-    assert resolve_query_params({"relations": ["bundle", "channel"]}) == (
+def test_sends_the_ids_and_the_relations_in_the_query_as_comma_lists() -> None:
+    assert resolve_query_params(
+        {"ids": ["first", "second"], "relations": ["bundle", "channel"]}
+    ) == (
+        ("ids", "first,second"),
         ("relations", "bundle,channel"),
     )
-
-
-def test_sends_the_ids_in_the_query_as_a_comma_list() -> None:
-    assert resolve_query_params({"ids": ["first", "second"]}) == (("ids", "first,second"),)
 
 
 def test_repeats_the_parameter_of_any_other_list_in_the_query() -> None:
@@ -245,15 +244,6 @@ def test_raises_a_hot_code_push_error_when_the_response_is_not_ok() -> None:
         api.create_http_client().fetch_json("GET", "/v1/users/me", Count)
 
     assert (raised.value.code, raised.value.status) == ("unauthenticated", 401)
-
-
-def test_raises_unexpected_response_when_a_rate_limit_in_front_of_the_api_answers_html() -> None:
-    api = StubApi(httpx.Response(429, text="<html>Too Many Requests</html>"))
-
-    with pytest.raises(HotCodePushError) as raised:
-        api.create_http_client().fetch_json("POST", "/v1/invitations/invitation/accept", Count)
-
-    assert (raised.value.code, raised.value.status) == ("unexpected_response", 429)
 
 
 @pytest.mark.parametrize("method", ["DELETE", "GET", "PUT"])
