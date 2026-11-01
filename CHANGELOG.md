@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.3.0](https://github.com/hotcodepush-team/hotcodepush-python/compare/v0.2.1...v0.3.0) (2026-10-31)
+
+
+### ⚠ BREAKING CHANGES
+
+* the API after the contract audit, one release list, qr-code, the renames, and the client alignments ([#5](https://github.com/hotcodepush-team/hotcodepush-python/issues/5))
+
+### Features
+
+* the API after the contract audit, one release list, qr-code, the renames, and the client alignments ([#5](https://github.com/hotcodepush-team/hotcodepush-python/issues/5)) ([1c5412c](https://github.com/hotcodepush-team/hotcodepush-python/commit/1c5412c0adb4a6e2189cbdb4624277af5977260c))
+
 ## [0.2.1](https://github.com/hotcodepush-team/hotcodepush-python/compare/v0.2.0...v0.2.1) (2026-10-31)
 
 
