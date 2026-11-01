@@ -18132,7 +18132,7 @@
     "/v1/apps/{appId}/channels/{channelId}/pause": {
       "post": {
         "operationId": "postV1AppsByAppIdChannelsByChannelIdPause",
-        "description": "A paused channel serves nothing new: its index carries `isPaused` and devices keep what they have — the kill switch for a whole channel.",
+        "description": "A paused channel serves nothing new: its index carries `pausedAt` and devices keep what they have — the kill switch for a whole channel.",
         "responses": {
           "200": {
             "content": {
@@ -18682,22 +18682,20 @@
                             "type": "object",
                             "properties": {
                               "key": {
-                                "type": "string",
-                                "minLength": 1
+                                "type": "string"
                               },
                               "type": {
                                 "type": "string",
                                 "const": "attribute"
                               },
-                              "valueSha256": {
-                                "type": "string",
-                                "pattern": "^[0-9a-f]{64}$"
+                              "value": {
+                                "type": "string"
                               }
                             },
                             "required": [
                               "key",
                               "type",
-                              "valueSha256"
+                              "value"
                             ],
                             "additionalProperties": false
                           },
@@ -18705,8 +18703,7 @@
                             "type": "object",
                             "properties": {
                               "range": {
-                                "type": "string",
-                                "minLength": 1
+                                "type": "string"
                               },
                               "type": {
                                 "type": "string",
@@ -18722,11 +18719,13 @@
                           {
                             "type": "object",
                             "properties": {
-                              "hashedIds": {
+                              "ids": {
+                                "maxItems": 500,
                                 "type": "array",
                                 "items": {
                                   "type": "string",
-                                  "pattern": "^[0-9a-f]{64}$"
+                                  "format": "uuid",
+                                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
                                 }
                               },
                               "type": {
@@ -18735,7 +18734,7 @@
                               }
                             },
                             "required": [
-                              "hashedIds",
+                              "ids",
                               "type"
                             ],
                             "additionalProperties": false
@@ -18762,8 +18761,7 @@
                             "type": "object",
                             "properties": {
                               "range": {
-                                "type": "string",
-                                "minLength": 1
+                                "type": "string"
                               },
                               "type": {
                                 "type": "string",
@@ -19157,22 +19155,20 @@
                           "type": "object",
                           "properties": {
                             "key": {
-                              "type": "string",
-                              "minLength": 1
+                              "type": "string"
                             },
                             "type": {
                               "type": "string",
                               "const": "attribute"
                             },
-                            "valueSha256": {
-                              "type": "string",
-                              "pattern": "^[0-9a-f]{64}$"
+                            "value": {
+                              "type": "string"
                             }
                           },
                           "required": [
                             "key",
                             "type",
-                            "valueSha256"
+                            "value"
                           ],
                           "additionalProperties": false
                         },
@@ -19180,8 +19176,7 @@
                           "type": "object",
                           "properties": {
                             "range": {
-                              "type": "string",
-                              "minLength": 1
+                              "type": "string"
                             },
                             "type": {
                               "type": "string",
@@ -19197,11 +19192,13 @@
                         {
                           "type": "object",
                           "properties": {
-                            "hashedIds": {
+                            "ids": {
+                              "maxItems": 500,
                               "type": "array",
                               "items": {
                                 "type": "string",
-                                "pattern": "^[0-9a-f]{64}$"
+                                "format": "uuid",
+                                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
                               }
                             },
                             "type": {
@@ -19210,7 +19207,7 @@
                             }
                           },
                           "required": [
-                            "hashedIds",
+                            "ids",
                             "type"
                           ],
                           "additionalProperties": false
@@ -19237,8 +19234,7 @@
                           "type": "object",
                           "properties": {
                             "range": {
-                              "type": "string",
-                              "minLength": 1
+                              "type": "string"
                             },
                             "type": {
                               "type": "string",
@@ -19445,22 +19441,20 @@
                             "type": "object",
                             "properties": {
                               "key": {
-                                "type": "string",
-                                "minLength": 1
+                                "type": "string"
                               },
                               "type": {
                                 "type": "string",
                                 "const": "attribute"
                               },
-                              "valueSha256": {
-                                "type": "string",
-                                "pattern": "^[0-9a-f]{64}$"
+                              "value": {
+                                "type": "string"
                               }
                             },
                             "required": [
                               "key",
                               "type",
-                              "valueSha256"
+                              "value"
                             ],
                             "additionalProperties": false
                           },
@@ -19468,8 +19462,7 @@
                             "type": "object",
                             "properties": {
                               "range": {
-                                "type": "string",
-                                "minLength": 1
+                                "type": "string"
                               },
                               "type": {
                                 "type": "string",
@@ -19485,11 +19478,13 @@
                           {
                             "type": "object",
                             "properties": {
-                              "hashedIds": {
+                              "ids": {
+                                "maxItems": 500,
                                 "type": "array",
                                 "items": {
                                   "type": "string",
-                                  "pattern": "^[0-9a-f]{64}$"
+                                  "format": "uuid",
+                                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
                                 }
                               },
                               "type": {
@@ -19498,7 +19493,7 @@
                               }
                             },
                             "required": [
-                              "hashedIds",
+                              "ids",
                               "type"
                             ],
                             "additionalProperties": false
@@ -19525,8 +19520,7 @@
                             "type": "object",
                             "properties": {
                               "range": {
-                                "type": "string",
-                                "minLength": 1
+                                "type": "string"
                               },
                               "type": {
                                 "type": "string",
@@ -19972,22 +19966,20 @@
                               "type": "object",
                               "properties": {
                                 "key": {
-                                  "type": "string",
-                                  "minLength": 1
+                                  "type": "string"
                                 },
                                 "type": {
                                   "type": "string",
                                   "const": "attribute"
                                 },
-                                "valueSha256": {
-                                  "type": "string",
-                                  "pattern": "^[0-9a-f]{64}$"
+                                "value": {
+                                  "type": "string"
                                 }
                               },
                               "required": [
                                 "key",
                                 "type",
-                                "valueSha256"
+                                "value"
                               ],
                               "additionalProperties": false
                             },
@@ -19995,8 +19987,7 @@
                               "type": "object",
                               "properties": {
                                 "range": {
-                                  "type": "string",
-                                  "minLength": 1
+                                  "type": "string"
                                 },
                                 "type": {
                                   "type": "string",
@@ -20012,11 +20003,13 @@
                             {
                               "type": "object",
                               "properties": {
-                                "hashedIds": {
+                                "ids": {
+                                  "maxItems": 500,
                                   "type": "array",
                                   "items": {
                                     "type": "string",
-                                    "pattern": "^[0-9a-f]{64}$"
+                                    "format": "uuid",
+                                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
                                   }
                                 },
                                 "type": {
@@ -20025,7 +20018,7 @@
                                 }
                               },
                               "required": [
-                                "hashedIds",
+                                "ids",
                                 "type"
                               ],
                               "additionalProperties": false
@@ -20052,8 +20045,7 @@
                               "type": "object",
                               "properties": {
                                 "range": {
-                                  "type": "string",
-                                  "minLength": 1
+                                  "type": "string"
                                 },
                                 "type": {
                                   "type": "string",
@@ -20967,22 +20959,20 @@
                                   "type": "object",
                                   "properties": {
                                     "key": {
-                                      "type": "string",
-                                      "minLength": 1
+                                      "type": "string"
                                     },
                                     "type": {
                                       "type": "string",
                                       "const": "attribute"
                                     },
-                                    "valueSha256": {
-                                      "type": "string",
-                                      "pattern": "^[0-9a-f]{64}$"
+                                    "value": {
+                                      "type": "string"
                                     }
                                   },
                                   "required": [
                                     "key",
                                     "type",
-                                    "valueSha256"
+                                    "value"
                                   ],
                                   "additionalProperties": false
                                 },
@@ -20990,8 +20980,7 @@
                                   "type": "object",
                                   "properties": {
                                     "range": {
-                                      "type": "string",
-                                      "minLength": 1
+                                      "type": "string"
                                     },
                                     "type": {
                                       "type": "string",
@@ -21007,11 +20996,13 @@
                                 {
                                   "type": "object",
                                   "properties": {
-                                    "hashedIds": {
+                                    "ids": {
+                                      "maxItems": 500,
                                       "type": "array",
                                       "items": {
                                         "type": "string",
-                                        "pattern": "^[0-9a-f]{64}$"
+                                        "format": "uuid",
+                                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
                                       }
                                     },
                                     "type": {
@@ -21020,7 +21011,7 @@
                                     }
                                   },
                                   "required": [
-                                    "hashedIds",
+                                    "ids",
                                     "type"
                                   ],
                                   "additionalProperties": false
@@ -21047,8 +21038,7 @@
                                   "type": "object",
                                   "properties": {
                                     "range": {
-                                      "type": "string",
-                                      "minLength": 1
+                                      "type": "string"
                                     },
                                     "type": {
                                       "type": "string",
@@ -22133,22 +22123,20 @@
                                 "type": "object",
                                 "properties": {
                                   "key": {
-                                    "type": "string",
-                                    "minLength": 1
+                                    "type": "string"
                                   },
                                   "type": {
                                     "type": "string",
                                     "const": "attribute"
                                   },
-                                  "valueSha256": {
-                                    "type": "string",
-                                    "pattern": "^[0-9a-f]{64}$"
+                                  "value": {
+                                    "type": "string"
                                   }
                                 },
                                 "required": [
                                   "key",
                                   "type",
-                                  "valueSha256"
+                                  "value"
                                 ],
                                 "additionalProperties": false
                               },
@@ -22156,8 +22144,7 @@
                                 "type": "object",
                                 "properties": {
                                   "range": {
-                                    "type": "string",
-                                    "minLength": 1
+                                    "type": "string"
                                   },
                                   "type": {
                                     "type": "string",
@@ -22173,11 +22160,13 @@
                               {
                                 "type": "object",
                                 "properties": {
-                                  "hashedIds": {
+                                  "ids": {
+                                    "maxItems": 500,
                                     "type": "array",
                                     "items": {
                                       "type": "string",
-                                      "pattern": "^[0-9a-f]{64}$"
+                                      "format": "uuid",
+                                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
                                     }
                                   },
                                   "type": {
@@ -22186,7 +22175,7 @@
                                   }
                                 },
                                 "required": [
-                                  "hashedIds",
+                                  "ids",
                                   "type"
                                 ],
                                 "additionalProperties": false
@@ -22213,8 +22202,7 @@
                                 "type": "object",
                                 "properties": {
                                   "range": {
-                                    "type": "string",
-                                    "minLength": 1
+                                    "type": "string"
                                   },
                                   "type": {
                                     "type": "string",
@@ -22860,22 +22848,20 @@
                                   "type": "object",
                                   "properties": {
                                     "key": {
-                                      "type": "string",
-                                      "minLength": 1
+                                      "type": "string"
                                     },
                                     "type": {
                                       "type": "string",
                                       "const": "attribute"
                                     },
-                                    "valueSha256": {
-                                      "type": "string",
-                                      "pattern": "^[0-9a-f]{64}$"
+                                    "value": {
+                                      "type": "string"
                                     }
                                   },
                                   "required": [
                                     "key",
                                     "type",
-                                    "valueSha256"
+                                    "value"
                                   ],
                                   "additionalProperties": false
                                 },
@@ -22883,8 +22869,7 @@
                                   "type": "object",
                                   "properties": {
                                     "range": {
-                                      "type": "string",
-                                      "minLength": 1
+                                      "type": "string"
                                     },
                                     "type": {
                                       "type": "string",
@@ -22900,11 +22885,13 @@
                                 {
                                   "type": "object",
                                   "properties": {
-                                    "hashedIds": {
+                                    "ids": {
+                                      "maxItems": 500,
                                       "type": "array",
                                       "items": {
                                         "type": "string",
-                                        "pattern": "^[0-9a-f]{64}$"
+                                        "format": "uuid",
+                                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
                                       }
                                     },
                                     "type": {
@@ -22913,7 +22900,7 @@
                                     }
                                   },
                                   "required": [
-                                    "hashedIds",
+                                    "ids",
                                     "type"
                                   ],
                                   "additionalProperties": false
@@ -22940,8 +22927,7 @@
                                   "type": "object",
                                   "properties": {
                                     "range": {
-                                      "type": "string",
-                                      "minLength": 1
+                                      "type": "string"
                                     },
                                     "type": {
                                       "type": "string",
@@ -24518,22 +24504,20 @@
                               "type": "object",
                               "properties": {
                                 "key": {
-                                  "type": "string",
-                                  "minLength": 1
+                                  "type": "string"
                                 },
                                 "type": {
                                   "type": "string",
                                   "const": "attribute"
                                 },
-                                "valueSha256": {
-                                  "type": "string",
-                                  "pattern": "^[0-9a-f]{64}$"
+                                "value": {
+                                  "type": "string"
                                 }
                               },
                               "required": [
                                 "key",
                                 "type",
-                                "valueSha256"
+                                "value"
                               ],
                               "additionalProperties": false
                             },
@@ -24541,8 +24525,7 @@
                               "type": "object",
                               "properties": {
                                 "range": {
-                                  "type": "string",
-                                  "minLength": 1
+                                  "type": "string"
                                 },
                                 "type": {
                                   "type": "string",
@@ -24558,11 +24541,13 @@
                             {
                               "type": "object",
                               "properties": {
-                                "hashedIds": {
+                                "ids": {
+                                  "maxItems": 500,
                                   "type": "array",
                                   "items": {
                                     "type": "string",
-                                    "pattern": "^[0-9a-f]{64}$"
+                                    "format": "uuid",
+                                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
                                   }
                                 },
                                 "type": {
@@ -24571,7 +24556,7 @@
                                 }
                               },
                               "required": [
-                                "hashedIds",
+                                "ids",
                                 "type"
                               ],
                               "additionalProperties": false
@@ -24598,8 +24583,7 @@
                               "type": "object",
                               "properties": {
                                 "range": {
-                                  "type": "string",
-                                  "minLength": 1
+                                  "type": "string"
                                 },
                                 "type": {
                                   "type": "string",
@@ -25626,22 +25610,20 @@
                             "type": "object",
                             "properties": {
                               "key": {
-                                "type": "string",
-                                "minLength": 1
+                                "type": "string"
                               },
                               "type": {
                                 "type": "string",
                                 "const": "attribute"
                               },
-                              "valueSha256": {
-                                "type": "string",
-                                "pattern": "^[0-9a-f]{64}$"
+                              "value": {
+                                "type": "string"
                               }
                             },
                             "required": [
                               "key",
                               "type",
-                              "valueSha256"
+                              "value"
                             ],
                             "additionalProperties": false
                           },
@@ -25649,8 +25631,7 @@
                             "type": "object",
                             "properties": {
                               "range": {
-                                "type": "string",
-                                "minLength": 1
+                                "type": "string"
                               },
                               "type": {
                                 "type": "string",
@@ -25666,11 +25647,13 @@
                           {
                             "type": "object",
                             "properties": {
-                              "hashedIds": {
+                              "ids": {
+                                "maxItems": 500,
                                 "type": "array",
                                 "items": {
                                   "type": "string",
-                                  "pattern": "^[0-9a-f]{64}$"
+                                  "format": "uuid",
+                                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
                                 }
                               },
                               "type": {
@@ -25679,7 +25662,7 @@
                               }
                             },
                             "required": [
-                              "hashedIds",
+                              "ids",
                               "type"
                             ],
                             "additionalProperties": false
@@ -25706,8 +25689,7 @@
                             "type": "object",
                             "properties": {
                               "range": {
-                                "type": "string",
-                                "minLength": 1
+                                "type": "string"
                               },
                               "type": {
                                 "type": "string",
@@ -26504,22 +26486,20 @@
                             "type": "object",
                             "properties": {
                               "key": {
-                                "type": "string",
-                                "minLength": 1
+                                "type": "string"
                               },
                               "type": {
                                 "type": "string",
                                 "const": "attribute"
                               },
-                              "valueSha256": {
-                                "type": "string",
-                                "pattern": "^[0-9a-f]{64}$"
+                              "value": {
+                                "type": "string"
                               }
                             },
                             "required": [
                               "key",
                               "type",
-                              "valueSha256"
+                              "value"
                             ],
                             "additionalProperties": false
                           },
@@ -26527,8 +26507,7 @@
                             "type": "object",
                             "properties": {
                               "range": {
-                                "type": "string",
-                                "minLength": 1
+                                "type": "string"
                               },
                               "type": {
                                 "type": "string",
@@ -26544,11 +26523,13 @@
                           {
                             "type": "object",
                             "properties": {
-                              "hashedIds": {
+                              "ids": {
+                                "maxItems": 500,
                                 "type": "array",
                                 "items": {
                                   "type": "string",
-                                  "pattern": "^[0-9a-f]{64}$"
+                                  "format": "uuid",
+                                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
                                 }
                               },
                               "type": {
@@ -26557,7 +26538,7 @@
                               }
                             },
                             "required": [
-                              "hashedIds",
+                              "ids",
                               "type"
                             ],
                             "additionalProperties": false
@@ -26584,8 +26565,7 @@
                             "type": "object",
                             "properties": {
                               "range": {
-                                "type": "string",
-                                "minLength": 1
+                                "type": "string"
                               },
                               "type": {
                                 "type": "string",
@@ -27084,7 +27064,7 @@
     "/v1/apps/{appId}/releases/{releaseId}/audience": {
       "get": {
         "operationId": "getV1AppsByAppIdReleasesByReleaseIdAudience",
-        "description": "The channel's devices seen in the last thirty days that the release's own conditions reach, evaluated over the registry the way the device evaluates the index — the stored attribute hashes and device-id hashes against the devices' values hashed the same way — and the release's rollout percentage as its estimated share; the release detail's audience, where the channel's preview takes the raw values the create dialog has. `warnings` carries `unsupported_condition_share` for the condition types the channel's SDKs do not know, and `fingerprint_unknown` for each fingerprint condition no binary of the app carries once the app has a binary.",
+        "description": "The channel's devices seen in the last thirty days that the release's own conditions reach, evaluated over the registry the way the device evaluates the index, and the release's rollout percentage as its estimated share; the release detail's audience, where the channel's preview answers the same for conditions before the release exists. `warnings` carries `unsupported_condition_share` for the condition types the channel's SDKs do not know, and `fingerprint_unknown` for each fingerprint condition no binary of the app carries once the app has a binary.",
         "responses": {
           "200": {
             "content": {
@@ -27353,22 +27333,20 @@
                             "type": "object",
                             "properties": {
                               "key": {
-                                "type": "string",
-                                "minLength": 1
+                                "type": "string"
                               },
                               "type": {
                                 "type": "string",
                                 "const": "attribute"
                               },
-                              "valueSha256": {
-                                "type": "string",
-                                "pattern": "^[0-9a-f]{64}$"
+                              "value": {
+                                "type": "string"
                               }
                             },
                             "required": [
                               "key",
                               "type",
-                              "valueSha256"
+                              "value"
                             ],
                             "additionalProperties": false
                           },
@@ -27376,8 +27354,7 @@
                             "type": "object",
                             "properties": {
                               "range": {
-                                "type": "string",
-                                "minLength": 1
+                                "type": "string"
                               },
                               "type": {
                                 "type": "string",
@@ -27393,11 +27370,13 @@
                           {
                             "type": "object",
                             "properties": {
-                              "hashedIds": {
+                              "ids": {
+                                "maxItems": 500,
                                 "type": "array",
                                 "items": {
                                   "type": "string",
-                                  "pattern": "^[0-9a-f]{64}$"
+                                  "format": "uuid",
+                                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
                                 }
                               },
                               "type": {
@@ -27406,7 +27385,7 @@
                               }
                             },
                             "required": [
-                              "hashedIds",
+                              "ids",
                               "type"
                             ],
                             "additionalProperties": false
@@ -27433,8 +27412,7 @@
                             "type": "object",
                             "properties": {
                               "range": {
-                                "type": "string",
-                                "minLength": 1
+                                "type": "string"
                               },
                               "type": {
                                 "type": "string",
@@ -27862,22 +27840,20 @@
                             "type": "object",
                             "properties": {
                               "key": {
-                                "type": "string",
-                                "minLength": 1
+                                "type": "string"
                               },
                               "type": {
                                 "type": "string",
                                 "const": "attribute"
                               },
-                              "valueSha256": {
-                                "type": "string",
-                                "pattern": "^[0-9a-f]{64}$"
+                              "value": {
+                                "type": "string"
                               }
                             },
                             "required": [
                               "key",
                               "type",
-                              "valueSha256"
+                              "value"
                             ],
                             "additionalProperties": false
                           },
@@ -27885,8 +27861,7 @@
                             "type": "object",
                             "properties": {
                               "range": {
-                                "type": "string",
-                                "minLength": 1
+                                "type": "string"
                               },
                               "type": {
                                 "type": "string",
@@ -27902,11 +27877,13 @@
                           {
                             "type": "object",
                             "properties": {
-                              "hashedIds": {
+                              "ids": {
+                                "maxItems": 500,
                                 "type": "array",
                                 "items": {
                                   "type": "string",
-                                  "pattern": "^[0-9a-f]{64}$"
+                                  "format": "uuid",
+                                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
                                 }
                               },
                               "type": {
@@ -27915,7 +27892,7 @@
                               }
                             },
                             "required": [
-                              "hashedIds",
+                              "ids",
                               "type"
                             ],
                             "additionalProperties": false
@@ -27942,8 +27919,7 @@
                             "type": "object",
                             "properties": {
                               "range": {
-                                "type": "string",
-                                "minLength": 1
+                                "type": "string"
                               },
                               "type": {
                                 "type": "string",
@@ -28371,22 +28347,20 @@
                             "type": "object",
                             "properties": {
                               "key": {
-                                "type": "string",
-                                "minLength": 1
+                                "type": "string"
                               },
                               "type": {
                                 "type": "string",
                                 "const": "attribute"
                               },
-                              "valueSha256": {
-                                "type": "string",
-                                "pattern": "^[0-9a-f]{64}$"
+                              "value": {
+                                "type": "string"
                               }
                             },
                             "required": [
                               "key",
                               "type",
-                              "valueSha256"
+                              "value"
                             ],
                             "additionalProperties": false
                           },
@@ -28394,8 +28368,7 @@
                             "type": "object",
                             "properties": {
                               "range": {
-                                "type": "string",
-                                "minLength": 1
+                                "type": "string"
                               },
                               "type": {
                                 "type": "string",
@@ -28411,11 +28384,13 @@
                           {
                             "type": "object",
                             "properties": {
-                              "hashedIds": {
+                              "ids": {
+                                "maxItems": 500,
                                 "type": "array",
                                 "items": {
                                   "type": "string",
-                                  "pattern": "^[0-9a-f]{64}$"
+                                  "format": "uuid",
+                                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
                                 }
                               },
                               "type": {
@@ -28424,7 +28399,7 @@
                               }
                             },
                             "required": [
-                              "hashedIds",
+                              "ids",
                               "type"
                             ],
                             "additionalProperties": false
@@ -28451,8 +28426,7 @@
                             "type": "object",
                             "properties": {
                               "range": {
-                                "type": "string",
-                                "minLength": 1
+                                "type": "string"
                               },
                               "type": {
                                 "type": "string",

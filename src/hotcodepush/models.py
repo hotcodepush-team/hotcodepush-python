@@ -144,11 +144,11 @@ class AppUsageMonth(HotCodePushModel):
 
 
 class AttributeCondition(HotCodePushModel):
-    """Devices whose attribute `key` holds the value with the SHA-256 hash `value_sha256`."""
+    """Devices whose attribute `key` holds `value`."""
 
     key: str
     type: Literal["attribute"] = "attribute"
-    value_sha256: str
+    value: str
 
 
 class Audience(HotCodePushModel):
@@ -370,9 +370,9 @@ class Device(HotCodePushModel):
 
 
 class DeviceCondition(HotCodePushModel):
-    """Devices whose hashed id is one of `hashed_ids`."""
+    """Devices whose id is one of `ids`, at most 500."""
 
-    hashed_ids: list[str]
+    ids: list[str]
     type: Literal["device"] = "device"
 
 
