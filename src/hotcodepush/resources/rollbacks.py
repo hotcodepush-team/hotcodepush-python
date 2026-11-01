@@ -26,7 +26,7 @@ class RollbacksResource(BaseResource):
                 appId=app_id,
                 channelId=channel_id,
             ),
-            Release,
             body={"isMandatory": is_mandatory, "toReleaseId": to_release_id},
             idempotency_key=idempotency_key,
+            response_type=Release,
         )

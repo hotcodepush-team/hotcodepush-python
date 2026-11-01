@@ -21,8 +21,8 @@ class MembersResource(BaseResource):
             resolve_path(
                 "/v1/organizations/{organizationId}/members/count", organizationId=organization_id
             ),
-            Count,
             query={"query": query, "role": role, "userId": user_id},
+            response_type=Count,
         )
 
     def delete(self, *, member_id: str, organization_id: str) -> None:
@@ -74,8 +74,8 @@ class MembersResource(BaseResource):
                 memberId=member_id,
                 organizationId=organization_id,
             ),
-            Member,
             query={"relations": relations},
+            response_type=Member,
         )
 
     def list(
@@ -98,7 +98,6 @@ class MembersResource(BaseResource):
             resolve_path(
                 "/v1/organizations/{organizationId}/members", organizationId=organization_id
             ),
-            list[Member],
             query={
                 "limit": limit,
                 "offset": offset,
@@ -107,6 +106,7 @@ class MembersResource(BaseResource):
                 "role": role,
                 "userId": user_id,
             },
+            response_type=list[Member],
         )
 
     def update(self, *, member_id: str, organization_id: str, role: Role) -> Member:
@@ -121,6 +121,6 @@ class MembersResource(BaseResource):
                 memberId=member_id,
                 organizationId=organization_id,
             ),
-            Member,
             body={"role": role},
+            response_type=Member,
         )

@@ -32,7 +32,6 @@ class DevicesResource(BaseResource):
         return self._http_client.fetch_json(
             "GET",
             resolve_path("/v1/apps/{appId}/devices/count", appId=app_id),
-            Count,
             query={
                 "attribute": attribute,
                 "binaryBuild": binary_build,
@@ -44,6 +43,7 @@ class DevicesResource(BaseResource):
                 "platform": platform,
                 "sdkVersion": sdk_version,
             },
+            response_type=Count,
         )
 
     def delete(self, *, app_id: str, device_id: str) -> None:
@@ -74,8 +74,8 @@ class DevicesResource(BaseResource):
         return self._http_client.fetch_json(
             "GET",
             resolve_path("/v1/apps/{appId}/devices/{deviceId}", appId=app_id, deviceId=device_id),
-            Device,
             query={"relations": relations},
+            response_type=Device,
         )
 
     def list(
@@ -102,7 +102,6 @@ class DevicesResource(BaseResource):
         return self._http_client.fetch_json(
             "GET",
             resolve_path("/v1/apps/{appId}/devices", appId=app_id),
-            list[Device],
             query={
                 "attribute": attribute,
                 "binaryBuild": binary_build,
@@ -117,4 +116,5 @@ class DevicesResource(BaseResource):
                 "relations": relations,
                 "sdkVersion": sdk_version,
             },
+            response_type=list[Device],
         )

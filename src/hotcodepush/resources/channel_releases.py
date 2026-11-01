@@ -35,7 +35,6 @@ class ChannelReleasesResource(BaseResource):
                 appId=app_id,
                 channelId=channel_id,
             ),
-            Release,
             body={
                 "bundleId": bundle_id,
                 "conditions": conditions,
@@ -49,6 +48,7 @@ class ChannelReleasesResource(BaseResource):
                 "rolloutPercent": rollout_percent,
             },
             idempotency_key=idempotency_key,
+            response_type=Release,
         )
 
     def revoke(
@@ -71,7 +71,7 @@ class ChannelReleasesResource(BaseResource):
                 appId=app_id,
                 channelId=channel_id,
             ),
-            list[Release],
             body={"fromNumber": from_number, "releaseIds": release_ids},
             is_retryable=True,
+            response_type=list[Release],
         )

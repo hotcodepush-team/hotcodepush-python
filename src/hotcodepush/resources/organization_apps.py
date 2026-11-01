@@ -14,8 +14,8 @@ class OrganizationAppsResource(BaseResource):
             resolve_path(
                 "/v1/organizations/{organizationId}/apps/count", organizationId=organization_id
             ),
-            Count,
             query={"query": query},
+            response_type=Count,
         )
 
     def create(
@@ -29,9 +29,9 @@ class OrganizationAppsResource(BaseResource):
         """Creates an app with the default channel `production`."""
         return self._http_client.fetch_creating_post(
             resolve_path("/v1/organizations/{organizationId}/apps", organizationId=organization_id),
-            App,
             body={"framework": framework, "name": name},
             idempotency_key=idempotency_key,
+            response_type=App,
         )
 
     def list(
@@ -49,6 +49,6 @@ class OrganizationAppsResource(BaseResource):
         return self._http_client.fetch_json(
             "GET",
             resolve_path("/v1/organizations/{organizationId}/apps", organizationId=organization_id),
-            list[App],
             query={"limit": limit, "offset": offset, "query": query},
+            response_type=list[App],
         )

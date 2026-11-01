@@ -19,7 +19,10 @@ class NotificationsResource(BaseResource):
         An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_json(
-            "GET", resolve_path("/v1/notifications/count"), Count, query={"isRead": is_read}
+            "GET",
+            resolve_path("/v1/notifications/count"),
+            query={"isRead": is_read},
+            response_type=Count,
         )
 
     def list(
@@ -37,8 +40,8 @@ class NotificationsResource(BaseResource):
         return self._http_client.fetch_json(
             "GET",
             resolve_path("/v1/notifications"),
-            list[Notification],
             query={"isRead": is_read, "limit": limit, "offset": offset, "relations": relations},
+            response_type=list[Notification],
         )
 
     def update(self, *, is_read: Literal[True], notification_id: str) -> Notification:
@@ -49,8 +52,8 @@ class NotificationsResource(BaseResource):
         return self._http_client.fetch_json(
             "PATCH",
             resolve_path("/v1/notifications/{notificationId}", notificationId=notification_id),
-            Notification,
             body={"isRead": is_read},
+            response_type=Notification,
         )
 
     def update_many(self, *, is_read: Literal[True]) -> None:

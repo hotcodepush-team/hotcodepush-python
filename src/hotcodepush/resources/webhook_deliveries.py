@@ -32,8 +32,8 @@ class WebhookDeliveriesResource(BaseResource):
                 organizationId=organization_id,
                 webhookId=webhook_id,
             ),
-            Count,
             query={"createdSince": created_since, "createdUntil": created_until, "status": status},
+            response_type=Count,
         )
 
     def list(
@@ -61,7 +61,6 @@ class WebhookDeliveriesResource(BaseResource):
                 organizationId=organization_id,
                 webhookId=webhook_id,
             ),
-            list[WebhookDelivery],
             query={
                 "createdSince": created_since,
                 "createdUntil": created_until,
@@ -69,6 +68,7 @@ class WebhookDeliveriesResource(BaseResource):
                 "offset": offset,
                 "status": status,
             },
+            response_type=list[WebhookDelivery],
         )
 
     def redeliver(
@@ -89,5 +89,5 @@ class WebhookDeliveriesResource(BaseResource):
                 organizationId=organization_id,
                 webhookId=webhook_id,
             ),
-            WebhookDelivery,
+            response_type=WebhookDelivery,
         )

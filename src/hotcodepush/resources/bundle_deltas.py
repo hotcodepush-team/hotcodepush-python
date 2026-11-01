@@ -16,7 +16,7 @@ class BundleDeltasResource(BaseResource):
                 appId=app_id,
                 bundleId=bundle_id,
             ),
-            Count,
+            response_type=Count,
         )
 
     def list(
@@ -38,6 +38,6 @@ class BundleDeltasResource(BaseResource):
             resolve_path(
                 "/v1/apps/{appId}/bundles/{bundleId}/deltas", appId=app_id, bundleId=bundle_id
             ),
-            list[BundleDelta],
             query={"limit": limit, "offset": offset, "relations": relations},
+            response_type=list[BundleDelta],
         )

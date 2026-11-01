@@ -36,7 +36,9 @@ class OrganizationsResource(BaseResource):
 
     def count(self) -> Count:
         """Counts the caller's organizations."""
-        return self._http_client.fetch_json("GET", resolve_path("/v1/organizations/count"), Count)
+        return self._http_client.fetch_json(
+            "GET", resolve_path("/v1/organizations/count"), response_type=Count
+        )
 
     def create(self, *, idempotency_key: str | NotGiven = NOT_GIVEN, name: str) -> Organization:
         """Creates an organization with the caller as its Owner.
@@ -45,9 +47,9 @@ class OrganizationsResource(BaseResource):
         """
         return self._http_client.fetch_creating_post(
             resolve_path("/v1/organizations"),
-            Organization,
             body={"name": name},
             idempotency_key=idempotency_key,
+            response_type=Organization,
         )
 
     def delete(self, *, organization_id: str) -> None:
@@ -66,7 +68,7 @@ class OrganizationsResource(BaseResource):
         return self._http_client.fetch_json(
             "GET",
             resolve_path("/v1/organizations/{organizationId}", organizationId=organization_id),
-            Organization,
+            response_type=Organization,
         )
 
     def list(
@@ -80,8 +82,8 @@ class OrganizationsResource(BaseResource):
         return self._http_client.fetch_json(
             "GET",
             resolve_path("/v1/organizations"),
-            list[Organization],
             query={"limit": limit, "offset": offset},
+            response_type=list[Organization],
         )
 
     def update(
@@ -103,7 +105,6 @@ class OrganizationsResource(BaseResource):
         return self._http_client.fetch_json(
             "PATCH",
             resolve_path("/v1/organizations/{organizationId}", organizationId=organization_id),
-            Organization,
             body={
                 "countryAllowlist": country_allowlist,
                 "ipAllowlist": ip_allowlist,
@@ -111,4 +112,5 @@ class OrganizationsResource(BaseResource):
                 "name": name,
                 "spendingCapCents": spending_cap_cents,
             },
+            response_type=Organization,
         )

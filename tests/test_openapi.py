@@ -784,7 +784,10 @@ def test_documents_the_path_method_query_idempotency_key_body_and_content_type_a
         if content_type == "application/json":
             body_schema = documented_content[content_type]["schema"]
             assert (
-                resolve_undocumented_fields(resolve_sent_json(request), body_schema, "body") == []
+                resolve_undocumented_fields(
+                    resolve_sent_json(request), path="body", schema=body_schema
+                )
+                == []
             )
 
 
@@ -858,7 +861,7 @@ def resolve_undeclared_fields(value: object, path: str) -> list[str]:
     return [f"{path}.{name}" for name in value.model_extra or {}] + nested_undeclared_fields
 
 
-def resolve_undocumented_fields(value: object, schema: dict[str, Any], path: str) -> list[str]:
+def resolve_undocumented_fields(value: object, *, path: str, schema: dict[str, Any]) -> list[str]:
     if isinstance(value, list):
         item_schema = next(
             branch["items"] for branch in resolve_branches(schema) if "items" in branch
@@ -867,7 +870,7 @@ def resolve_undocumented_fields(value: object, schema: dict[str, Any], path: str
             undocumented_field
             for index, item in enumerate(value)
             for undocumented_field in resolve_undocumented_fields(
-                item, item_schema, f"{path}[{index}]"
+                item, path=f"{path}[{index}]", schema=item_schema
             )
         ]
     if not isinstance(value, dict):
@@ -881,7 +884,7 @@ def resolve_undocumented_fields(value: object, schema: dict[str, Any], path: str
         undocumented_field
         for name, item in value.items()
         for undocumented_field in (
-            resolve_undocumented_fields(item, properties[name], f"{path}.{name}")
+            resolve_undocumented_fields(item, path=f"{path}.{name}", schema=properties[name])
             if name in properties
             else [f"{path}.{name}"]
         )

@@ -38,7 +38,7 @@ class SsoProviderResource(BaseResource):
             resolve_path(
                 "/v1/organizations/{organizationId}/sso-provider", organizationId=organization_id
             ),
-            SsoProvider,
+            response_type=SsoProvider,
         )
 
     def set(
@@ -61,6 +61,6 @@ class SsoProviderResource(BaseResource):
             resolve_path(
                 "/v1/organizations/{organizationId}/sso-provider", organizationId=organization_id
             ),
-            SsoProvider,
             body={"domain": domain, "oidc": oidc, "saml": saml},
+            response_type=SsoProvider,
         )

@@ -18,5 +18,5 @@ class ReleaseAudienceResource(BaseResource):
                 appId=app_id,
                 releaseId=release_id,
             ),
-            Audience,
+            response_type=Audience,
         )

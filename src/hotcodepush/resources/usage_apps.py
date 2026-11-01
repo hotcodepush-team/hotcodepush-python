@@ -18,8 +18,8 @@ class UsageAppsResource(BaseResource):
                 "/v1/organizations/{organizationId}/usage/apps/count",
                 organizationId=organization_id,
             ),
-            Count,
             query={"month": month},
+            response_type=Count,
         )
 
     def download_csv(self, *, month: str | NotGiven = NOT_GIVEN, organization_id: str) -> bytes:
@@ -54,6 +54,6 @@ class UsageAppsResource(BaseResource):
             resolve_path(
                 "/v1/organizations/{organizationId}/usage/apps", organizationId=organization_id
             ),
-            list[AppUsageMonth],
             query={"limit": limit, "month": month, "offset": offset, "relations": relations},
+            response_type=list[AppUsageMonth],
         )

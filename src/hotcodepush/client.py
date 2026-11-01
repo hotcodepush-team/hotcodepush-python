@@ -70,7 +70,8 @@ class HotCodePush:
     def __enter__(self) -> HotCodePush:
         return self
 
-    def __exit__(
+    # Python calls __exit__ with three positional arguments.
+    def __exit__(  # noqa: PLR0917
         self,
         exception_type: type[BaseException] | None,
         exception: BaseException | None,

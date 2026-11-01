@@ -66,11 +66,21 @@ target-version = "py311"
 src = ["src", "tests"]
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "UP", "B", "W", "N", "C4", "SIM"]
+select = ["E", "F", "I", "UP", "B", "W", "N", "C4", "SIM", "C901", "PLR0915", "PLR0917"]
 ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["PLR0915"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["hotcodepush"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.ruff.lint.pylint]
+max-positional-args = 2
+max-statements = 30
 
 [tool.mypy]
 python_version = "3.11"

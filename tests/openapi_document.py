@@ -28,6 +28,19 @@ def resolve_documented_operation_names() -> set[str]:
     }
 
 
+def resolve_object_example(schema: dict[str, Any]) -> dict[str, object]:
+    example = {
+        name: resolve_schema_example(property_schema)
+        for name, property_schema in schema.get("properties", {}).items()
+    }
+    value_schema = schema.get("additionalProperties")
+    # An empty schema allows any value and adds no entry.
+    if isinstance(value_schema, dict) and value_schema:
+        names = schema.get("propertyNames", {}).get("enum", ["key"])
+        example |= {name: resolve_schema_example(value_schema) for name in names}
+    return example
+
+
 def resolve_operation(method: str, template: str) -> dict[str, Any]:
     operation: dict[str, Any] = OPENAPI_DOCUMENT["paths"][template][method.lower()]
     return operation
@@ -62,20 +75,9 @@ def resolve_schema_example(schema: dict[str, Any]) -> object:
         return schema["const"]
     if "enum" in schema:
         return schema["enum"][0]
-    schema_type = schema.get("type")
-    if isinstance(schema_type, list):
-        schema_type = next(item for item in schema_type if item != "null")
+    schema_type = resolve_schema_type(schema)
     if schema_type == "object":
-        example = {
-            name: resolve_schema_example(property_schema)
-            for name, property_schema in schema.get("properties", {}).items()
-        }
-        value_schema = schema.get("additionalProperties")
-        # An empty schema allows any value and adds no entry.
-        if isinstance(value_schema, dict) and value_schema:
-            names = schema.get("propertyNames", {}).get("enum", ["key"])
-            example |= {name: resolve_schema_example(value_schema) for name in names}
-        return example
+        return resolve_object_example(schema)
     if schema_type == "array":
         return [resolve_schema_example(branch) for branch in resolve_branches(schema["items"])]
     if schema_type == "string":
@@ -85,3 +87,10 @@ def resolve_schema_example(schema: dict[str, Any]) -> object:
     if schema_type == "boolean":
         return True
     raise ValueError(f"The schema {schema} has no example.")
+
+
+def resolve_schema_type(schema: dict[str, Any]) -> object:
+    schema_type = schema.get("type")
+    if isinstance(schema_type, list):
+        return next(item for item in schema_type if item != "null")
+    return schema_type

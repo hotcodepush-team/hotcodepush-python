@@ -48,8 +48,8 @@ class FilesResource(BaseResource):
             )
         return self._http_client.fetch_upload(
             resolve_path("/v1/apps/{appId}/files/{sha256}", appId=app_id, sha256=sha256),
-            AppFile,
             body=body,
             content_length=content_length,
             content_type="application/gzip",
+            response_type=AppFile,
         )

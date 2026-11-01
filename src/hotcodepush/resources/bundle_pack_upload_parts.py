@@ -29,8 +29,8 @@ class BundlePackUploadPartsResource(BaseResource):
                 partNumber=part_number,
                 uploadId=upload_id,
             ),
-            UploadedPart,
             body=body,
             content_length=content_length,
             content_type="application/x-tar",
+            response_type=UploadedPart,
         )

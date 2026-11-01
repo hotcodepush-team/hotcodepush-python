@@ -20,6 +20,6 @@ class StatisticsUsageResource(BaseResource):
         return self._http_client.fetch_json(
             "GET",
             resolve_path("/v1/apps/{appId}/statistics/usage", appId=app_id),
-            UsageStatistics,
             query={"periodSince": period_since, "periodUntil": period_until},
+            response_type=UsageStatistics,
         )

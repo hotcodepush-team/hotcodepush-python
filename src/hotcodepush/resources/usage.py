@@ -22,6 +22,6 @@ class UsageResource(BaseResource):
             resolve_path(
                 "/v1/organizations/{organizationId}/usage", organizationId=organization_id
             ),
-            Usage,
             query={"month": month},
+            response_type=Usage,
         )

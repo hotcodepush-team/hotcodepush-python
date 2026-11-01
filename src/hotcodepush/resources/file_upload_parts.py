@@ -29,8 +29,8 @@ class FileUploadPartsResource(BaseResource):
                 sha256=sha256,
                 uploadId=upload_id,
             ),
-            UploadedPart,
             body=body,
             content_length=content_length,
             content_type="application/gzip",
+            response_type=UploadedPart,
         )

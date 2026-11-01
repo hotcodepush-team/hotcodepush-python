@@ -31,8 +31,8 @@ class BundlePackUploadsResource(BaseResource):
                 bundleId=bundle_id,
                 uploadId=upload_id,
             ),
-            UploadedBundlePack,
             body={"parts": parts},
+            response_type=UploadedBundlePack,
         )
 
     def create(self, *, app_id: str, bundle_id: str) -> MultipartUpload:
@@ -48,8 +48,8 @@ class BundlePackUploadsResource(BaseResource):
                 appId=app_id,
                 bundleId=bundle_id,
             ),
-            MultipartUpload,
             is_retryable=True,
+            response_type=MultipartUpload,
         )
 
     def delete(self, *, app_id: str, bundle_id: str, upload_id: str) -> None:

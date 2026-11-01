@@ -18,8 +18,8 @@ class BinariesResource(BaseResource):
         return self._http_client.fetch_json(
             "GET",
             resolve_path("/v1/apps/{appId}/binaries/count", appId=app_id),
-            Count,
             query={"fingerprint": fingerprint, "platform": platform},
+            response_type=Count,
         )
 
     def create(
@@ -41,7 +41,6 @@ class BinariesResource(BaseResource):
         """
         return self._http_client.fetch_creating_post(
             resolve_path("/v1/apps/{appId}/binaries", appId=app_id),
-            Binary,
             body={
                 "build": build,
                 "files": files,
@@ -51,13 +50,14 @@ class BinariesResource(BaseResource):
                 "version": version,
             },
             idempotency_key=idempotency_key,
+            response_type=Binary,
         )
 
     def get(self, *, app_id: str, binary_id: str) -> Binary:
         return self._http_client.fetch_json(
             "GET",
             resolve_path("/v1/apps/{appId}/binaries/{binaryId}", appId=app_id, binaryId=binary_id),
-            Binary,
+            response_type=Binary,
         )
 
     def list(
@@ -73,11 +73,11 @@ class BinariesResource(BaseResource):
         return self._http_client.fetch_json(
             "GET",
             resolve_path("/v1/apps/{appId}/binaries", appId=app_id),
-            list[Binary],
             query={
                 "fingerprint": fingerprint,
                 "limit": limit,
                 "offset": offset,
                 "platform": platform,
             },
+            response_type=list[Binary],
         )

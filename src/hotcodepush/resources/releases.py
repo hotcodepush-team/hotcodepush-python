@@ -31,7 +31,6 @@ class ReleasesResource(BaseResource):
         return self._http_client.fetch_json(
             "GET",
             resolve_path("/v1/apps/{appId}/releases/count", appId=app_id),
-            Count,
             query={
                 "bundleId": bundle_id,
                 "channelId": channel_id,
@@ -39,6 +38,7 @@ class ReleasesResource(BaseResource):
                 "number": number,
                 "status": status,
             },
+            response_type=Count,
         )
 
     def get(
@@ -57,8 +57,8 @@ class ReleasesResource(BaseResource):
             resolve_path(
                 "/v1/apps/{appId}/releases/{releaseId}", appId=app_id, releaseId=release_id
             ),
-            Release,
             query={"relations": relations},
+            response_type=Release,
         )
 
     def list(
@@ -83,7 +83,6 @@ class ReleasesResource(BaseResource):
         return self._http_client.fetch_json(
             "GET",
             resolve_path("/v1/apps/{appId}/releases", appId=app_id),
-            list[Release],
             query={
                 "bundleId": bundle_id,
                 "channelId": channel_id,
@@ -94,6 +93,7 @@ class ReleasesResource(BaseResource):
                 "relations": relations,
                 "status": status,
             },
+            response_type=list[Release],
         )
 
     def pause(self, *, app_id: str, release_id: str) -> Release:
@@ -106,8 +106,8 @@ class ReleasesResource(BaseResource):
             resolve_path(
                 "/v1/apps/{appId}/releases/{releaseId}/pause", appId=app_id, releaseId=release_id
             ),
-            Release,
             is_retryable=True,
+            response_type=Release,
         )
 
     def resume(self, *, app_id: str, release_id: str) -> Release:
@@ -120,8 +120,8 @@ class ReleasesResource(BaseResource):
             resolve_path(
                 "/v1/apps/{appId}/releases/{releaseId}/resume", appId=app_id, releaseId=release_id
             ),
-            Release,
             is_retryable=True,
+            response_type=Release,
         )
 
     def revoke(self, *, app_id: str, release_id: str) -> Release:
@@ -135,7 +135,7 @@ class ReleasesResource(BaseResource):
             resolve_path(
                 "/v1/apps/{appId}/releases/{releaseId}/revoke", appId=app_id, releaseId=release_id
             ),
-            Release,
+            response_type=Release,
         )
 
     def update(
@@ -161,7 +161,6 @@ class ReleasesResource(BaseResource):
             resolve_path(
                 "/v1/apps/{appId}/releases/{releaseId}", appId=app_id, releaseId=release_id
             ),
-            Release,
             body={
                 "failureAction": failure_action,
                 "failureMinimumUpdateCount": failure_minimum_update_count,
@@ -171,4 +170,5 @@ class ReleasesResource(BaseResource):
                 "progression": progression,
                 "rolloutPercent": rollout_percent,
             },
+            response_type=Release,
         )
