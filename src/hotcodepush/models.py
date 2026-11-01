@@ -261,7 +261,7 @@ class Bundle(HotCodePushModel):
 
 
 class BundleDelta(HotCodePushModel):
-    """A delta pack of a bundle against one base. Its size and patch count are known once it is
+    """A delta of a bundle against one base bundle. Its size and patch count are known once it is
     built. `base_bundle` is set when `relations` names it.
     """
 
