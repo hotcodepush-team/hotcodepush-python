@@ -17,7 +17,7 @@ It requires Python 3.11 or later.
 ```python
 from hotcodepush import HotCodePush
 
-hot_code_push = HotCodePush()  # reads the API token from HOTCODEPUSH_TOKEN
+hot_code_push = HotCodePush()  # reads the API token from HOTCODEPUSH_TOKEN, or pass token="…"
 
 organization, *_ = hot_code_push.organizations.list()
 app = hot_code_push.organizations.apps.create(
