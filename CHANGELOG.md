@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.6.0](https://github.com/hotcodepush-team/hotcodepush-python/compare/v0.5.0...v0.6.0) (2026-11-02)
+
+
+### ⚠ BREAKING CHANGES
+
+* HotCodePush("…") no longer works; pass the token as HotCodePush(token="…").
+
+### Code Refactoring
+
+* the client takes the token keyword-only ([#15](https://github.com/hotcodepush-team/hotcodepush-python/issues/15)) ([05a1c00](https://github.com/hotcodepush-team/hotcodepush-python/commit/05a1c0056213cbadd7e31d3897a2c3b6efe25d7a))
+
 ## [0.5.0](https://github.com/hotcodepush-team/hotcodepush-python/compare/v0.4.0...v0.5.0) (2026-11-01)
 
 
