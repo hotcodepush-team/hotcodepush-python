@@ -25,25 +25,25 @@ class HotCodePush:
     `organizations.apps`, and `/v1/apps/{appId}/channels` is `apps.channels`.
 
     Args:
-        token: The API token, sent as `Authorization: Bearer <token>`. Falls back to the
-            `HOTCODEPUSH_TOKEN` environment variable. Optional, since `/health` needs none.
         base_url: The base URL of the API.
         client: The `X-HotCodePush-Client` header, `<name>/<version>`.
         http_client: An `httpx.Client` to send the requests with. `close` leaves it open.
         timeout: The seconds each phase of a JSON request attempt may take: connect, read,
             write and pool. Sixty when unset. An upload attempt always gets ten minutes.
+        token: The API token, sent as `Authorization: Bearer <token>`. Falls back to the
+            `HOTCODEPUSH_TOKEN` environment variable. Optional, since `/health` needs none.
         user_agent: The `User-Agent` header, sent only when set. A session stores it, and the
             sessions page names the client by it.
     """
 
     def __init__(
         self,
-        token: str | None = None,
         *,
         base_url: str = DEFAULT_BASE_URL,
         client: str = DEFAULT_CLIENT,
         http_client: httpx.Client | None = None,
         timeout: float | None = None,
+        token: str | None = None,
         user_agent: str | None = None,
     ) -> None:
         self._http_client = HttpClient(

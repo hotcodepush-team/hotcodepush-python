@@ -60,7 +60,7 @@ def test_requests_the_given_base_url_when_a_base_url_is_set() -> None:
 def test_sends_the_token_as_a_bearer_when_a_token_is_set() -> None:
     api = StubApi()
 
-    HotCodePush("token", http_client=api.http_client).health.get()
+    HotCodePush(http_client=api.http_client, token="token").health.get()
 
     assert api.last_request.headers["Authorization"] == "Bearer token"
 

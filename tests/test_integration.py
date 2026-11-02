@@ -27,7 +27,7 @@ pytestmark = pytest.mark.skipif(
 def hot_code_push() -> Iterator[HotCodePush]:
     if not TOKEN:
         raise RuntimeError("HOTCODEPUSH_API_TOKEN must hold the bearer of a verified user.")
-    with HotCodePush(TOKEN, base_url=API_BASE_URL or "") as hot_code_push:
+    with HotCodePush(base_url=API_BASE_URL or "", token=TOKEN) as hot_code_push:
         yield hot_code_push
 
 
