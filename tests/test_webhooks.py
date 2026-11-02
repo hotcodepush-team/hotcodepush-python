@@ -6,13 +6,13 @@ from tests.openapi_document import resolve_response_example
 from tests.stub_api import StubApi, resolve_sent_json
 
 CREATED_WEBHOOK_ROW = resolve_response_example(
-    "POST", "/v1/organizations/{organizationId}/webhooks"
+    method="POST", template="/v1/organizations/{organizationId}/webhooks"
 )
 WEBHOOK_DELIVERY_ROW = resolve_response_example(
-    "POST", "/v1/organizations/{organizationId}/webhooks/{webhookId}/test"
+    method="POST", template="/v1/organizations/{organizationId}/webhooks/{webhookId}/test"
 )
 WEBHOOK_ROW = resolve_response_example(
-    "GET", "/v1/organizations/{organizationId}/webhooks/{webhookId}"
+    method="GET", template="/v1/organizations/{organizationId}/webhooks/{webhookId}"
 )
 WEBHOOKS_URL = "https://api.hotcodepush.com/v1/organizations/organization/webhooks"
 

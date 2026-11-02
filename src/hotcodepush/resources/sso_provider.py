@@ -22,8 +22,8 @@ class SsoProviderResource(BaseResource):
         An API token answers `forbidden`; sign in with a session.
         """
         self._http_client.fetch_status(
-            "DELETE",
-            resolve_path(
+            method="DELETE",
+            path=resolve_path(
                 "/v1/organizations/{organizationId}/sso-provider", organizationId=organization_id
             ),
         )
@@ -34,8 +34,8 @@ class SsoProviderResource(BaseResource):
         An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_json(
-            "GET",
-            resolve_path(
+            method="GET",
+            path=resolve_path(
                 "/v1/organizations/{organizationId}/sso-provider", organizationId=organization_id
             ),
             response_type=SsoProvider,
@@ -57,10 +57,10 @@ class SsoProviderResource(BaseResource):
         An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_json(
-            "PUT",
-            resolve_path(
+            body={"domain": domain, "oidc": oidc, "saml": saml},
+            method="PUT",
+            path=resolve_path(
                 "/v1/organizations/{organizationId}/sso-provider", organizationId=organization_id
             ),
-            body={"domain": domain, "oidc": oidc, "saml": saml},
             response_type=SsoProvider,
         )

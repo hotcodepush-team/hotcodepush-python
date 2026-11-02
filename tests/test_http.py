@@ -120,9 +120,9 @@ def test_sends_the_body_as_json_without_its_not_given_values_when_a_body_is_set(
     api = StubApi(httpx.Response(200, json={"count": 1}))
 
     api.create_http_client().fetch_json(
-        "POST",
-        "/v1/apps/app/channels",
         body={"name": "production", "notes": NOT_GIVEN},
+        method="POST",
+        path="/v1/apps/app/channels",
         response_type=Count,
     )
 
@@ -134,7 +134,7 @@ def test_sends_none_in_the_body_as_null() -> None:
     api = StubApi(httpx.Response(200, json={"count": 1}))
 
     api.create_http_client().fetch_json(
-        "PATCH", "/v1/apps/app", body={"channelLinkTemplate": None}, response_type=Count
+        body={"channelLinkTemplate": None}, method="PATCH", path="/v1/apps/app", response_type=Count
     )
 
     assert resolve_sent_json(api.last_request) == {"channelLinkTemplate": None}
@@ -144,9 +144,9 @@ def test_sends_a_model_in_the_body_by_its_api_names() -> None:
     api = StubApi(httpx.Response(200, json={"count": 1}))
 
     api.create_http_client().fetch_json(
-        "POST",
-        "/v1/apps/app/bundles",
         body={"files": [ManifestFile(path="index.html", sha256="a" * 64, size_bytes=5)]},
+        method="POST",
+        path="/v1/apps/app/bundles",
         response_type=Count,
     )
 
@@ -159,9 +159,9 @@ def test_sends_a_model_in_the_body_without_its_none_fields() -> None:
     api = StubApi(httpx.Response(200, json={"count": 1}))
 
     api.create_http_client().fetch_json(
-        "PUT",
-        "/v1/organizations/organization/sso-provider",
         body={"oidc": OidcConfig(client_id="client", client_secret="secret", issuer="issuer")},
+        method="PUT",
+        path="/v1/organizations/organization/sso-provider",
         response_type=Count,
     )
 
@@ -174,9 +174,9 @@ def test_sends_a_timestamp_in_the_body_in_utc_with_a_z() -> None:
     api = StubApi(httpx.Response(200, json={"count": 1}))
 
     api.create_http_client().fetch_json(
-        "PATCH",
-        "/v1/apps/app/channels/channel",
         body={"expiresAt": datetime(2026, 10, 1, 14, tzinfo=timezone(timedelta(hours=2)))},
+        method="PATCH",
+        path="/v1/apps/app/channels/channel",
         response_type=Count,
     )
 
@@ -221,7 +221,7 @@ def test_returns_the_validated_body_when_the_response_has_one() -> None:
     api = StubApi(httpx.Response(200, json={"count": 3}))
 
     fetched_count = api.create_http_client().fetch_json(
-        "GET", "/v1/organizations/count", response_type=Count
+        method="GET", path="/v1/organizations/count", response_type=Count
     )
 
     assert fetched_count == Count(count=3)
@@ -231,7 +231,7 @@ def test_returns_the_body_whole_when_the_response_is_binary() -> None:
     api = StubApi(httpx.Response(200, content=b"\x89PNG", headers={"Content-Type": "image/png"}))
 
     fetched_bytes = api.create_http_client().fetch_bytes(
-        "GET", "/v1/apps/app/channels/channel/qr", query={"format": "png"}
+        method="GET", path="/v1/apps/app/channels/channel/qr", query={"format": "png"}
     )
 
     assert fetched_bytes == b"\x89PNG"
@@ -246,7 +246,7 @@ def test_raises_a_hot_code_push_error_when_the_response_is_not_ok() -> None:
     )
 
     with pytest.raises(HotCodePushError) as raised:
-        api.create_http_client().fetch_json("GET", "/v1/users/me", response_type=Count)
+        api.create_http_client().fetch_json(method="GET", path="/v1/users/me", response_type=Count)
 
     assert (raised.value.code, raised.value.status) == ("unauthenticated", 401)
 
@@ -256,7 +256,7 @@ def test_retries_a_request_when_the_api_is_unavailable(method: HttpMethod) -> No
     api = StubApi(httpx.Response(503))
 
     with pytest.raises(HotCodePushError):
-        api.create_http_client().fetch_status(method, "/v1/apps/app")
+        api.create_http_client().fetch_status(method=method, path="/v1/apps/app")
 
     assert len(api.requests) == 3
 
@@ -266,7 +266,7 @@ def test_does_not_retry_a_request_when_the_api_is_unavailable(method: HttpMethod
     api = StubApi(httpx.Response(503))
 
     with pytest.raises(HotCodePushError):
-        api.create_http_client().fetch_status(method, "/v1/apps/app")
+        api.create_http_client().fetch_status(method=method, path="/v1/apps/app")
 
     assert len(api.requests) == 1
 
@@ -276,7 +276,10 @@ def test_retries_a_post_when_the_api_is_unavailable_and_the_call_is_retryable() 
 
     with pytest.raises(HotCodePushError):
         api.create_http_client().fetch_json(
-            "POST", "/v1/apps/app/channels/channel/pause", is_retryable=True, response_type=Count
+            is_retryable=True,
+            method="POST",
+            path="/v1/apps/app/channels/channel/pause",
+            response_type=Count,
         )
 
     assert len(api.requests) == 3
@@ -285,7 +288,9 @@ def test_retries_a_post_when_the_api_is_unavailable_and_the_call_is_retryable() 
 def test_sends_the_body_of_a_status_request_as_json_when_a_body_is_set() -> None:
     api = StubApi(httpx.Response(204))
 
-    api.create_http_client().fetch_status("DELETE", "/v1/users/me", body={"password": "secret"})
+    api.create_http_client().fetch_status(
+        body={"password": "secret"}, method="DELETE", path="/v1/users/me"
+    )
 
     assert api.last_request.headers["Content-Type"] == "application/json"
     assert resolve_sent_json(api.last_request) == {"password": "secret"}
@@ -296,7 +301,9 @@ def test_retries_a_status_post_when_the_api_is_unavailable_and_the_call_is_retry
 
     with pytest.raises(HotCodePushError):
         api.create_http_client().fetch_status(
-            "POST", "/v1/organizations/organization/subscription/uncancel", is_retryable=True
+            is_retryable=True,
+            method="POST",
+            path="/v1/organizations/organization/subscription/uncancel",
         )
 
     assert len(api.requests) == 3
@@ -322,7 +329,7 @@ def test_sends_the_given_idempotency_key_when_one_is_set() -> None:
     api = StubApi(httpx.Response(201, json={"count": 1}))
 
     api.create_http_client().fetch_creating_post(
-        "/v1/organizations", body={"name": "Acme"}, idempotency_key="key", response_type=Count
+        body={"name": "Acme"}, idempotency_key="key", path="/v1/organizations", response_type=Count
     )
 
     assert api.last_request.method == "POST"
@@ -334,7 +341,10 @@ def test_sends_one_generated_idempotency_key_on_every_attempt_when_none_is_set()
     api = StubApi(httpx.Response(503), httpx.Response(201, json={"count": 1}))
 
     api.create_http_client().fetch_creating_post(
-        "/v1/organizations", body={"name": "Acme"}, idempotency_key=NOT_GIVEN, response_type=Count
+        body={"name": "Acme"},
+        idempotency_key=NOT_GIVEN,
+        path="/v1/organizations",
+        response_type=Count,
     )
 
     first_key, second_key = (request.headers["Idempotency-Key"] for request in api.requests)
@@ -346,10 +356,10 @@ def test_puts_bytes_with_their_size_as_the_content_length() -> None:
     api = StubApi(httpx.Response(200, json={"count": 1}))
 
     api.create_http_client().fetch_upload(
-        "/v1/apps/app/files/sha256",
         body=b"gzip bytes",
         content_length=None,
         content_type="application/gzip",
+        path="/v1/apps/app/files/sha256",
         response_type=Count,
     )
 
@@ -363,10 +373,10 @@ def test_streams_a_file_object_with_the_given_content_length() -> None:
     api = StubApi(httpx.Response(200, json={"count": 1}))
 
     api.create_http_client().fetch_upload(
-        "/v1/apps/app/bundles/bundle/pack",
         body=io.BytesIO(b"tar bytes"),
         content_length=9,
         content_type="application/x-tar",
+        path="/v1/apps/app/bundles/bundle/pack",
         response_type=Count,
     )
 
@@ -380,10 +390,10 @@ def test_raises_when_a_file_object_comes_without_its_content_length() -> None:
 
     with pytest.raises(ValueError, match="content_length"):
         api.create_http_client().fetch_upload(
-            "/v1/apps/app/bundles/bundle/pack",
             body=io.BytesIO(b"tar bytes"),
             content_length=None,
             content_type="application/x-tar",
+            path="/v1/apps/app/bundles/bundle/pack",
             response_type=Count,
         )
 
@@ -392,10 +402,10 @@ def test_gives_each_upload_attempt_ten_minutes() -> None:
     api = StubApi(httpx.Response(200, json={"count": 1}))
 
     api.create_http_client().fetch_upload(
-        "/v1/apps/app/bundles/bundle/pack",
         body=b"tar bytes",
         content_length=None,
         content_type="application/x-tar",
+        path="/v1/apps/app/bundles/bundle/pack",
         response_type=Count,
     )
 
@@ -406,10 +416,10 @@ def test_retries_bytes_when_the_status_is_retryable() -> None:
     api = StubApi(httpx.Response(502), httpx.Response(200, json={"count": 9}))
 
     uploaded_count = api.create_http_client().fetch_upload(
-        "/v1/apps/app/bundles/bundle/pack",
         body=b"tar bytes",
         content_length=None,
         content_type="application/x-tar",
+        path="/v1/apps/app/bundles/bundle/pack",
         response_type=Count,
     )
 
@@ -422,10 +432,10 @@ def test_does_not_retry_a_file_object_which_is_read_once() -> None:
 
     with pytest.raises(HotCodePushError) as raised:
         api.create_http_client().fetch_upload(
-            "/v1/apps/app/bundles/bundle/pack",
             body=io.BytesIO(b"tar bytes"),
             content_length=9,
             content_type="application/x-tar",
+            path="/v1/apps/app/bundles/bundle/pack",
             response_type=Count,
         )
 
@@ -464,7 +474,9 @@ def test_raises_when_a_path_parameter_is_missing() -> None:
 def test_retries_three_times_when_the_status_is_retryable(status: int) -> None:
     sent_statuses: list[int] = []
 
-    response = send_with_retry(lambda: record_response(sent_statuses, httpx.Response(status)))
+    response = send_with_retry(
+        lambda: record_response(sent_statuses, response=httpx.Response(status))
+    )
 
     assert response.status_code == status
     assert sent_statuses == [status, status, status]
@@ -473,7 +485,7 @@ def test_retries_three_times_when_the_status_is_retryable(status: int) -> None:
 def test_does_not_retry_when_the_status_is_not_retryable() -> None:
     sent_statuses: list[int] = []
 
-    response = send_with_retry(lambda: record_response(sent_statuses, httpx.Response(404)))
+    response = send_with_retry(lambda: record_response(sent_statuses, response=httpx.Response(404)))
 
     assert response.status_code == 404
     assert sent_statuses == [404]
@@ -547,6 +559,6 @@ def test_raises_the_last_error_when_every_attempt_raises(recorded_sleeps: list[f
     assert recorded_sleeps == [0.5, 1.0]
 
 
-def record_response(sent_statuses: list[int], response: httpx.Response) -> httpx.Response:
+def record_response(sent_statuses: list[int], *, response: httpx.Response) -> httpx.Response:
     sent_statuses.append(response.status_code)
     return response

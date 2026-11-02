@@ -16,8 +16,8 @@ class BinariesResource(BaseResource):
     ) -> Count:
         """Counts the store builds of the app that match the filters."""
         return self._http_client.fetch_json(
-            "GET",
-            resolve_path("/v1/apps/{appId}/binaries/count", appId=app_id),
+            method="GET",
+            path=resolve_path("/v1/apps/{appId}/binaries/count", appId=app_id),
             query={"fingerprint": fingerprint, "platform": platform},
             response_type=Count,
         )
@@ -40,7 +40,6 @@ class BinariesResource(BaseResource):
         conflicting fingerprint or file set is refused unless `force` is set.
         """
         return self._http_client.fetch_creating_post(
-            resolve_path("/v1/apps/{appId}/binaries", appId=app_id),
             body={
                 "build": build,
                 "files": files,
@@ -50,13 +49,16 @@ class BinariesResource(BaseResource):
                 "version": version,
             },
             idempotency_key=idempotency_key,
+            path=resolve_path("/v1/apps/{appId}/binaries", appId=app_id),
             response_type=Binary,
         )
 
     def get(self, *, app_id: str, binary_id: str) -> Binary:
         return self._http_client.fetch_json(
-            "GET",
-            resolve_path("/v1/apps/{appId}/binaries/{binaryId}", appId=app_id, binaryId=binary_id),
+            method="GET",
+            path=resolve_path(
+                "/v1/apps/{appId}/binaries/{binaryId}", appId=app_id, binaryId=binary_id
+            ),
             response_type=Binary,
         )
 
@@ -71,8 +73,8 @@ class BinariesResource(BaseResource):
     ) -> list[Binary]:
         """Lists the store builds of the app, newest first."""
         return self._http_client.fetch_json(
-            "GET",
-            resolve_path("/v1/apps/{appId}/binaries", appId=app_id),
+            method="GET",
+            path=resolve_path("/v1/apps/{appId}/binaries", appId=app_id),
             query={
                 "fingerprint": fingerprint,
                 "limit": limit,

@@ -4,7 +4,9 @@ from hotcodepush import NotificationPreference
 from tests.openapi_document import resolve_response_example
 from tests.stub_api import StubApi, resolve_sent_json
 
-NOTIFICATION_PREFERENCE_ROW = resolve_response_example("PATCH", "/v1/notification-preferences")
+NOTIFICATION_PREFERENCE_ROW = resolve_response_example(
+    method="PATCH", template="/v1/notification-preferences"
+)
 NOTIFICATION_PREFERENCES_URL = "https://api.hotcodepush.com/v1/notification-preferences"
 
 

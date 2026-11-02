@@ -4,7 +4,9 @@ from hotcodepush import Count
 from tests.openapi_document import resolve_response_example
 from tests.stub_api import StubApi
 
-FILE_ROWS = resolve_response_example("GET", "/v1/apps/{appId}/bundles/{bundleId}/files")
+FILE_ROWS = resolve_response_example(
+    method="GET", template="/v1/apps/{appId}/bundles/{bundleId}/files"
+)
 FILES_URL = "https://api.hotcodepush.com/v1/apps/app/bundles/bundle/files"
 
 

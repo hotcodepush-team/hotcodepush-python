@@ -17,9 +17,9 @@ class InvitationsResource(BaseResource):
         An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_json(
-            "POST",
-            resolve_path("/v1/invitations/{invitationId}/accept", invitationId=invitation_id),
             body={"token": token},
+            method="POST",
+            path=resolve_path("/v1/invitations/{invitationId}/accept", invitationId=invitation_id),
             response_type=Member,
         )
 
@@ -29,7 +29,7 @@ class InvitationsResource(BaseResource):
         An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_json(
-            "GET", resolve_path("/v1/invitations/count"), response_type=Count
+            method="GET", path=resolve_path("/v1/invitations/count"), response_type=Count
         )
 
     def list(
@@ -46,8 +46,8 @@ class InvitationsResource(BaseResource):
         An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_json(
-            "GET",
-            resolve_path("/v1/invitations"),
+            method="GET",
+            path=resolve_path("/v1/invitations"),
             query={"limit": limit, "offset": offset, "relations": relations},
             response_type=list[Invitation],
         )

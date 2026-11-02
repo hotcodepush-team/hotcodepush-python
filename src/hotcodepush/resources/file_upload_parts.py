@@ -22,15 +22,15 @@ class FileUploadPartsResource(BaseResource):
         needs its `content_length`.
         """
         return self._http_client.fetch_upload(
-            resolve_path(
+            body=body,
+            content_length=content_length,
+            content_type="application/gzip",
+            path=resolve_path(
                 "/v1/apps/{appId}/files/{sha256}/uploads/{uploadId}/parts/{partNumber}",
                 appId=app_id,
                 partNumber=part_number,
                 sha256=sha256,
                 uploadId=upload_id,
             ),
-            body=body,
-            content_length=content_length,
-            content_type="application/gzip",
             response_type=UploadedPart,
         )

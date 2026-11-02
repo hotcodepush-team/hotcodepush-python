@@ -21,7 +21,7 @@ class QrCodesResource(BaseResource):
         `validation` with the rule `host_not_allowed`. Needs no token.
         """
         return self._http_client.fetch_bytes(
-            "GET",
-            resolve_path("/v1/qr-codes"),
+            method="GET",
+            path=resolve_path("/v1/qr-codes"),
             query={"format": format, "size": size, "url": url},
         )

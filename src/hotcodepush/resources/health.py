@@ -10,4 +10,4 @@ class HealthResource(BaseResource):
         Returns when the API answers its plain-text `ok`. Raises a `HotCodePushError` on
         `unavailable` or any other status outside 2xx.
         """
-        self._http_client.fetch_status("GET", "/health")
+        self._http_client.fetch_status(method="GET", path="/health")

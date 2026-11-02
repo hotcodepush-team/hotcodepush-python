@@ -61,15 +61,15 @@ class HttpClient:
         if self._is_httpx_client_owned:
             self._httpx_client.close()
 
-    def fetch_bytes(self, method: HttpMethod, path: str, *, query: Query | None = None) -> bytes:
-        return self._fetch_response(method, path, query=query).content
+    def fetch_bytes(self, *, method: HttpMethod, path: str, query: Query | None = None) -> bytes:
+        return self._fetch_response(method=method, path=path, query=query).content
 
     def fetch_creating_post(
         self,
-        path: str,
         *,
         body: JsonBody,
         idempotency_key: str | NotGiven,
+        path: str,
         response_type: type[T],
     ) -> T:
         resolved_idempotency_key = (
@@ -77,48 +77,55 @@ class HttpClient:
         )
         # The API answers a repeated key with the first result, so a retry is safe.
         return self.fetch_json(
-            "POST",
-            path,
             body=body,
             headers={"Idempotency-Key": resolved_idempotency_key},
             is_retryable=True,
+            method="POST",
+            path=path,
             response_type=response_type,
         )
 
     def fetch_json(
         self,
-        method: HttpMethod,
-        path: str,
         *,
         body: JsonBody | None = None,
         headers: Mapping[str, str] | None = None,
         is_retryable: bool | None = None,
+        method: HttpMethod,
+        path: str,
         query: Query | None = None,
         response_type: type[T],
     ) -> T:
         response = self._fetch_response(
-            method, path, body=body, headers=headers, is_retryable=is_retryable, query=query
+            body=body,
+            headers=headers,
+            is_retryable=is_retryable,
+            method=method,
+            path=path,
+            query=query,
         )
         return TypeAdapter(response_type).validate_json(response.content)
 
     def fetch_status(
         self,
-        method: HttpMethod,
-        path: str,
         *,
         body: JsonBody | None = None,
         is_retryable: bool | None = None,
+        method: HttpMethod,
+        path: str,
         query: Query | None = None,
     ) -> None:
-        self._fetch_response(method, path, body=body, is_retryable=is_retryable, query=query)
+        self._fetch_response(
+            body=body, is_retryable=is_retryable, method=method, path=path, query=query
+        )
 
     def fetch_upload(
         self,
-        path: str,
         *,
         body: UploadBody,
         content_length: int | None,
         content_type: str,
+        path: str,
         response_type: type[T],
     ) -> T:
         request = self._httpx_client.build_request(
@@ -127,7 +134,7 @@ class HttpClient:
             content=body,
             headers={
                 **self._headers,
-                "Content-Length": str(resolve_content_length(body, content_length)),
+                "Content-Length": str(resolve_content_length(body, content_length=content_length)),
                 "Content-Type": content_type,
             },
             timeout=UPLOAD_TIMEOUT_SECONDS,
@@ -137,12 +144,12 @@ class HttpClient:
 
     def _fetch_response(
         self,
-        method: HttpMethod,
-        path: str,
         *,
         body: JsonBody | None = None,
         headers: Mapping[str, str] | None = None,
         is_retryable: bool | None = None,
+        method: HttpMethod,
+        path: str,
         query: Query | None = None,
     ) -> httpx.Response:
         request = self._httpx_client.build_request(
@@ -164,7 +171,7 @@ class HttpClient:
 
         response = send_with_retry(send) if is_retryable else send()
         if not response.is_success:
-            raise resolve_hot_code_push_error(response.status_code, response.text)
+            raise resolve_hot_code_push_error(status=response.status_code, text=response.text)
         return response
 
 
@@ -172,7 +179,7 @@ def is_retryable_status(status: int) -> bool:
     return status in (408, 429) or status >= 500
 
 
-def resolve_content_length(body: UploadBody, content_length: int | None) -> int:
+def resolve_content_length(body: UploadBody, *, content_length: int | None) -> int:
     if isinstance(body, bytes):
         return len(body)
     if content_length is None:

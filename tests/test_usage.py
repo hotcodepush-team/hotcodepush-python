@@ -4,7 +4,9 @@ from hotcodepush import Usage
 from tests.openapi_document import resolve_response_example
 from tests.stub_api import StubApi
 
-USAGE_ROW = resolve_response_example("GET", "/v1/organizations/{organizationId}/usage")
+USAGE_ROW = resolve_response_example(
+    method="GET", template="/v1/organizations/{organizationId}/usage"
+)
 USAGE_URL = "https://api.hotcodepush.com/v1/organizations/organization/usage"
 
 

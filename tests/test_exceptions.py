@@ -15,7 +15,7 @@ def test_carries_the_api_error_and_the_status_verbatim_when_the_body_has_the_err
         }
     )
 
-    resolved_error = resolve_hot_code_push_error(400, body)
+    resolved_error = resolve_hot_code_push_error(status=400, text=body)
 
     assert isinstance(resolved_error, HotCodePushError)
     assert resolved_error.code == "validation"
@@ -32,7 +32,7 @@ def test_carries_the_api_error_and_the_status_verbatim_when_the_body_has_the_err
 def test_answers_unexpected_response_without_the_body_when_the_body_lacks_the_error_shape(
     body: str,
 ) -> None:
-    resolved_error = resolve_hot_code_push_error(429, body)
+    resolved_error = resolve_hot_code_push_error(status=429, text=body)
 
     assert resolved_error.code == "unexpected_response"
     assert resolved_error.details is None

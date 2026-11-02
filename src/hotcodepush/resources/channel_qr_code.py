@@ -21,8 +21,8 @@ class ChannelQrCodeResource(BaseResource):
         template is unset. Needs no token, since the channel id is the capability.
         """
         return self._http_client.fetch_bytes(
-            "GET",
-            resolve_path(
+            method="GET",
+            path=resolve_path(
                 "/v1/apps/{appId}/channels/{channelId}/qr-code",
                 appId=app_id,
                 channelId=channel_id,

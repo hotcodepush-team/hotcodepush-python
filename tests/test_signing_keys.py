@@ -5,7 +5,7 @@ from hotcodepush import Count, HotCodePushError, SigningKey
 from tests.openapi_document import resolve_response_example
 from tests.stub_api import StubApi, resolve_sent_json
 
-SIGNING_KEY_ROW = resolve_response_example("POST", "/v1/apps/{appId}/signing-keys")
+SIGNING_KEY_ROW = resolve_response_example(method="POST", template="/v1/apps/{appId}/signing-keys")
 SIGNING_KEYS_URL = "https://api.hotcodepush.com/v1/apps/app/signing-keys"
 
 

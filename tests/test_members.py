@@ -5,10 +5,10 @@ from tests.openapi_document import resolve_response_example
 from tests.stub_api import StubApi, resolve_sent_json
 
 MEMBER_ROW = resolve_response_example(
-    "PATCH", "/v1/organizations/{organizationId}/members/{memberId}"
+    method="PATCH", template="/v1/organizations/{organizationId}/members/{memberId}"
 )
 MEMBER_ROW_WITH_RELATIONS = resolve_response_example(
-    "GET", "/v1/organizations/{organizationId}/members/{memberId}"
+    method="GET", template="/v1/organizations/{organizationId}/members/{memberId}"
 )
 MEMBERS_URL = "https://api.hotcodepush.com/v1/organizations/organization/members"
 

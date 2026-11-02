@@ -5,11 +5,15 @@ from hotcodepush import Count, HotCodePushError, Release
 from tests.openapi_document import resolve_response_example
 from tests.stub_api import StubApi, resolve_sent_json
 
-RELEASE_ROW = resolve_response_example("PATCH", "/v1/apps/{appId}/releases/{releaseId}")
-RELEASE_ROW_WITH_RELATIONS = resolve_response_example(
-    "GET", "/v1/apps/{appId}/releases/{releaseId}"
+RELEASE_ROW = resolve_response_example(
+    method="PATCH", template="/v1/apps/{appId}/releases/{releaseId}"
 )
-RELEASE_ROWS_WITH_RELATIONS = resolve_response_example("GET", "/v1/apps/{appId}/releases")
+RELEASE_ROW_WITH_RELATIONS = resolve_response_example(
+    method="GET", template="/v1/apps/{appId}/releases/{releaseId}"
+)
+RELEASE_ROWS_WITH_RELATIONS = resolve_response_example(
+    method="GET", template="/v1/apps/{appId}/releases"
+)
 RELEASES_URL = "https://api.hotcodepush.com/v1/apps/app/releases"
 
 

@@ -26,8 +26,8 @@ class WebhooksResource(BaseResource):
         An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_json(
-            "GET",
-            resolve_path(
+            method="GET",
+            path=resolve_path(
                 "/v1/organizations/{organizationId}/webhooks/count", organizationId=organization_id
             ),
             response_type=Count,
@@ -52,11 +52,11 @@ class WebhooksResource(BaseResource):
         An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_json(
-            "POST",
-            resolve_path(
+            body={"appId": app_id, "events": events, "format": format, "name": name, "url": url},
+            method="POST",
+            path=resolve_path(
                 "/v1/organizations/{organizationId}/webhooks", organizationId=organization_id
             ),
-            body={"appId": app_id, "events": events, "format": format, "name": name, "url": url},
             response_type=CreatedWebhook,
         )
 
@@ -66,8 +66,8 @@ class WebhooksResource(BaseResource):
         An API token answers `forbidden`; sign in with a session.
         """
         self._http_client.fetch_status(
-            "DELETE",
-            resolve_path(
+            method="DELETE",
+            path=resolve_path(
                 "/v1/organizations/{organizationId}/webhooks/{webhookId}",
                 organizationId=organization_id,
                 webhookId=webhook_id,
@@ -80,8 +80,8 @@ class WebhooksResource(BaseResource):
         An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_json(
-            "GET",
-            resolve_path(
+            method="GET",
+            path=resolve_path(
                 "/v1/organizations/{organizationId}/webhooks/{webhookId}",
                 organizationId=organization_id,
                 webhookId=webhook_id,
@@ -101,8 +101,8 @@ class WebhooksResource(BaseResource):
         An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_json(
-            "GET",
-            resolve_path(
+            method="GET",
+            path=resolve_path(
                 "/v1/organizations/{organizationId}/webhooks", organizationId=organization_id
             ),
             query={"limit": limit, "offset": offset},
@@ -118,8 +118,8 @@ class WebhooksResource(BaseResource):
         An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_json(
-            "POST",
-            resolve_path(
+            method="POST",
+            path=resolve_path(
                 "/v1/organizations/{organizationId}/webhooks/{webhookId}/test",
                 organizationId=organization_id,
                 webhookId=webhook_id,
@@ -146,12 +146,6 @@ class WebhooksResource(BaseResource):
         An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_json(
-            "PATCH",
-            resolve_path(
-                "/v1/organizations/{organizationId}/webhooks/{webhookId}",
-                organizationId=organization_id,
-                webhookId=webhook_id,
-            ),
             body={
                 "appId": app_id,
                 "events": events,
@@ -159,5 +153,11 @@ class WebhooksResource(BaseResource):
                 "name": name,
                 "url": url,
             },
+            method="PATCH",
+            path=resolve_path(
+                "/v1/organizations/{organizationId}/webhooks/{webhookId}",
+                organizationId=organization_id,
+                webhookId=webhook_id,
+            ),
             response_type=Webhook,
         )

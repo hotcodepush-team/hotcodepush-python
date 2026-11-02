@@ -168,7 +168,7 @@ def test_passes_the_apis_error_through_when_a_bundle_misses_its_files(
 ) -> None:
     created_bundle = hot_code_push.apps.bundles.create(
         app_id=app.id,
-        files=[resolve_manifest_file("index.html", INDEX_HTML)],
+        files=[resolve_manifest_file(content=INDEX_HTML, path="index.html")],
         platforms=["android"],
         version="1.0.0",
     )
@@ -192,7 +192,7 @@ def test_passes_the_apis_error_through_when_a_bundle_misses_its_files(
 def test_creates_a_bundle_uploads_its_file_and_pack_completes_it_and_reads_its_manifest_hash(
     hot_code_push: HotCodePush, app: App
 ) -> None:
-    index_file = resolve_manifest_file("index.html", INDEX_HTML)
+    index_file = resolve_manifest_file(content=INDEX_HTML, path="index.html")
     gzip_bytes = gzip.compress(INDEX_HTML)
     created_bundle = hot_code_push.apps.bundles.create(
         app_id=app.id, files=[index_file], platforms=["android"], version="1.0.0"
@@ -222,7 +222,7 @@ def test_creates_a_bundle_uploads_its_file_and_pack_completes_it_and_reads_its_m
 
 
 def test_uploads_a_file_in_parts_and_completes_it(hot_code_push: HotCodePush, app: App) -> None:
-    main_file = resolve_manifest_file("main.js", MAIN_JS)
+    main_file = resolve_manifest_file(content=MAIN_JS, path="main.js")
     created_upload = hot_code_push.apps.files.uploads.create(app_id=app.id, sha256=main_file.sha256)
     uploaded_part = hot_code_push.apps.files.uploads.parts.upload(
         app_id=app.id,
@@ -243,7 +243,7 @@ def test_uploads_a_file_in_parts_and_completes_it(hot_code_push: HotCodePush, ap
 
 
 def test_aborts_a_multipart_upload(hot_code_push: HotCodePush, app: App) -> None:
-    aborted_file = resolve_manifest_file("aborted.js", b"never completed")
+    aborted_file = resolve_manifest_file(content=b"never completed", path="aborted.js")
     created_upload = hot_code_push.apps.files.uploads.create(
         app_id=app.id, sha256=aborted_file.sha256
     )
@@ -258,7 +258,7 @@ def test_completes_a_bundle_whose_files_are_stored_lists_it_as_ready_and_deletes
 ) -> None:
     created_bundle = hot_code_push.apps.bundles.create(
         app_id=app.id,
-        files=[resolve_manifest_file("main.js", MAIN_JS)],
+        files=[resolve_manifest_file(content=MAIN_JS, path="main.js")],
         platforms=["android"],
         version="1.0.1",
     )
@@ -283,7 +283,7 @@ def test_completes_a_bundle_whose_files_are_stored_lists_it_as_ready_and_deletes
 def test_creates_a_binary_and_reads_it_with_its_bundle(
     hot_code_push: HotCodePush, app: App
 ) -> None:
-    index_file = resolve_manifest_file("index.html", INDEX_HTML)
+    index_file = resolve_manifest_file(content=INDEX_HTML, path="index.html")
     created_binary = hot_code_push.apps.binaries.create(
         app_id=app.id,
         build="1",
@@ -344,7 +344,7 @@ def test_deletes_the_app(hot_code_push: HotCodePush, app: App) -> None:
     assert (raised.value.code, raised.value.status) == ("not_found", 404)
 
 
-def resolve_manifest_file(path: str, content: bytes) -> ManifestFile:
+def resolve_manifest_file(*, content: bytes, path: str) -> ManifestFile:
     return ManifestFile(
         path=path, sha256=hashlib.sha256(content).hexdigest(), size_bytes=len(content)
     )

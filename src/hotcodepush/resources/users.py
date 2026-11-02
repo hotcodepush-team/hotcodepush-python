@@ -26,9 +26,9 @@ class UsersResource(BaseResource):
         An API token answers `forbidden`; sign in with a session.
         """
         self._http_client.fetch_status(
-            "DELETE",
-            resolve_path("/v1/users/{userId}", userId=user_id),
             body={"password": password},
+            method="DELETE",
+            path=resolve_path("/v1/users/{userId}", userId=user_id),
         )
 
     def get(self, *, relations: list[UserRelation] | NotGiven = NOT_GIVEN, user_id: str) -> User:
@@ -39,8 +39,8 @@ class UsersResource(BaseResource):
         `members.organization` to embed the organization of each row.
         """
         return self._http_client.fetch_json(
-            "GET",
-            resolve_path("/v1/users/{userId}", userId=user_id),
+            method="GET",
+            path=resolve_path("/v1/users/{userId}", userId=user_id),
             query={"relations": relations},
             response_type=User,
         )

@@ -12,8 +12,8 @@ class LimitsResource(BaseResource):
         An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_json(
-            "GET",
-            resolve_path(
+            method="GET",
+            path=resolve_path(
                 "/v1/organizations/{organizationId}/limits", organizationId=organization_id
             ),
             response_type=dict[str, Limit],

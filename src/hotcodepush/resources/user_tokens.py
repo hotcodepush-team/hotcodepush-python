@@ -13,7 +13,7 @@ class UserTokensResource(BaseResource):
         An API token answers `forbidden`; sign in with a session.
         """
         self._http_client.fetch_status(
-            "DELETE",
-            resolve_path("/v1/users/{userId}/tokens", userId=user_id),
+            method="DELETE",
+            path=resolve_path("/v1/users/{userId}/tokens", userId=user_id),
             query={"ids": ids},
         )

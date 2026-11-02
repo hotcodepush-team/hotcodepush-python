@@ -18,8 +18,8 @@ class UsageResource(BaseResource):
         The API reads it from the stored months.
         """
         return self._http_client.fetch_json(
-            "GET",
-            resolve_path(
+            method="GET",
+            path=resolve_path(
                 "/v1/organizations/{organizationId}/usage", organizationId=organization_id
             ),
             query={"month": month},

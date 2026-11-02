@@ -8,7 +8,7 @@ from tests.openapi_document import resolve_response_example
 from tests.stub_api import MultipartUploadStubApi, StubApi, resolve_sent_json
 
 BYTES_ABOVE_SINGLE_UPLOAD_LIMIT = bytes(SINGLE_UPLOAD_LIMIT_BYTES + 1)
-FILE_ROW = resolve_response_example("PUT", "/v1/apps/{appId}/files/{sha256}")
+FILE_ROW = resolve_response_example(method="PUT", template="/v1/apps/{appId}/files/{sha256}")
 SHA256 = "a" * 64
 FILE_URL = f"https://api.hotcodepush.com/v1/apps/app/files/{SHA256}"
 PART_NUMBERS = range(1, 8)

@@ -5,7 +5,7 @@ from hotcodepush import Bundle, BundleSignature, Count, HotCodePushError, Manife
 from tests.openapi_document import resolve_response_example
 from tests.stub_api import StubApi, resolve_sent_json
 
-BUNDLE_ROW = resolve_response_example("GET", "/v1/apps/{appId}/bundles/{bundleId}")
+BUNDLE_ROW = resolve_response_example(method="GET", template="/v1/apps/{appId}/bundles/{bundleId}")
 BUNDLES_URL = "https://api.hotcodepush.com/v1/apps/app/bundles"
 FINGERPRINT = f"fp1:{'a' * 64}"
 

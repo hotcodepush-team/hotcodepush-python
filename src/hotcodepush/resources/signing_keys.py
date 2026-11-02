@@ -10,8 +10,8 @@ class SigningKeysResource(BaseResource):
     def count(self, *, app_id: str) -> Count:
         """Counts the signing keys of the app."""
         return self._http_client.fetch_json(
-            "GET",
-            resolve_path("/v1/apps/{appId}/signing-keys/count", appId=app_id),
+            method="GET",
+            path=resolve_path("/v1/apps/{appId}/signing-keys/count", appId=app_id),
             response_type=Count,
         )
 
@@ -22,17 +22,17 @@ class SigningKeysResource(BaseResource):
         2048 bits. Retried, since a key the app already holds answers its row unchanged.
         """
         return self._http_client.fetch_json(
-            "POST",
-            resolve_path("/v1/apps/{appId}/signing-keys", appId=app_id),
             body={"publicKey": public_key},
             is_retryable=True,
+            method="POST",
+            path=resolve_path("/v1/apps/{appId}/signing-keys", appId=app_id),
             response_type=SigningKey,
         )
 
     def delete(self, *, app_id: str, signing_key_id: str) -> None:
         self._http_client.fetch_status(
-            "DELETE",
-            resolve_path(
+            method="DELETE",
+            path=resolve_path(
                 "/v1/apps/{appId}/signing-keys/{signingKeyId}",
                 appId=app_id,
                 signingKeyId=signing_key_id,
@@ -48,8 +48,8 @@ class SigningKeysResource(BaseResource):
     ) -> list[SigningKey]:
         """Lists the signing keys of the app, newest first."""
         return self._http_client.fetch_json(
-            "GET",
-            resolve_path("/v1/apps/{appId}/signing-keys", appId=app_id),
+            method="GET",
+            path=resolve_path("/v1/apps/{appId}/signing-keys", appId=app_id),
             query={"limit": limit, "offset": offset},
             response_type=list[SigningKey],
         )

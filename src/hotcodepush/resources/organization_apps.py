@@ -10,8 +10,8 @@ class OrganizationAppsResource(BaseResource):
     def count(self, *, organization_id: str, query: str | NotGiven = NOT_GIVEN) -> Count:
         """Counts the apps of the organization that match the filters."""
         return self._http_client.fetch_json(
-            "GET",
-            resolve_path(
+            method="GET",
+            path=resolve_path(
                 "/v1/organizations/{organizationId}/apps/count", organizationId=organization_id
             ),
             query={"query": query},
@@ -28,9 +28,11 @@ class OrganizationAppsResource(BaseResource):
     ) -> App:
         """Creates an app with the default channel `production`."""
         return self._http_client.fetch_creating_post(
-            resolve_path("/v1/organizations/{organizationId}/apps", organizationId=organization_id),
             body={"framework": framework, "name": name},
             idempotency_key=idempotency_key,
+            path=resolve_path(
+                "/v1/organizations/{organizationId}/apps", organizationId=organization_id
+            ),
             response_type=App,
         )
 
@@ -47,8 +49,10 @@ class OrganizationAppsResource(BaseResource):
         `query` selects the apps whose name contains it.
         """
         return self._http_client.fetch_json(
-            "GET",
-            resolve_path("/v1/organizations/{organizationId}/apps", organizationId=organization_id),
+            method="GET",
+            path=resolve_path(
+                "/v1/organizations/{organizationId}/apps", organizationId=organization_id
+            ),
             query={"limit": limit, "offset": offset, "query": query},
             response_type=list[App],
         )

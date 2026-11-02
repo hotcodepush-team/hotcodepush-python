@@ -24,8 +24,8 @@ class StatisticsUpdatesResource(BaseResource):
         release, whatever its age.
         """
         return self._http_client.fetch_json(
-            "GET",
-            resolve_path("/v1/apps/{appId}/statistics/updates", appId=app_id),
+            method="GET",
+            path=resolve_path("/v1/apps/{appId}/statistics/updates", appId=app_id),
             query={
                 "channelId": channel_id,
                 "periodSince": period_since,

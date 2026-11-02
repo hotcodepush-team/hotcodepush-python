@@ -14,7 +14,7 @@ class UserPasswordResource(BaseResource):
         An API token answers `forbidden`; sign in with a session.
         """
         self._http_client.fetch_status(
-            "POST",
-            resolve_path("/v1/users/{userId}/password", userId=user_id),
             body={"password": password},
+            method="POST",
+            path=resolve_path("/v1/users/{userId}/password", userId=user_id),
         )

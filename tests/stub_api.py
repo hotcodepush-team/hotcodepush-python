@@ -49,7 +49,7 @@ class StubApi:
 
 
 class MultipartUploadStubApi(StubApi):
-    def __init__(self, completed_body: object, failed_part_number: int | None = None) -> None:
+    def __init__(self, *, completed_body: object, failed_part_number: int | None = None) -> None:
         super().__init__()
         self._completed_body = completed_body
         self._failed_part_number = failed_part_number

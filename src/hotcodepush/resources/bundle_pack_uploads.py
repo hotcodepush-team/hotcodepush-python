@@ -24,14 +24,14 @@ class BundlePackUploadsResource(BaseResource):
         Never retried, since R2 refuses a second completion.
         """
         return self._http_client.fetch_json(
-            "POST",
-            resolve_path(
+            body={"parts": parts},
+            method="POST",
+            path=resolve_path(
                 "/v1/apps/{appId}/bundles/{bundleId}/pack/uploads/{uploadId}/complete",
                 appId=app_id,
                 bundleId=bundle_id,
                 uploadId=upload_id,
             ),
-            body={"parts": parts},
             response_type=UploadedBundlePack,
         )
 
@@ -42,21 +42,21 @@ class BundlePackUploadsResource(BaseResource):
         holds no state and the bucket expires an unused upload.
         """
         return self._http_client.fetch_json(
-            "POST",
-            resolve_path(
+            is_retryable=True,
+            method="POST",
+            path=resolve_path(
                 "/v1/apps/{appId}/bundles/{bundleId}/pack/uploads",
                 appId=app_id,
                 bundleId=bundle_id,
             ),
-            is_retryable=True,
             response_type=MultipartUpload,
         )
 
     def delete(self, *, app_id: str, bundle_id: str, upload_id: str) -> None:
         """Aborts a multipart pack upload and discards its parts."""
         self._http_client.fetch_status(
-            "DELETE",
-            resolve_path(
+            method="DELETE",
+            path=resolve_path(
                 "/v1/apps/{appId}/bundles/{bundleId}/pack/uploads/{uploadId}",
                 appId=app_id,
                 bundleId=bundle_id,

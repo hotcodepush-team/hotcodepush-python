@@ -30,8 +30,8 @@ class DevicesResource(BaseResource):
     ) -> Count:
         """Counts the devices of the app that match the filters."""
         return self._http_client.fetch_json(
-            "GET",
-            resolve_path("/v1/apps/{appId}/devices/count", appId=app_id),
+            method="GET",
+            path=resolve_path("/v1/apps/{appId}/devices/count", appId=app_id),
             query={
                 "attribute": attribute,
                 "binaryBuild": binary_build,
@@ -49,8 +49,10 @@ class DevicesResource(BaseResource):
     def delete(self, *, app_id: str, device_id: str) -> None:
         """Deletes the registry row of a device, for an erasure request."""
         self._http_client.fetch_status(
-            "DELETE",
-            resolve_path("/v1/apps/{appId}/devices/{deviceId}", appId=app_id, deviceId=device_id),
+            method="DELETE",
+            path=resolve_path(
+                "/v1/apps/{appId}/devices/{deviceId}", appId=app_id, deviceId=device_id
+            ),
         )
 
     def delete_many(self, *, app_id: str, ids: list[str]) -> None:
@@ -59,8 +61,8 @@ class DevicesResource(BaseResource):
         An id of another app is skipped.
         """
         self._http_client.fetch_status(
-            "DELETE",
-            resolve_path("/v1/apps/{appId}/devices", appId=app_id),
+            method="DELETE",
+            path=resolve_path("/v1/apps/{appId}/devices", appId=app_id),
             query={"ids": ids},
         )
 
@@ -72,8 +74,10 @@ class DevicesResource(BaseResource):
         relations: list[DeviceRelation] | NotGiven = NOT_GIVEN,
     ) -> Device:
         return self._http_client.fetch_json(
-            "GET",
-            resolve_path("/v1/apps/{appId}/devices/{deviceId}", appId=app_id, deviceId=device_id),
+            method="GET",
+            path=resolve_path(
+                "/v1/apps/{appId}/devices/{deviceId}", appId=app_id, deviceId=device_id
+            ),
             query={"relations": relations},
             response_type=Device,
         )
@@ -100,8 +104,8 @@ class DevicesResource(BaseResource):
         `attribute` takes one `key=value`.
         """
         return self._http_client.fetch_json(
-            "GET",
-            resolve_path("/v1/apps/{appId}/devices", appId=app_id),
+            method="GET",
+            path=resolve_path("/v1/apps/{appId}/devices", appId=app_id),
             query={
                 "attribute": attribute,
                 "binaryBuild": binary_build,
