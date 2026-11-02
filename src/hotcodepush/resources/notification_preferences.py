@@ -22,8 +22,8 @@ class NotificationPreferencesResource(BaseResource):
         An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_json(
-            "GET",
-            resolve_path("/v1/notification-preferences"),
+            method="GET",
+            path=resolve_path("/v1/notification-preferences"),
             query={"organizationId": organization_id},
             response_type=list[NotificationPreference],
         )
@@ -43,13 +43,13 @@ class NotificationPreferencesResource(BaseResource):
         An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_json(
-            "PATCH",
-            resolve_path("/v1/notification-preferences"),
             body={
                 "category": category,
                 "isEnabled": is_enabled,
                 "medium": medium,
                 "organizationId": organization_id,
             },
+            method="PATCH",
+            path=resolve_path("/v1/notification-preferences"),
             response_type=NotificationPreference,
         )

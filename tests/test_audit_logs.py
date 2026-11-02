@@ -4,7 +4,9 @@ from hotcodepush import Count
 from tests.openapi_document import resolve_response_example
 from tests.stub_api import StubApi
 
-AUDIT_LOG_ROWS = resolve_response_example("GET", "/v1/organizations/{organizationId}/audit-logs")
+AUDIT_LOG_ROWS = resolve_response_example(
+    method="GET", template="/v1/organizations/{organizationId}/audit-logs"
+)
 AUDIT_LOGS_URL = "https://api.hotcodepush.com/v1/organizations/organization/audit-logs"
 
 

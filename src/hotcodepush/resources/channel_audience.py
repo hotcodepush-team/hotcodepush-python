@@ -25,8 +25,8 @@ class ChannelAudienceResource(BaseResource):
         match. An `attribute` is `key=value`, and a `device` is a device id.
         """
         return self._http_client.fetch_json(
-            "GET",
-            resolve_path(
+            method="GET",
+            path=resolve_path(
                 "/v1/apps/{appId}/channels/{channelId}/audience",
                 appId=app_id,
                 channelId=channel_id,

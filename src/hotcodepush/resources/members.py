@@ -17,8 +17,8 @@ class MembersResource(BaseResource):
     ) -> Count:
         """Counts the members of the organization that match the filters."""
         return self._http_client.fetch_json(
-            "GET",
-            resolve_path(
+            method="GET",
+            path=resolve_path(
                 "/v1/organizations/{organizationId}/members/count", organizationId=organization_id
             ),
             query={"query": query, "role": role, "userId": user_id},
@@ -31,8 +31,8 @@ class MembersResource(BaseResource):
         An API token answers `forbidden`; sign in with a session.
         """
         self._http_client.fetch_status(
-            "DELETE",
-            resolve_path(
+            method="DELETE",
+            path=resolve_path(
                 "/v1/organizations/{organizationId}/members/{memberId}",
                 memberId=member_id,
                 organizationId=organization_id,
@@ -48,8 +48,8 @@ class MembersResource(BaseResource):
         An API token answers `forbidden`; sign in with a session.
         """
         self._http_client.fetch_status(
-            "DELETE",
-            resolve_path(
+            method="DELETE",
+            path=resolve_path(
                 "/v1/organizations/{organizationId}/members", organizationId=organization_id
             ),
             query={"ids": ids},
@@ -68,8 +68,8 @@ class MembersResource(BaseResource):
         sign-in identities of the user.
         """
         return self._http_client.fetch_json(
-            "GET",
-            resolve_path(
+            method="GET",
+            path=resolve_path(
                 "/v1/organizations/{organizationId}/members/{memberId}",
                 memberId=member_id,
                 organizationId=organization_id,
@@ -94,8 +94,8 @@ class MembersResource(BaseResource):
         `query` selects the members whose email contains it.
         """
         return self._http_client.fetch_json(
-            "GET",
-            resolve_path(
+            method="GET",
+            path=resolve_path(
                 "/v1/organizations/{organizationId}/members", organizationId=organization_id
             ),
             query={
@@ -115,12 +115,12 @@ class MembersResource(BaseResource):
         An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_json(
-            "PATCH",
-            resolve_path(
+            body={"role": role},
+            method="PATCH",
+            path=resolve_path(
                 "/v1/organizations/{organizationId}/members/{memberId}",
                 memberId=member_id,
                 organizationId=organization_id,
             ),
-            body={"role": role},
             response_type=Member,
         )

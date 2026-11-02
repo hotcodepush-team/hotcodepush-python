@@ -70,7 +70,7 @@ class HotCodePushError(Exception):
         self.status = status
 
 
-def resolve_hot_code_push_error(status: int, text: str) -> HotCodePushError:
+def resolve_hot_code_push_error(*, status: int, text: str) -> HotCodePushError:
     body = resolve_json_object(text)
     code, message = body.get("code"), body.get("message")
     if isinstance(code, str) and isinstance(message, str):

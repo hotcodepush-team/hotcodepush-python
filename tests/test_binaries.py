@@ -5,7 +5,7 @@ from tests.openapi_document import resolve_response_example
 from tests.stub_api import StubApi, resolve_sent_json
 
 BINARIES_URL = "https://api.hotcodepush.com/v1/apps/app/binaries"
-BINARY_ROW = resolve_response_example("GET", "/v1/apps/{appId}/binaries/{binaryId}")
+BINARY_ROW = resolve_response_example(method="GET", template="/v1/apps/{appId}/binaries/{binaryId}")
 FINGERPRINT = f"fp1:{'a' * 64}"
 
 

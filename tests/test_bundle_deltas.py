@@ -5,7 +5,7 @@ from tests.openapi_document import resolve_response_example
 from tests.stub_api import StubApi
 
 DELTA_ROWS_WITH_BASE_BUNDLES = resolve_response_example(
-    "GET", "/v1/apps/{appId}/bundles/{bundleId}/deltas"
+    method="GET", template="/v1/apps/{appId}/bundles/{bundleId}/deltas"
 )
 DELTAS_URL = "https://api.hotcodepush.com/v1/apps/app/bundles/bundle/deltas"
 

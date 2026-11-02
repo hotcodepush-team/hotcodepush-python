@@ -4,7 +4,7 @@ from hotcodepush import User
 from tests.openapi_document import resolve_response_example
 from tests.stub_api import StubApi, resolve_sent_json
 
-USER_ROW = resolve_response_example("GET", "/v1/users/{userId}")
+USER_ROW = resolve_response_example(method="GET", template="/v1/users/{userId}")
 USERS_URL = "https://api.hotcodepush.com/v1/users"
 
 

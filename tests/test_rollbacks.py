@@ -4,7 +4,9 @@ from hotcodepush import Release
 from tests.openapi_document import resolve_response_example
 from tests.stub_api import StubApi, resolve_sent_json
 
-RELEASE_ROW = resolve_response_example("POST", "/v1/apps/{appId}/channels/{channelId}/rollbacks")
+RELEASE_ROW = resolve_response_example(
+    method="POST", template="/v1/apps/{appId}/channels/{channelId}/rollbacks"
+)
 
 
 def test_posts_the_rollback_to_its_channel_with_its_idempotency_key() -> None:

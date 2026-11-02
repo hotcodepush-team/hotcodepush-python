@@ -4,7 +4,9 @@ from hotcodepush import Audience
 from tests.openapi_document import resolve_response_example
 from tests.stub_api import StubApi
 
-AUDIENCE = resolve_response_example("GET", "/v1/apps/{appId}/channels/{channelId}/audience")
+AUDIENCE = resolve_response_example(
+    method="GET", template="/v1/apps/{appId}/channels/{channelId}/audience"
+)
 
 
 def test_gets_the_audience_with_each_condition_repeated() -> None:

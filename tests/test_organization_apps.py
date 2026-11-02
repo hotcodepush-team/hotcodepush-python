@@ -4,7 +4,7 @@ from hotcodepush import App, Count
 from tests.openapi_document import resolve_response_example
 from tests.stub_api import StubApi, resolve_sent_json
 
-APP_ROW = resolve_response_example("GET", "/v1/apps/{appId}")
+APP_ROW = resolve_response_example(method="GET", template="/v1/apps/{appId}")
 APPS_URL = "https://api.hotcodepush.com/v1/organizations/organization/apps"
 
 

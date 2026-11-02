@@ -12,8 +12,8 @@ class ReleaseAudienceResource(BaseResource):
         The API evaluates the registry the same way a device evaluates the index.
         """
         return self._http_client.fetch_json(
-            "GET",
-            resolve_path(
+            method="GET",
+            path=resolve_path(
                 "/v1/apps/{appId}/releases/{releaseId}/audience",
                 appId=app_id,
                 releaseId=release_id,

@@ -12,8 +12,8 @@ class BundleFilesResource(BaseResource):
     ) -> Count:
         """Counts the files of the bundle that match the filters."""
         return self._http_client.fetch_json(
-            "GET",
-            resolve_path(
+            method="GET",
+            path=resolve_path(
                 "/v1/apps/{appId}/bundles/{bundleId}/files/count", appId=app_id, bundleId=bundle_id
             ),
             query={"isStored": is_stored},
@@ -35,8 +35,8 @@ class BundleFilesResource(BaseResource):
         selects the files that still need an upload after the bundle is created.
         """
         return self._http_client.fetch_json(
-            "GET",
-            resolve_path(
+            method="GET",
+            path=resolve_path(
                 "/v1/apps/{appId}/bundles/{bundleId}/files", appId=app_id, bundleId=bundle_id
             ),
             query={"isStored": is_stored, "limit": limit, "offset": offset},

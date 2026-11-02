@@ -18,8 +18,8 @@ class CustomerPortalSessionsResource(BaseResource):
         An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_json(
-            "POST",
-            resolve_path(
+            method="POST",
+            path=resolve_path(
                 "/v1/organizations/{organizationId}/customer-portal-sessions",
                 organizationId=organization_id,
             ),

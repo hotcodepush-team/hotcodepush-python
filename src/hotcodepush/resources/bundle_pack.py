@@ -44,11 +44,11 @@ class BundlePackResource(BaseResource):
                 ),
             )
         return self._http_client.fetch_upload(
-            resolve_path(
-                "/v1/apps/{appId}/bundles/{bundleId}/pack", appId=app_id, bundleId=bundle_id
-            ),
             body=body,
             content_length=content_length,
             content_type="application/x-tar",
+            path=resolve_path(
+                "/v1/apps/{appId}/bundles/{bundleId}/pack", appId=app_id, bundleId=bundle_id
+            ),
             response_type=UploadedBundlePack,
         )

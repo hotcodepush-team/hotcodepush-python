@@ -21,12 +21,12 @@ class RollbacksResource(BaseResource):
         `to_release_id` picks another earlier release instead. A rollback is a new release.
         """
         return self._http_client.fetch_creating_post(
-            resolve_path(
+            body={"isMandatory": is_mandatory, "toReleaseId": to_release_id},
+            idempotency_key=idempotency_key,
+            path=resolve_path(
                 "/v1/apps/{appId}/channels/{channelId}/rollbacks",
                 appId=app_id,
                 channelId=channel_id,
             ),
-            body={"isMandatory": is_mandatory, "toReleaseId": to_release_id},
-            idempotency_key=idempotency_key,
             response_type=Release,
         )

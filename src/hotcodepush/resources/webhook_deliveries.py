@@ -26,8 +26,8 @@ class WebhookDeliveriesResource(BaseResource):
         An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_json(
-            "GET",
-            resolve_path(
+            method="GET",
+            path=resolve_path(
                 "/v1/organizations/{organizationId}/webhooks/{webhookId}/deliveries/count",
                 organizationId=organization_id,
                 webhookId=webhook_id,
@@ -55,8 +55,8 @@ class WebhookDeliveriesResource(BaseResource):
         An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_json(
-            "GET",
-            resolve_path(
+            method="GET",
+            path=resolve_path(
                 "/v1/organizations/{organizationId}/webhooks/{webhookId}/deliveries",
                 organizationId=organization_id,
                 webhookId=webhook_id,
@@ -82,8 +82,8 @@ class WebhookDeliveriesResource(BaseResource):
         An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_json(
-            "POST",
-            resolve_path(
+            method="POST",
+            path=resolve_path(
                 "/v1/organizations/{organizationId}/webhooks/{webhookId}/deliveries/{deliveryId}/redeliver",
                 deliveryId=delivery_id,
                 organizationId=organization_id,

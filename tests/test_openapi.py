@@ -718,7 +718,7 @@ class SnapshotApi(StubApi):
         template = resolve_path_template(request.url.path)
         if template is None:
             return httpx.Response(404)
-        responses = resolve_operation(request.method, template)["responses"]
+        responses = resolve_operation(method=request.method, template=template)["responses"]
         status, response = next(
             (status, response) for status, response in responses.items() if status.startswith("2")
         )
@@ -736,7 +736,7 @@ def test_holds_a_call_for_every_resource_method() -> None:
             method_name
             for name, resource in vars(hot_code_push).items()
             if isinstance(resource, BaseResource) and name not in UNDOCUMENTED_RESOURCES
-            for method_name in resolve_resource_method_names(resource, name)
+            for method_name in resolve_resource_method_names(resource, path=name)
         ]
 
     assert sorted(CALLS) == sorted(resource_method_names)
@@ -765,7 +765,7 @@ def test_documents_the_path_method_query_idempotency_key_body_and_content_type_a
     request = api.last_request
     template = resolve_path_template(request.url.path)
     assert template is not None, f"{request.url.path} is not in openapi.json"
-    operation = resolve_operation(request.method, template)
+    operation = resolve_operation(method=request.method, template=template)
     parameters = operation.get("parameters", [])
     documented_query_names = {
         parameter["name"] for parameter in parameters if parameter.get("in") == "query"
@@ -797,7 +797,7 @@ def test_declares_every_field_of_the_response_a_call_reads(name: str) -> None:
 
     response_value = CALLS[name](api.client)
 
-    assert resolve_undeclared_fields(response_value, name) == []
+    assert resolve_undeclared_fields(response_value, path=name) == []
 
 
 @pytest.mark.parametrize("name", sorted(CALLS))
@@ -809,7 +809,9 @@ def test_notes_the_refusal_of_an_api_token_exactly_where_the_operation_is_sessio
     CALLS[name](api.client)
 
     request = api.last_request
-    operation = resolve_operation(request.method, resolve_path_template(request.url.path) or "")
+    operation = resolve_operation(
+        method=request.method, template=resolve_path_template(request.url.path) or ""
+    )
     is_session_only = any(
         "sessionAuth" in requirement for requirement in operation.get("security", [])
     )
@@ -823,7 +825,7 @@ def test_types_the_error_code_as_the_catalog_of_the_snapshot_and_unexpected_resp
     assert sorted(get_args(ErrorCode)) == sorted([*documented_codes["enum"], "unexpected_response"])
 
 
-def resolve_resource_method_names(resource: BaseResource, path: str) -> list[str]:
+def resolve_resource_method_names(resource: BaseResource, *, path: str) -> list[str]:
     method_names = [
         f"{path}.{name}"
         for name, _ in inspect.getmembers(type(resource), inspect.isfunction)
@@ -833,30 +835,32 @@ def resolve_resource_method_names(resource: BaseResource, path: str) -> list[str
         method_name
         for name, nested_resource in vars(resource).items()
         if isinstance(nested_resource, BaseResource)
-        for method_name in resolve_resource_method_names(nested_resource, f"{path}.{name}")
+        for method_name in resolve_resource_method_names(nested_resource, path=f"{path}.{name}")
     ]
     return method_names + nested_method_names
 
 
-def resolve_undeclared_fields(value: object, path: str) -> list[str]:
+def resolve_undeclared_fields(value: object, *, path: str) -> list[str]:
     if isinstance(value, list):
         return [
             undeclared_field
             for index, item in enumerate(value)
-            for undeclared_field in resolve_undeclared_fields(item, f"{path}[{index}]")
+            for undeclared_field in resolve_undeclared_fields(item, path=f"{path}[{index}]")
         ]
     if isinstance(value, dict):
         return [
             undeclared_field
             for key, item in value.items()
-            for undeclared_field in resolve_undeclared_fields(item, f"{path}[{key}]")
+            for undeclared_field in resolve_undeclared_fields(item, path=f"{path}[{key}]")
         ]
     if not isinstance(value, BaseModel):
         return []
     nested_undeclared_fields = [
         undeclared_field
         for name in type(value).model_fields
-        for undeclared_field in resolve_undeclared_fields(getattr(value, name), f"{path}.{name}")
+        for undeclared_field in resolve_undeclared_fields(
+            getattr(value, name), path=f"{path}.{name}"
+        )
     ]
     return [f"{path}.{name}" for name in value.model_extra or {}] + nested_undeclared_fields
 

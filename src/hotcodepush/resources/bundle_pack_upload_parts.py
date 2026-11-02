@@ -22,15 +22,15 @@ class BundlePackUploadPartsResource(BaseResource):
         needs its `content_length`.
         """
         return self._http_client.fetch_upload(
-            resolve_path(
+            body=body,
+            content_length=content_length,
+            content_type="application/x-tar",
+            path=resolve_path(
                 "/v1/apps/{appId}/bundles/{bundleId}/pack/uploads/{uploadId}/parts/{partNumber}",
                 appId=app_id,
                 bundleId=bundle_id,
                 partNumber=part_number,
                 uploadId=upload_id,
             ),
-            body=body,
-            content_length=content_length,
-            content_type="application/x-tar",
             response_type=UploadedPart,
         )

@@ -30,11 +30,6 @@ class ChannelReleasesResource(BaseResource):
         `from_channel_id`.
         """
         return self._http_client.fetch_creating_post(
-            resolve_path(
-                "/v1/apps/{appId}/channels/{channelId}/releases",
-                appId=app_id,
-                channelId=channel_id,
-            ),
             body={
                 "bundleId": bundle_id,
                 "conditions": conditions,
@@ -48,6 +43,11 @@ class ChannelReleasesResource(BaseResource):
                 "rolloutPercent": rollout_percent,
             },
             idempotency_key=idempotency_key,
+            path=resolve_path(
+                "/v1/apps/{appId}/channels/{channelId}/releases",
+                appId=app_id,
+                channelId=channel_id,
+            ),
             response_type=Release,
         )
 
@@ -65,13 +65,13 @@ class ChannelReleasesResource(BaseResource):
         Retried, since revoking a revoked release changes nothing.
         """
         return self._http_client.fetch_json(
-            "POST",
-            resolve_path(
+            body={"fromNumber": from_number, "releaseIds": release_ids},
+            is_retryable=True,
+            method="POST",
+            path=resolve_path(
                 "/v1/apps/{appId}/channels/{channelId}/releases/revoke",
                 appId=app_id,
                 channelId=channel_id,
             ),
-            body={"fromNumber": from_number, "releaseIds": release_ids},
-            is_retryable=True,
             response_type=list[Release],
         )

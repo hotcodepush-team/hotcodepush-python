@@ -23,8 +23,8 @@ class ChannelsResource(BaseResource):
     def count(self, *, app_id: str, query: str | NotGiven = NOT_GIVEN) -> Count:
         """Counts the channels of the app that match the filters."""
         return self._http_client.fetch_json(
-            "GET",
-            resolve_path("/v1/apps/{appId}/channels/count", appId=app_id),
+            method="GET",
+            path=resolve_path("/v1/apps/{appId}/channels/count", appId=app_id),
             query={"query": query},
             response_type=Count,
         )
@@ -47,7 +47,6 @@ class ChannelsResource(BaseResource):
         The name has 1 to 64 letters, digits, hyphens or underscores, and is unique in the app.
         """
         return self._http_client.fetch_creating_post(
-            resolve_path("/v1/apps/{appId}/channels", appId=app_id),
             body={
                 "expiresAt": expires_at,
                 "failureAction": failure_action,
@@ -58,14 +57,15 @@ class ChannelsResource(BaseResource):
                 "name": name,
             },
             idempotency_key=idempotency_key,
+            path=resolve_path("/v1/apps/{appId}/channels", appId=app_id),
             response_type=Channel,
         )
 
     def delete(self, *, app_id: str, channel_id: str) -> None:
         """Deletes a channel at once. The default channel of the app is refused."""
         self._http_client.fetch_status(
-            "DELETE",
-            resolve_path(
+            method="DELETE",
+            path=resolve_path(
                 "/v1/apps/{appId}/channels/{channelId}", appId=app_id, channelId=channel_id
             ),
         )
@@ -77,8 +77,8 @@ class ChannelsResource(BaseResource):
         channel, or a protected channel while the caller is a Member.
         """
         self._http_client.fetch_status(
-            "DELETE",
-            resolve_path("/v1/apps/{appId}/channels", appId=app_id),
+            method="DELETE",
+            path=resolve_path("/v1/apps/{appId}/channels", appId=app_id),
             query={"ids": ids},
         )
 
@@ -88,8 +88,8 @@ class ChannelsResource(BaseResource):
         To count its devices, call `apps.statistics.fleet.get` with its `channel_id`.
         """
         return self._http_client.fetch_json(
-            "GET",
-            resolve_path(
+            method="GET",
+            path=resolve_path(
                 "/v1/apps/{appId}/channels/{channelId}", appId=app_id, channelId=channel_id
             ),
             response_type=Channel,
@@ -108,8 +108,8 @@ class ChannelsResource(BaseResource):
         `query` selects the channels whose name contains it.
         """
         return self._http_client.fetch_json(
-            "GET",
-            resolve_path("/v1/apps/{appId}/channels", appId=app_id),
+            method="GET",
+            path=resolve_path("/v1/apps/{appId}/channels", appId=app_id),
             query={"limit": limit, "offset": offset, "query": query},
             response_type=list[Channel],
         )
@@ -120,11 +120,11 @@ class ChannelsResource(BaseResource):
         Retried, since pausing a paused channel answers it unchanged.
         """
         return self._http_client.fetch_json(
-            "POST",
-            resolve_path(
+            is_retryable=True,
+            method="POST",
+            path=resolve_path(
                 "/v1/apps/{appId}/channels/{channelId}/pause", appId=app_id, channelId=channel_id
             ),
-            is_retryable=True,
             response_type=Channel,
         )
 
@@ -134,11 +134,11 @@ class ChannelsResource(BaseResource):
         Retried, since resuming a running channel answers it unchanged.
         """
         return self._http_client.fetch_json(
-            "POST",
-            resolve_path(
+            is_retryable=True,
+            method="POST",
+            path=resolve_path(
                 "/v1/apps/{appId}/channels/{channelId}/resume", appId=app_id, channelId=channel_id
             ),
-            is_retryable=True,
             response_type=Channel,
         )
 
@@ -160,10 +160,6 @@ class ChannelsResource(BaseResource):
         The flags are `is_protected` and `is_discoverable`. `None` clears a nullable field.
         """
         return self._http_client.fetch_json(
-            "PATCH",
-            resolve_path(
-                "/v1/apps/{appId}/channels/{channelId}", appId=app_id, channelId=channel_id
-            ),
             body={
                 "expiresAt": expires_at,
                 "failureAction": failure_action,
@@ -173,5 +169,9 @@ class ChannelsResource(BaseResource):
                 "isProtected": is_protected,
                 "name": name,
             },
+            method="PATCH",
+            path=resolve_path(
+                "/v1/apps/{appId}/channels/{channelId}", appId=app_id, channelId=channel_id
+            ),
             response_type=Channel,
         )

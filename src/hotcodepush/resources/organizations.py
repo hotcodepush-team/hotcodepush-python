@@ -37,7 +37,7 @@ class OrganizationsResource(BaseResource):
     def count(self) -> Count:
         """Counts the caller's organizations."""
         return self._http_client.fetch_json(
-            "GET", resolve_path("/v1/organizations/count"), response_type=Count
+            method="GET", path=resolve_path("/v1/organizations/count"), response_type=Count
         )
 
     def create(self, *, idempotency_key: str | NotGiven = NOT_GIVEN, name: str) -> Organization:
@@ -46,9 +46,9 @@ class OrganizationsResource(BaseResource):
         An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_creating_post(
-            resolve_path("/v1/organizations"),
             body={"name": name},
             idempotency_key=idempotency_key,
+            path=resolve_path("/v1/organizations"),
             response_type=Organization,
         )
 
@@ -60,14 +60,14 @@ class OrganizationsResource(BaseResource):
         An API token answers `forbidden`; sign in with a session.
         """
         self._http_client.fetch_status(
-            "DELETE",
-            resolve_path("/v1/organizations/{organizationId}", organizationId=organization_id),
+            method="DELETE",
+            path=resolve_path("/v1/organizations/{organizationId}", organizationId=organization_id),
         )
 
     def get(self, *, organization_id: str) -> Organization:
         return self._http_client.fetch_json(
-            "GET",
-            resolve_path("/v1/organizations/{organizationId}", organizationId=organization_id),
+            method="GET",
+            path=resolve_path("/v1/organizations/{organizationId}", organizationId=organization_id),
             response_type=Organization,
         )
 
@@ -80,8 +80,8 @@ class OrganizationsResource(BaseResource):
         `users.get(relations=["members"], user_id="me")`.
         """
         return self._http_client.fetch_json(
-            "GET",
-            resolve_path("/v1/organizations"),
+            method="GET",
+            path=resolve_path("/v1/organizations"),
             query={"limit": limit, "offset": offset},
             response_type=list[Organization],
         )
@@ -103,8 +103,6 @@ class OrganizationsResource(BaseResource):
         An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_json(
-            "PATCH",
-            resolve_path("/v1/organizations/{organizationId}", organizationId=organization_id),
             body={
                 "countryAllowlist": country_allowlist,
                 "ipAllowlist": ip_allowlist,
@@ -112,5 +110,7 @@ class OrganizationsResource(BaseResource):
                 "name": name,
                 "spendingCapCents": spending_cap_cents,
             },
+            method="PATCH",
+            path=resolve_path("/v1/organizations/{organizationId}", organizationId=organization_id),
             response_type=Organization,
         )

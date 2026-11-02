@@ -5,7 +5,9 @@ from hotcodepush import BinaryCondition, HotCodePushError, Release, ReleaseProgr
 from tests.openapi_document import resolve_response_example
 from tests.stub_api import StubApi, resolve_sent_json
 
-RELEASE_ROW = resolve_response_example("POST", "/v1/apps/{appId}/channels/{channelId}/releases")
+RELEASE_ROW = resolve_response_example(
+    method="POST", template="/v1/apps/{appId}/channels/{channelId}/releases"
+)
 RELEASES_URL = "https://api.hotcodepush.com/v1/apps/app/channels/channel/releases"
 
 

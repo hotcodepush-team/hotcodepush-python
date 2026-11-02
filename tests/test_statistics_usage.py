@@ -6,7 +6,9 @@ from hotcodepush import UsageStatistics
 from tests.openapi_document import resolve_response_example
 from tests.stub_api import StubApi
 
-USAGE_STATISTICS = resolve_response_example("GET", "/v1/apps/{appId}/statistics/usage")
+USAGE_STATISTICS = resolve_response_example(
+    method="GET", template="/v1/apps/{appId}/statistics/usage"
+)
 
 
 def test_gets_the_usage_statistics_of_the_period() -> None:

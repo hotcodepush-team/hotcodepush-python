@@ -31,11 +31,13 @@ class AppsResource(BaseResource):
 
         An API token answers `forbidden`; sign in with a session.
         """
-        self._http_client.fetch_status("DELETE", resolve_path("/v1/apps/{appId}", appId=app_id))
+        self._http_client.fetch_status(
+            method="DELETE", path=resolve_path("/v1/apps/{appId}", appId=app_id)
+        )
 
     def get(self, *, app_id: str) -> App:
         return self._http_client.fetch_json(
-            "GET", resolve_path("/v1/apps/{appId}", appId=app_id), response_type=App
+            method="GET", path=resolve_path("/v1/apps/{appId}", appId=app_id), response_type=App
         )
 
     def transfer(self, *, app_id: str, organization_id: str) -> App:
@@ -46,9 +48,9 @@ class AppsResource(BaseResource):
         An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_json(
-            "POST",
-            resolve_path("/v1/apps/{appId}/transfer", appId=app_id),
             body={"organizationId": organization_id},
+            method="POST",
+            path=resolve_path("/v1/apps/{appId}/transfer", appId=app_id),
             response_type=App,
         )
 
@@ -67,13 +69,13 @@ class AppsResource(BaseResource):
         `{channelId}` exactly once.
         """
         return self._http_client.fetch_json(
-            "PATCH",
-            resolve_path("/v1/apps/{appId}", appId=app_id),
             body={
                 "channelLinkTemplate": channel_link_template,
                 "defaultChannelId": default_channel_id,
                 "framework": framework,
                 "name": name,
             },
+            method="PATCH",
+            path=resolve_path("/v1/apps/{appId}", appId=app_id),
             response_type=App,
         )

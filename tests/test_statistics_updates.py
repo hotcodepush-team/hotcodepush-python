@@ -6,7 +6,9 @@ from hotcodepush import UpdateStatistics
 from tests.openapi_document import resolve_response_example
 from tests.stub_api import StubApi
 
-UPDATE_STATISTICS = resolve_response_example("GET", "/v1/apps/{appId}/statistics/updates")
+UPDATE_STATISTICS = resolve_response_example(
+    method="GET", template="/v1/apps/{appId}/statistics/updates"
+)
 
 
 def test_gets_the_update_statistics_of_one_channel_and_release_over_the_period() -> None:

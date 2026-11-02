@@ -25,11 +25,11 @@ class BundlesResource(BaseResource):
         Retried, since a completed bundle answers itself again.
         """
         return self._http_client.fetch_json(
-            "POST",
-            resolve_path(
+            is_retryable=True,
+            method="POST",
+            path=resolve_path(
                 "/v1/apps/{appId}/bundles/{bundleId}/complete", appId=app_id, bundleId=bundle_id
             ),
-            is_retryable=True,
             response_type=Bundle,
         )
 
@@ -47,8 +47,8 @@ class BundlesResource(BaseResource):
     ) -> Count:
         """Counts the bundles of the app that match the filters."""
         return self._http_client.fetch_json(
-            "GET",
-            resolve_path("/v1/apps/{appId}/bundles/count", appId=app_id),
+            method="GET",
+            path=resolve_path("/v1/apps/{appId}/bundles/count", appId=app_id),
             query={
                 "fingerprint": fingerprint,
                 "isInUse": is_in_use,
@@ -83,7 +83,6 @@ class BundlesResource(BaseResource):
         through `apps.files.upload`, and the pack through `apps.bundles.pack.upload`.
         """
         return self._http_client.fetch_creating_post(
-            resolve_path("/v1/apps/{appId}/bundles", appId=app_id),
             body={
                 "files": files,
                 "fingerprint": fingerprint,
@@ -97,6 +96,7 @@ class BundlesResource(BaseResource):
                 "version": version,
             },
             idempotency_key=idempotency_key,
+            path=resolve_path("/v1/apps/{appId}/bundles", appId=app_id),
             response_type=Bundle,
         )
 
@@ -106,14 +106,18 @@ class BundlesResource(BaseResource):
         A bundle that a release serves or a store build embeds is refused.
         """
         self._http_client.fetch_status(
-            "DELETE",
-            resolve_path("/v1/apps/{appId}/bundles/{bundleId}", appId=app_id, bundleId=bundle_id),
+            method="DELETE",
+            path=resolve_path(
+                "/v1/apps/{appId}/bundles/{bundleId}", appId=app_id, bundleId=bundle_id
+            ),
         )
 
     def get(self, *, app_id: str, bundle_id: str) -> Bundle:
         return self._http_client.fetch_json(
-            "GET",
-            resolve_path("/v1/apps/{appId}/bundles/{bundleId}", appId=app_id, bundleId=bundle_id),
+            method="GET",
+            path=resolve_path(
+                "/v1/apps/{appId}/bundles/{bundleId}", appId=app_id, bundleId=bundle_id
+            ),
             response_type=Bundle,
         )
 
@@ -133,8 +137,8 @@ class BundlesResource(BaseResource):
     ) -> list[Bundle]:
         """Lists the bundles of the app, newest first."""
         return self._http_client.fetch_json(
-            "GET",
-            resolve_path("/v1/apps/{appId}/bundles", appId=app_id),
+            method="GET",
+            path=resolve_path("/v1/apps/{appId}/bundles", appId=app_id),
             query={
                 "fingerprint": fingerprint,
                 "isInUse": is_in_use,

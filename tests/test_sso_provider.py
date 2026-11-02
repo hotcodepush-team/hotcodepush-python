@@ -5,7 +5,7 @@ from tests.openapi_document import resolve_response_example
 from tests.stub_api import StubApi, resolve_sent_json
 
 SSO_PROVIDER_ROW = resolve_response_example(
-    "GET", "/v1/organizations/{organizationId}/sso-provider"
+    method="GET", template="/v1/organizations/{organizationId}/sso-provider"
 )
 SSO_PROVIDER_URL = "https://api.hotcodepush.com/v1/organizations/organization/sso-provider"
 

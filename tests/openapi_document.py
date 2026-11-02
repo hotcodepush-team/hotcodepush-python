@@ -41,7 +41,7 @@ def resolve_object_example(schema: dict[str, Any]) -> dict[str, object]:
     return example
 
 
-def resolve_operation(method: str, template: str) -> dict[str, Any]:
+def resolve_operation(*, method: str, template: str) -> dict[str, Any]:
     operation: dict[str, Any] = OPENAPI_DOCUMENT["paths"][template][method.lower()]
     return operation
 
@@ -57,8 +57,8 @@ def resolve_path_template(path: str) -> str | None:
     )
 
 
-def resolve_response_example(method: str, template: str) -> object:
-    responses = resolve_operation(method, template)["responses"]
+def resolve_response_example(*, method: str, template: str) -> object:
+    responses = resolve_operation(method=method, template=template)["responses"]
     schema = next(
         response["content"]["application/json"]["schema"]
         for status, response in responses.items()

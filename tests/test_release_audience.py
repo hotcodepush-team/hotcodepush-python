@@ -4,7 +4,9 @@ from hotcodepush import Audience
 from tests.openapi_document import resolve_response_example
 from tests.stub_api import StubApi
 
-AUDIENCE = resolve_response_example("GET", "/v1/apps/{appId}/releases/{releaseId}/audience")
+AUDIENCE = resolve_response_example(
+    method="GET", template="/v1/apps/{appId}/releases/{releaseId}/audience"
+)
 
 
 def test_gets_the_audience_the_release_reaches() -> None:

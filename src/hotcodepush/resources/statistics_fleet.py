@@ -13,8 +13,8 @@ class StatisticsFleetResource(BaseResource):
         `channel_id` limits it to one channel.
         """
         return self._http_client.fetch_json(
-            "GET",
-            resolve_path("/v1/apps/{appId}/statistics/fleet", appId=app_id),
+            method="GET",
+            path=resolve_path("/v1/apps/{appId}/statistics/fleet", appId=app_id),
             query={"channelId": channel_id},
             response_type=FleetStatistics,
         )

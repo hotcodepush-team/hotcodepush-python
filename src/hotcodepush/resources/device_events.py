@@ -12,8 +12,8 @@ class DeviceEventsResource(BaseResource):
     ) -> Count:
         """Counts the events of the device that match the filter."""
         return self._http_client.fetch_json(
-            "GET",
-            resolve_path(
+            method="GET",
+            path=resolve_path(
                 "/v1/apps/{appId}/devices/{deviceId}/events/count",
                 appId=app_id,
                 deviceId=device_id,
@@ -38,8 +38,8 @@ class DeviceEventsResource(BaseResource):
         of each event.
         """
         return self._http_client.fetch_json(
-            "GET",
-            resolve_path(
+            method="GET",
+            path=resolve_path(
                 "/v1/apps/{appId}/devices/{deviceId}/events", appId=app_id, deviceId=device_id
             ),
             query={

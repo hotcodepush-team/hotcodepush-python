@@ -18,11 +18,11 @@ class SsoProviderVerificationsResource(BaseResource):
         An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_json(
-            "POST",
-            resolve_path(
+            is_retryable=True,
+            method="POST",
+            path=resolve_path(
                 "/v1/organizations/{organizationId}/sso-provider/verifications",
                 organizationId=organization_id,
             ),
-            is_retryable=True,
             response_type=SsoProvider,
         )

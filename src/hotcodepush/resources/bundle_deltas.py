@@ -10,8 +10,8 @@ class BundleDeltasResource(BaseResource):
     def count(self, *, app_id: str, bundle_id: str) -> Count:
         """Counts the deltas of the bundle."""
         return self._http_client.fetch_json(
-            "GET",
-            resolve_path(
+            method="GET",
+            path=resolve_path(
                 "/v1/apps/{appId}/bundles/{bundleId}/deltas/count",
                 appId=app_id,
                 bundleId=bundle_id,
@@ -34,8 +34,8 @@ class BundleDeltasResource(BaseResource):
         embeds the base.
         """
         return self._http_client.fetch_json(
-            "GET",
-            resolve_path(
+            method="GET",
+            path=resolve_path(
                 "/v1/apps/{appId}/bundles/{bundleId}/deltas", appId=app_id, bundleId=bundle_id
             ),
             query={"limit": limit, "offset": offset, "relations": relations},

@@ -19,8 +19,8 @@ class NotificationsResource(BaseResource):
         An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_json(
-            "GET",
-            resolve_path("/v1/notifications/count"),
+            method="GET",
+            path=resolve_path("/v1/notifications/count"),
             query={"isRead": is_read},
             response_type=Count,
         )
@@ -38,8 +38,8 @@ class NotificationsResource(BaseResource):
         An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_json(
-            "GET",
-            resolve_path("/v1/notifications"),
+            method="GET",
+            path=resolve_path("/v1/notifications"),
             query={"isRead": is_read, "limit": limit, "offset": offset, "relations": relations},
             response_type=list[Notification],
         )
@@ -50,9 +50,9 @@ class NotificationsResource(BaseResource):
         An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_json(
-            "PATCH",
-            resolve_path("/v1/notifications/{notificationId}", notificationId=notification_id),
             body={"isRead": is_read},
+            method="PATCH",
+            path=resolve_path("/v1/notifications/{notificationId}", notificationId=notification_id),
             response_type=Notification,
         )
 
@@ -62,5 +62,5 @@ class NotificationsResource(BaseResource):
         An API token answers `forbidden`; sign in with a session.
         """
         self._http_client.fetch_status(
-            "PATCH", resolve_path("/v1/notifications"), body={"isRead": is_read}
+            body={"isRead": is_read}, method="PATCH", path=resolve_path("/v1/notifications")
         )

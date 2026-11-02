@@ -22,8 +22,8 @@ class OrganizationInvitationsResource(BaseResource):
         An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_json(
-            "GET",
-            resolve_path(
+            method="GET",
+            path=resolve_path(
                 "/v1/organizations/{organizationId}/invitations/count",
                 organizationId=organization_id,
             ),
@@ -46,11 +46,11 @@ class OrganizationInvitationsResource(BaseResource):
         An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_creating_post(
-            resolve_path(
-                "/v1/organizations/{organizationId}/invitations", organizationId=organization_id
-            ),
             body={"email": email, "role": role},
             idempotency_key=idempotency_key,
+            path=resolve_path(
+                "/v1/organizations/{organizationId}/invitations", organizationId=organization_id
+            ),
             response_type=Invitation,
         )
 
@@ -60,8 +60,8 @@ class OrganizationInvitationsResource(BaseResource):
         An API token answers `forbidden`; sign in with a session.
         """
         self._http_client.fetch_status(
-            "DELETE",
-            resolve_path(
+            method="DELETE",
+            path=resolve_path(
                 "/v1/organizations/{organizationId}/invitations/{invitationId}",
                 invitationId=invitation_id,
                 organizationId=organization_id,
@@ -76,8 +76,8 @@ class OrganizationInvitationsResource(BaseResource):
         An API token answers `forbidden`; sign in with a session.
         """
         self._http_client.fetch_status(
-            "DELETE",
-            resolve_path(
+            method="DELETE",
+            path=resolve_path(
                 "/v1/organizations/{organizationId}/invitations", organizationId=organization_id
             ),
             query={"ids": ids},
@@ -101,8 +101,8 @@ class OrganizationInvitationsResource(BaseResource):
         An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_json(
-            "GET",
-            resolve_path(
+            method="GET",
+            path=resolve_path(
                 "/v1/organizations/{organizationId}/invitations", organizationId=organization_id
             ),
             query={

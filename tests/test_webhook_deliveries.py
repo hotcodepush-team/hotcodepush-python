@@ -11,8 +11,8 @@ DELIVERIES_URL = (
     "https://api.hotcodepush.com/v1/organizations/organization/webhooks/webhook/deliveries"
 )
 WEBHOOK_DELIVERY_ROW = resolve_response_example(
-    "POST",
-    "/v1/organizations/{organizationId}/webhooks/{webhookId}/deliveries/{deliveryId}/redeliver",
+    method="POST",
+    template="/v1/organizations/{organizationId}/webhooks/{webhookId}/deliveries/{deliveryId}/redeliver",
 )
 
 

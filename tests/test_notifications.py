@@ -4,8 +4,12 @@ from hotcodepush import Count, Notification
 from tests.openapi_document import resolve_response_example
 from tests.stub_api import StubApi, resolve_sent_json
 
-NOTIFICATION_ROW = resolve_response_example("PATCH", "/v1/notifications/{notificationId}")
-NOTIFICATION_ROWS_WITH_RELATIONS = resolve_response_example("GET", "/v1/notifications")
+NOTIFICATION_ROW = resolve_response_example(
+    method="PATCH", template="/v1/notifications/{notificationId}"
+)
+NOTIFICATION_ROWS_WITH_RELATIONS = resolve_response_example(
+    method="GET", template="/v1/notifications"
+)
 NOTIFICATIONS_URL = "https://api.hotcodepush.com/v1/notifications"
 
 

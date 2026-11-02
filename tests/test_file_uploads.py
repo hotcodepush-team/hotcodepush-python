@@ -5,7 +5,7 @@ from tests.openapi_document import resolve_response_example
 from tests.stub_api import StubApi, resolve_sent_json
 
 FILE_ROW = resolve_response_example(
-    "POST", "/v1/apps/{appId}/files/{sha256}/uploads/{uploadId}/complete"
+    method="POST", template="/v1/apps/{appId}/files/{sha256}/uploads/{uploadId}/complete"
 )
 SHA256 = "a" * 64
 UPLOADS_URL = f"https://api.hotcodepush.com/v1/apps/app/files/{SHA256}/uploads"

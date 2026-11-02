@@ -26,8 +26,8 @@ class AuditLogsResource(BaseResource):
         An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_json(
-            "GET",
-            resolve_path(
+            method="GET",
+            path=resolve_path(
                 "/v1/organizations/{organizationId}/audit-logs/count",
                 organizationId=organization_id,
             ),
@@ -58,8 +58,8 @@ class AuditLogsResource(BaseResource):
         An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_bytes(
-            "GET",
-            resolve_path(
+            method="GET",
+            path=resolve_path(
                 "/v1/organizations/{organizationId}/audit-logs", organizationId=organization_id
             ),
             query={
@@ -95,8 +95,8 @@ class AuditLogsResource(BaseResource):
         An API token answers `forbidden`; sign in with a session.
         """
         return self._http_client.fetch_json(
-            "GET",
-            resolve_path(
+            method="GET",
+            path=resolve_path(
                 "/v1/organizations/{organizationId}/audit-logs", organizationId=organization_id
             ),
             query={

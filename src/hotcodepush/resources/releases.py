@@ -29,8 +29,8 @@ class ReleasesResource(BaseResource):
         `number` needs `channel_id`, since release numbers count per channel.
         """
         return self._http_client.fetch_json(
-            "GET",
-            resolve_path("/v1/apps/{appId}/releases/count", appId=app_id),
+            method="GET",
+            path=resolve_path("/v1/apps/{appId}/releases/count", appId=app_id),
             query={
                 "bundleId": bundle_id,
                 "channelId": channel_id,
@@ -53,8 +53,8 @@ class ReleasesResource(BaseResource):
         The status includes when the release went live in the index and when the purge completed.
         """
         return self._http_client.fetch_json(
-            "GET",
-            resolve_path(
+            method="GET",
+            path=resolve_path(
                 "/v1/apps/{appId}/releases/{releaseId}", appId=app_id, releaseId=release_id
             ),
             query={"relations": relations},
@@ -81,8 +81,8 @@ class ReleasesResource(BaseResource):
         numbers count per channel; without `channel_id` the API answers `validation`.
         """
         return self._http_client.fetch_json(
-            "GET",
-            resolve_path("/v1/apps/{appId}/releases", appId=app_id),
+            method="GET",
+            path=resolve_path("/v1/apps/{appId}/releases", appId=app_id),
             query={
                 "bundleId": bundle_id,
                 "channelId": channel_id,
@@ -102,11 +102,11 @@ class ReleasesResource(BaseResource):
         Retried, since pausing a paused release answers it unchanged.
         """
         return self._http_client.fetch_json(
-            "POST",
-            resolve_path(
+            is_retryable=True,
+            method="POST",
+            path=resolve_path(
                 "/v1/apps/{appId}/releases/{releaseId}/pause", appId=app_id, releaseId=release_id
             ),
-            is_retryable=True,
             response_type=Release,
         )
 
@@ -116,11 +116,11 @@ class ReleasesResource(BaseResource):
         Retried, since resuming an active release answers it unchanged.
         """
         return self._http_client.fetch_json(
-            "POST",
-            resolve_path(
+            is_retryable=True,
+            method="POST",
+            path=resolve_path(
                 "/v1/apps/{appId}/releases/{releaseId}/resume", appId=app_id, releaseId=release_id
             ),
-            is_retryable=True,
             response_type=Release,
         )
 
@@ -131,8 +131,8 @@ class ReleasesResource(BaseResource):
         retried, since a repeat answers `release_revoked`.
         """
         return self._http_client.fetch_json(
-            "POST",
-            resolve_path(
+            method="POST",
+            path=resolve_path(
                 "/v1/apps/{appId}/releases/{releaseId}/revoke", appId=app_id, releaseId=release_id
             ),
             response_type=Release,
@@ -157,10 +157,6 @@ class ReleasesResource(BaseResource):
         an auto-pause override inherits the channel's value.
         """
         return self._http_client.fetch_json(
-            "PATCH",
-            resolve_path(
-                "/v1/apps/{appId}/releases/{releaseId}", appId=app_id, releaseId=release_id
-            ),
             body={
                 "failureAction": failure_action,
                 "failureMinimumUpdateCount": failure_minimum_update_count,
@@ -170,5 +166,9 @@ class ReleasesResource(BaseResource):
                 "progression": progression,
                 "rolloutPercent": rollout_percent,
             },
+            method="PATCH",
+            path=resolve_path(
+                "/v1/apps/{appId}/releases/{releaseId}", appId=app_id, releaseId=release_id
+            ),
             response_type=Release,
         )

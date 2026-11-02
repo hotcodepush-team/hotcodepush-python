@@ -13,8 +13,8 @@ class UsageAppsResource(BaseResource):
         `list` pages through them.
         """
         return self._http_client.fetch_json(
-            "GET",
-            resolve_path(
+            method="GET",
+            path=resolve_path(
                 "/v1/organizations/{organizationId}/usage/apps/count",
                 organizationId=organization_id,
             ),
@@ -28,8 +28,8 @@ class UsageAppsResource(BaseResource):
         The CSV includes the app names.
         """
         return self._http_client.fetch_bytes(
-            "GET",
-            resolve_path(
+            method="GET",
+            path=resolve_path(
                 "/v1/organizations/{organizationId}/usage/apps", organizationId=organization_id
             ),
             query={"format": "csv", "month": month},
@@ -50,8 +50,8 @@ class UsageAppsResource(BaseResource):
         id and name of each app.
         """
         return self._http_client.fetch_json(
-            "GET",
-            resolve_path(
+            method="GET",
+            path=resolve_path(
                 "/v1/organizations/{organizationId}/usage/apps", organizationId=organization_id
             ),
             query={"limit": limit, "month": month, "offset": offset, "relations": relations},

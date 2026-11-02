@@ -18,8 +18,8 @@ class StatisticsUsageResource(BaseResource):
     ) -> UsageStatistics:
         """Gets the usage statistics from `period_since` to `period_until`, both inclusive."""
         return self._http_client.fetch_json(
-            "GET",
-            resolve_path("/v1/apps/{appId}/statistics/usage", appId=app_id),
+            method="GET",
+            path=resolve_path("/v1/apps/{appId}/statistics/usage", appId=app_id),
             query={"periodSince": period_since, "periodUntil": period_until},
             response_type=UsageStatistics,
         )

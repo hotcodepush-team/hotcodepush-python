@@ -4,7 +4,7 @@ from hotcodepush import Count, Device
 from tests.openapi_document import resolve_response_example
 from tests.stub_api import StubApi
 
-DEVICE_ROW = resolve_response_example("GET", "/v1/apps/{appId}/devices/{deviceId}")
+DEVICE_ROW = resolve_response_example(method="GET", template="/v1/apps/{appId}/devices/{deviceId}")
 DEVICES_URL = "https://api.hotcodepush.com/v1/apps/app/devices"
 
 

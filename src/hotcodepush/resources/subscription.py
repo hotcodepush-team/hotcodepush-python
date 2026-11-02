@@ -27,13 +27,13 @@ class SubscriptionResource(BaseResource):
         An API token answers `forbidden`; sign in with a session.
         """
         self._http_client.fetch_status(
-            "POST",
-            resolve_path(
+            body={"comment": comment, "reason": reason},
+            is_retryable=True,
+            method="POST",
+            path=resolve_path(
                 "/v1/organizations/{organizationId}/subscription/cancel",
                 organizationId=organization_id,
             ),
-            body={"comment": comment, "reason": reason},
-            is_retryable=True,
         )
 
     def uncancel(self, *, organization_id: str) -> None:
@@ -44,10 +44,10 @@ class SubscriptionResource(BaseResource):
         An API token answers `forbidden`; sign in with a session.
         """
         self._http_client.fetch_status(
-            "POST",
-            resolve_path(
+            is_retryable=True,
+            method="POST",
+            path=resolve_path(
                 "/v1/organizations/{organizationId}/subscription/uncancel",
                 organizationId=organization_id,
             ),
-            is_retryable=True,
         )

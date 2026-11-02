@@ -5,9 +5,13 @@ from hotcodepush import Count, HotCodePushError, Invitation, Member
 from tests.openapi_document import resolve_response_example
 from tests.stub_api import StubApi, resolve_sent_json
 
-INVITATION_ROW = resolve_response_example("POST", "/v1/organizations/{organizationId}/invitations")
+INVITATION_ROW = resolve_response_example(
+    method="POST", template="/v1/organizations/{organizationId}/invitations"
+)
 INVITATIONS_URL = "https://api.hotcodepush.com/v1/invitations"
-MEMBER_ROW = resolve_response_example("POST", "/v1/invitations/{invitationId}/accept")
+MEMBER_ROW = resolve_response_example(
+    method="POST", template="/v1/invitations/{invitationId}/accept"
+)
 
 
 def test_posts_the_token_to_accept_the_invitation() -> None:
@@ -48,7 +52,9 @@ def test_lists_the_callers_pending_invitations() -> None:
 
 
 def test_lists_the_callers_invitations_with_their_organizations_when_the_relation_is_set() -> None:
-    api = StubApi(httpx.Response(200, json=resolve_response_example("GET", "/v1/invitations")))
+    api = StubApi(
+        httpx.Response(200, json=resolve_response_example(method="GET", template="/v1/invitations"))
+    )
 
     fetched_invitations = api.client.invitations.list(relations=["organization"])
 

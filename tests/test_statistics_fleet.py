@@ -4,7 +4,9 @@ from hotcodepush import FleetStatistics
 from tests.openapi_document import resolve_response_example
 from tests.stub_api import StubApi
 
-FLEET_STATISTICS = resolve_response_example("GET", "/v1/apps/{appId}/statistics/fleet")
+FLEET_STATISTICS = resolve_response_example(
+    method="GET", template="/v1/apps/{appId}/statistics/fleet"
+)
 
 
 def test_gets_the_fleet_statistics_of_the_devices_of_one_channel() -> None:
