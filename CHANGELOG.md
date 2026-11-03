@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.7.0](https://github.com/hotcodepush-team/hotcodepush-python/compare/v0.6.0...v0.7.0) (2026-11-03)
+
+
+### ⚠ BREAKING CHANGES
+
+* WebhookDelivery is replaced by Delivery, and Webhook.is_enabled by disabled_at, a datetime or None.
+
+### Features
+
+* the telemetry export resource ([#17](https://github.com/hotcodepush-team/hotcodepush-python/issues/17)) ([efa59fb](https://github.com/hotcodepush-team/hotcodepush-python/commit/efa59fb906fd142a095697fb40ad1aebc644c34e))
+
+
+### Documentation
+
+* the token passed explicitly in the README ([b74d9c9](https://github.com/hotcodepush-team/hotcodepush-python/commit/b74d9c9010ab3ecae79eb789c4f0622b4025b8b5))
+
 ## [0.6.0](https://github.com/hotcodepush-team/hotcodepush-python/compare/v0.5.0...v0.6.0) (2026-11-02)
 
 
