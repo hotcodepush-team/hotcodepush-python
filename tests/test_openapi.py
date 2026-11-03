@@ -417,7 +417,18 @@ CALLS: dict[str, Callable[[HotCodePush], object]] = {
     ),
     "notifications.count": lambda hot_code_push: hot_code_push.notifications.count(is_read=False),
     "notifications.list": lambda hot_code_push: hot_code_push.notifications.list(
-        is_read=False, limit=10, offset=10, relations=["app", "channel", "memberUser", "release"]
+        is_read=False,
+        limit=10,
+        offset=10,
+        relations=[
+            "apiToken",
+            "app",
+            "channel",
+            "memberUser",
+            "release",
+            "userSessionClient",
+            "webhook",
+        ],
     ),
     "notifications.update": lambda hot_code_push: hot_code_push.notifications.update(
         is_read=True, notification_id=NOTIFICATION_ID
@@ -595,6 +606,51 @@ CALLS: dict[str, Callable[[HotCodePush], object]] = {
     ),
     "organizations.subscription.uncancel": lambda hot_code_push: (
         hot_code_push.organizations.subscription.uncancel(organization_id=ORGANIZATION_ID)
+    ),
+    "organizations.telemetry_export.delete": lambda hot_code_push: (
+        hot_code_push.organizations.telemetry_export.delete(organization_id=ORGANIZATION_ID)
+    ),
+    "organizations.telemetry_export.deliveries.count": lambda hot_code_push: (
+        hot_code_push.organizations.telemetry_export.deliveries.count(
+            created_since=CREATED_SINCE,
+            created_until=CREATED_UNTIL,
+            organization_id=ORGANIZATION_ID,
+            status="failed",
+        )
+    ),
+    "organizations.telemetry_export.deliveries.list": lambda hot_code_push: (
+        hot_code_push.organizations.telemetry_export.deliveries.list(
+            created_since=CREATED_SINCE,
+            created_until=CREATED_UNTIL,
+            limit=10,
+            offset=10,
+            organization_id=ORGANIZATION_ID,
+            status="failed",
+        )
+    ),
+    "organizations.telemetry_export.deliveries.redeliver": lambda hot_code_push: (
+        hot_code_push.organizations.telemetry_export.deliveries.redeliver(
+            delivery_id=DELIVERY_ID, organization_id=ORGANIZATION_ID
+        )
+    ),
+    "organizations.telemetry_export.get": lambda hot_code_push: (
+        hot_code_push.organizations.telemetry_export.get(organization_id=ORGANIZATION_ID)
+    ),
+    "organizations.telemetry_export.set": lambda hot_code_push: (
+        hot_code_push.organizations.telemetry_export.set(
+            headers={"Authorization": "Bearer example-token"},
+            organization_id=ORGANIZATION_ID,
+            signals=["logs", "metrics"],
+            url="https://otlp.example.com",
+        )
+    ),
+    "organizations.telemetry_export.test": lambda hot_code_push: (
+        hot_code_push.organizations.telemetry_export.test(organization_id=ORGANIZATION_ID)
+    ),
+    "organizations.telemetry_export.update": lambda hot_code_push: (
+        hot_code_push.organizations.telemetry_export.update(
+            is_enabled=False, organization_id=ORGANIZATION_ID
+        )
     ),
     "organizations.update": lambda hot_code_push: hot_code_push.organizations.update(
         country_allowlist=["DE"],
@@ -884,6 +940,16 @@ def resolve_undocumented_fields(value: object, *, path: str, schema: dict[str, A
         for branch in resolve_branches(schema)
         for name, property_schema in branch.get("properties", {}).items()
     }
+    record_value_schema = next(
+        (
+            branch["additionalProperties"]
+            for branch in resolve_branches(schema)
+            if isinstance(branch.get("additionalProperties"), dict)
+        ),
+        None,
+    )
+    if record_value_schema is not None:
+        properties = dict.fromkeys(value, record_value_schema) | properties
     return [
         undocumented_field
         for name, item in value.items()

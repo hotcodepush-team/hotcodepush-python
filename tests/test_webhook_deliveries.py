@@ -3,7 +3,7 @@ from datetime import UTC, datetime
 import httpx
 import pytest
 
-from hotcodepush import Count, HotCodePushError, WebhookDelivery
+from hotcodepush import Count, Delivery, HotCodePushError
 from tests.openapi_document import resolve_response_example
 from tests.stub_api import StubApi
 
@@ -43,7 +43,7 @@ def test_lists_the_deliveries_of_the_webhook_under_the_filters() -> None:
         webhook_id="webhook",
     )
 
-    assert fetched_deliveries == [WebhookDelivery.model_validate(WEBHOOK_DELIVERY_ROW)]
+    assert fetched_deliveries == [Delivery.model_validate(WEBHOOK_DELIVERY_ROW)]
     assert api.sent_methods_and_urls == [
         f"GET {DELIVERIES_URL}?createdUntil=2026-10-20T00%3A00%3A00.000Z&limit=10&status=pending"
     ]
@@ -56,7 +56,7 @@ def test_posts_to_redeliver_the_delivery_and_answers_it_settled() -> None:
         delivery_id="delivery", organization_id="organization", webhook_id="webhook"
     )
 
-    assert redelivered_delivery == WebhookDelivery.model_validate(WEBHOOK_DELIVERY_ROW)
+    assert redelivered_delivery == Delivery.model_validate(WEBHOOK_DELIVERY_ROW)
     assert api.sent_methods_and_urls == [f"POST {DELIVERIES_URL}/delivery/redeliver"]
     assert api.last_request.content == b""
 

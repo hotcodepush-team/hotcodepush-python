@@ -1,7 +1,7 @@
 import httpx
 import pytest
 
-from hotcodepush import Count, CreatedWebhook, HotCodePushError, Webhook, WebhookDelivery
+from hotcodepush import Count, CreatedWebhook, Delivery, HotCodePushError, Webhook
 from tests.openapi_document import resolve_response_example
 from tests.stub_api import StubApi, resolve_sent_json
 
@@ -101,7 +101,7 @@ def test_posts_to_test_the_webhook_and_answers_the_settled_delivery() -> None:
         organization_id="organization", webhook_id="webhook"
     )
 
-    assert tested_delivery == WebhookDelivery.model_validate(WEBHOOK_DELIVERY_ROW)
+    assert tested_delivery == Delivery.model_validate(WEBHOOK_DELIVERY_ROW)
     assert api.sent_methods_and_urls == [f"POST {WEBHOOKS_URL}/webhook/test"]
     assert api.last_request.content == b""
 

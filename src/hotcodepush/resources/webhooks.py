@@ -5,7 +5,7 @@ from typing import Literal
 
 from .._http import HttpClient, resolve_path
 from .._types import NOT_GIVEN, NotGiven
-from ..models import Count, CreatedWebhook, Webhook, WebhookDelivery, WebhookEvent
+from ..models import Count, CreatedWebhook, Delivery, Webhook, WebhookEvent
 from ._base import BaseResource
 from .webhook_deliveries import WebhookDeliveriesResource
 
@@ -109,7 +109,7 @@ class WebhooksResource(BaseResource):
             response_type=list[Webhook],
         )
 
-    def test(self, *, organization_id: str, webhook_id: str) -> WebhookDelivery:
+    def test(self, *, organization_id: str, webhook_id: str) -> Delivery:
         """Sends one sample event, `webhook.test`, and returns the settled delivery.
 
         The event takes the normal delivery path within the request. Never retried, since each
@@ -124,7 +124,7 @@ class WebhooksResource(BaseResource):
                 organizationId=organization_id,
                 webhookId=webhook_id,
             ),
-            response_type=WebhookDelivery,
+            response_type=Delivery,
         )
 
     def update(
@@ -140,8 +140,8 @@ class WebhooksResource(BaseResource):
     ) -> Webhook:
         """Changes the name, the URL, the `events`, the app filter or `is_enabled`.
 
-        The format and the secret never change. Enabling a webhook that was turned off after fifty
-        failed deliveries in a row resets its failure count.
+        The format and the secret never change. `is_enabled=False` sets `disabled_at`, and
+        `is_enabled=True` clears it and resets the failure count.
 
         An API token answers `forbidden`; sign in with a session.
         """

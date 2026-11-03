@@ -16,6 +16,7 @@ from pydantic.alias_generators import to_camel
 AppUsageMonthRelation = Literal["app"]
 AuditLogRelation = Literal["app", "user"]
 BundleDeltaRelation = Literal["baseBundle"]
+DeliveryStatus = Literal["failed", "pending", "succeeded"]
 DeviceRelation = Literal["channel", "currentRelease"]
 FailureAction = Literal["none", "notify", "pause", "revoke"]
 Framework = Literal["capacitor", "cordova", "expo", "react_native"]
@@ -34,11 +35,14 @@ NotificationCategory = Literal[
     "team_activity",
 ]
 NotificationMedium = Literal["email", "in_app"]
-NotificationRelation = Literal["app", "channel", "memberUser", "release"]
+NotificationRelation = Literal[
+    "apiToken", "app", "channel", "memberUser", "release", "userSessionClient", "webhook"
+]
 Platform = Literal["android", "ios"]
 ReleaseDeviceEventRelation = Literal["release"]
 ReleaseRelation = Literal["bundle", "channel", "releaseCounters"]
 Role = Literal["admin", "billing", "member", "owner"]
+TelemetrySignal = Literal["logs", "metrics"]
 UserRelation = Literal["accounts", "members", "members.organization"]
 WebhookEvent = Literal[
     "app.created",
@@ -376,11 +380,41 @@ class DeviceCondition(HotCodePushModel):
     type: Literal["device"] = "device"
 
 
+class Delivery(HotCodePushModel):
+    """One event or OTLP document sent to a webhook or to the telemetry export, with its attempts.
+
+    Exactly one of `telemetry_export_id` and `webhook_id` is set. `type` is the audit type,
+    `metrics`, `webhook.test` or `telemetry_export.test`. `response_code` and `response_body` are
+    from the last attempt, and the body is cut at 4,096 characters. `next_attempt_at` is set while
+    the queue retries the delivery.
+    """
+
+    attempt_count: int
+    audit_row_id: str | None
+    created_at: datetime
+    id: str
+    next_attempt_at: datetime | None
+    response_body: str | None
+    response_code: int | None
+    status: DeliveryStatus
+    telemetry_export_id: str | None
+    type: str
+    updated_at: datetime
+    webhook_id: str | None
+
+
 class DeviceCount(HotCodePushModel):
     """One value of a dimension and the number of devices that report it."""
 
     device_count: int
     value: str | None
+
+
+class EmbeddedApiToken(HotCodePushModel):
+    """An API token embedded in a notification."""
+
+    id: str
+    name: str | None
 
 
 class EmbeddedRelease(HotCodePushModel):
@@ -407,6 +441,14 @@ class EmbeddedUser(HotCodePushModel):
     name: str
     two_factor_enabled: bool
     updated_at: datetime
+
+
+class EmbeddedUserSessionClient(HotCodePushModel):
+    """The client of a sign-in embedded in a notification, with the country it signed in from."""
+
+    client: str
+    country: str | None
+    id: str
 
 
 class FingerprintCondition(HotCodePushModel):
@@ -502,10 +544,12 @@ class Notification(HotCodePushModel):
     caller's account. `organization_name` names the organization of a deletion notice, which
     outlives it.
 
-    `app`, `channel`, `member_user` and `release` are set when `relations` names them, and are
-    `None` once the row is deleted.
+    `api_token`, `app`, `channel`, `member_user`, `release`, `user_session_client` and `webhook`
+    are set when `relations` names them, and are `None` once the row is deleted.
     """
 
+    api_token: EmbeddedApiToken | None = None
+    api_token_id: str | None
     app: NamedEmbed | None = None
     app_id: str | None
     channel: NamedEmbed | None = None
@@ -522,6 +566,10 @@ class Notification(HotCodePushModel):
     type: str
     updated_at: datetime
     user_id: str
+    user_session_client: EmbeddedUserSessionClient | None = None
+    user_session_client_id: str | None
+    webhook: NamedEmbed | None = None
+    webhook_id: str | None
 
 
 class NotificationPreference(HotCodePushModel):
@@ -752,6 +800,25 @@ class SsoProvider(HotCodePushModel):
     user_id: str | None
 
 
+class TelemetryExport(HotCodePushModel):
+    """The OTLP export of an organization's audit log and metrics, one per organization.
+
+    `url` is the OTLP/HTTP base URL. The header values are write-only, so only `header_names` is
+    answered. `disabled_at` is set while the export is off, by hand or after fifty failed
+    deliveries in a row.
+    """
+
+    consecutive_failure_count: int
+    created_at: datetime
+    disabled_at: datetime | None
+    header_names: list[str]
+    id: str
+    organization_id: str
+    signals: list[TelemetrySignal]
+    updated_at: datetime
+    url: str
+
+
 class TimeToAdoption(HotCodePushModel):
     """When a release reached half and nine tenths of the active devices of its channel. Each
     is `None` until it happens.
@@ -873,17 +940,17 @@ class Webhook(HotCodePushModel):
     """An outbound webhook for the audit `events` it subscribes to.
 
     `format` is `raw` for the JSON payload, or `slack`, `discord` or `teams` for a chat message.
-    `app_id` is `None` for the events of every app and of the organization. `is_enabled` turns
-    off after fifty failed deliveries in a row.
+    `app_id` is `None` for the events of every app and of the organization. `disabled_at` is set
+    while the webhook is off, by hand or after fifty failed deliveries in a row.
     """
 
     app_id: str | None
     consecutive_failure_count: int
     created_at: datetime
+    disabled_at: datetime | None
     events: list[str]
     format: Literal["discord", "raw", "slack", "teams"]
     id: str
-    is_enabled: bool
     name: str
     organization_id: str
     updated_at: datetime
@@ -898,27 +965,6 @@ class CreatedWebhook(Webhook):
     """
 
     secret: str | None
-
-
-class WebhookDelivery(HotCodePushModel):
-    """One event sent to a webhook, with its attempts.
-
-    `type` is the audit type or `webhook.test`. `response_code` and `response_body` are from the
-    last attempt, and the body is cut at 4,096 characters. `next_attempt_at` is set while the
-    queue retries the delivery.
-    """
-
-    attempt_count: int
-    audit_row_id: str | None
-    created_at: datetime
-    id: str
-    next_attempt_at: datetime | None
-    response_body: str | None
-    response_code: int | None
-    status: Literal["failed", "pending", "succeeded"]
-    type: str
-    updated_at: datetime
-    webhook_id: str
 
 
 ReleaseCondition = Annotated[

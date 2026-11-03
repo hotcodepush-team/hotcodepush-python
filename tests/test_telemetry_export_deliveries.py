@@ -1,0 +1,70 @@
+from datetime import UTC, datetime
+
+import httpx
+import pytest
+
+from hotcodepush import Count, Delivery, HotCodePushError
+from tests.openapi_document import resolve_response_example
+from tests.stub_api import StubApi
+
+DELIVERIES_URL = (
+    "https://api.hotcodepush.com/v1/organizations/organization/telemetry-export/deliveries"
+)
+TELEMETRY_EXPORT_DELIVERY_ROW = resolve_response_example(
+    method="POST",
+    template="/v1/organizations/{organizationId}/telemetry-export/deliveries/{deliveryId}/redeliver",
+)
+
+
+def test_counts_the_deliveries_of_the_telemetry_export_under_the_filters() -> None:
+    api = StubApi(httpx.Response(200, json={"count": 4}))
+
+    fetched_count = api.client.organizations.telemetry_export.deliveries.count(
+        created_since=datetime(2026, 10, 1, tzinfo=UTC),
+        organization_id="organization",
+        status="failed",
+    )
+
+    assert fetched_count == Count(count=4)
+    assert api.sent_methods_and_urls == [
+        f"GET {DELIVERIES_URL}/count?createdSince=2026-10-01T00%3A00%3A00.000Z&status=failed"
+    ]
+
+
+def test_lists_the_deliveries_of_the_telemetry_export_under_the_filters() -> None:
+    api = StubApi(httpx.Response(200, json=[TELEMETRY_EXPORT_DELIVERY_ROW]))
+
+    fetched_deliveries = api.client.organizations.telemetry_export.deliveries.list(
+        created_until=datetime(2026, 10, 20, tzinfo=UTC),
+        limit=10,
+        organization_id="organization",
+        status="pending",
+    )
+
+    assert fetched_deliveries == [Delivery.model_validate(TELEMETRY_EXPORT_DELIVERY_ROW)]
+    assert api.sent_methods_and_urls == [
+        f"GET {DELIVERIES_URL}?createdUntil=2026-10-20T00%3A00%3A00.000Z&limit=10&status=pending"
+    ]
+
+
+def test_posts_to_redeliver_the_delivery_and_answers_it_settled() -> None:
+    api = StubApi(httpx.Response(200, json=TELEMETRY_EXPORT_DELIVERY_ROW))
+
+    redelivered_delivery = api.client.organizations.telemetry_export.deliveries.redeliver(
+        delivery_id="delivery", organization_id="organization"
+    )
+
+    assert redelivered_delivery == Delivery.model_validate(TELEMETRY_EXPORT_DELIVERY_ROW)
+    assert api.sent_methods_and_urls == [f"POST {DELIVERIES_URL}/delivery/redeliver"]
+    assert api.last_request.content == b""
+
+
+def test_does_not_retry_the_redelivery_when_the_api_is_unavailable() -> None:
+    api = StubApi(httpx.Response(503))
+
+    with pytest.raises(HotCodePushError):
+        api.client.organizations.telemetry_export.deliveries.redeliver(
+            delivery_id="delivery", organization_id="organization"
+        )
+
+    assert len(api.requests) == 1

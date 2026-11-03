@@ -1,11 +1,10 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Literal
 
 from .._http import resolve_path
 from .._types import NOT_GIVEN, NotGiven
-from ..models import Count, WebhookDelivery
+from ..models import Count, Delivery, DeliveryStatus
 from ._base import BaseResource
 
 
@@ -18,7 +17,7 @@ class WebhookDeliveriesResource(BaseResource):
         created_since: datetime | NotGiven = NOT_GIVEN,
         created_until: datetime | NotGiven = NOT_GIVEN,
         organization_id: str,
-        status: Literal["failed", "pending", "succeeded"] | NotGiven = NOT_GIVEN,
+        status: DeliveryStatus | NotGiven = NOT_GIVEN,
         webhook_id: str,
     ) -> Count:
         """Counts the deliveries of the webhook that match the filters.
@@ -44,9 +43,9 @@ class WebhookDeliveriesResource(BaseResource):
         limit: int | NotGiven = NOT_GIVEN,
         offset: int | NotGiven = NOT_GIVEN,
         organization_id: str,
-        status: Literal["failed", "pending", "succeeded"] | NotGiven = NOT_GIVEN,
+        status: DeliveryStatus | NotGiven = NOT_GIVEN,
         webhook_id: str,
-    ) -> list[WebhookDelivery]:
+    ) -> list[Delivery]:
         """Lists the deliveries of the webhook, newest first.
 
         `status` filters by status. `created_since` and `created_until` filter by creation time,
@@ -68,12 +67,10 @@ class WebhookDeliveriesResource(BaseResource):
                 "offset": offset,
                 "status": status,
             },
-            response_type=list[WebhookDelivery],
+            response_type=list[Delivery],
         )
 
-    def redeliver(
-        self, *, delivery_id: str, organization_id: str, webhook_id: str
-    ) -> WebhookDelivery:
+    def redeliver(self, *, delivery_id: str, organization_id: str, webhook_id: str) -> Delivery:
         """Delivers the event again, once, and returns the settled delivery.
 
         The attempt runs within the request, and the attempt count goes on from before. Never
@@ -89,5 +86,5 @@ class WebhookDeliveriesResource(BaseResource):
                 organizationId=organization_id,
                 webhookId=webhook_id,
             ),
-            response_type=WebhookDelivery,
+            response_type=Delivery,
         )
