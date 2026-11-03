@@ -15,6 +15,7 @@ from .organization_apps import OrganizationAppsResource
 from .organization_invitations import OrganizationInvitationsResource
 from .sso_provider import SsoProviderResource
 from .subscription import SubscriptionResource
+from .telemetry_export import TelemetryExportResource
 from .usage import UsageResource
 from .webhooks import WebhooksResource
 
@@ -31,6 +32,7 @@ class OrganizationsResource(BaseResource):
         self.members = MembersResource(http_client)
         self.sso_provider = SsoProviderResource(http_client)
         self.subscription = SubscriptionResource(http_client)
+        self.telemetry_export = TelemetryExportResource(http_client)
         self.usage = UsageResource(http_client)
         self.webhooks = WebhooksResource(http_client)
 
