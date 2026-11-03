@@ -15,23 +15,25 @@ It requires Python 3.11 or later.
 ## Usage
 
 ```python
+import os
+
 from hotcodepush import HotCodePush
 
-hot_code_push = HotCodePush()  # reads the API token from HOTCODEPUSH_TOKEN, or pass token="…"
+hot_code_push = HotCodePush(token=os.environ["HOTCODEPUSH_TOKEN"])
 
 organization, *_ = hot_code_push.organizations.list()
 app = hot_code_push.organizations.apps.create(
     framework="capacitor", name="Demo", organization_id=organization.id
 )
 channel = hot_code_push.apps.channels.create(app_id=app.id, name="staging")
-hot_code_push.apps.channels.pause(app_id=app.id, channel_id=channel.id)
 ```
 
+`token` is an API token from the console's [API tokens](https://console.hotcodepush.com/settings/tokens) page. Left out, the client reads `HOTCODEPUSH_TOKEN`.
 The resources mirror the API's paths, `/v1/apps/{appId}/channels` being `apps.channels`.
-Every method takes keyword arguments and returns pydantic models with snake_case fields; an argument left out stays out of the request, and `None` sends `null`.
+Every method takes keyword arguments and returns pydantic models with snake_case fields. An argument left out stays out of the request, and `None` sends `null`.
 Uploads take `bytes` or a file object with its `content_length` and stream it.
-Creating calls send an `Idempotency-Key` and are retried; pass `idempotency_key` to reuse one across your own retries.
-A failed request raises a `HotCodePushError` with the API's `code`, `message`, `details` and the HTTP `status`; `code` is a `str`, so a code newer than your client passes through, and `ErrorCode` lists the codes this version knows.
+Creating calls send an `Idempotency-Key` and are retried. Pass `idempotency_key` to reuse one across your own retries.
+A failed request raises a `HotCodePushError` with the API's `code`, `message`, `details` and the HTTP `status`. `code` is a `str`, so a code newer than your client passes through, and `ErrorCode` lists the codes this version knows.
 
 ## Documentation
 
