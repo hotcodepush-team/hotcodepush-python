@@ -3,7 +3,7 @@
   "components": {
     "parameters": {
       "ClientHeader": {
-        "description": "The calling client and its version, `<cli|console|mcp|node|python>/<version>`; a version listed as faulty answers `client_update_required`.",
+        "description": "The calling client and its version, `<cli|console|mcp|node|python>/<version>`, optionally followed by `ci/<provider>`, which the CLI adds in CI; a version listed as faulty answers `client_update_required`.",
         "in": "header",
         "name": "X-HotCodePush-Client",
         "required": false,
@@ -11936,7 +11936,8 @@
                         {
                           "type": "null"
                         }
-                      ]
+                      ],
+                      "description": "The hour bucket the count was reported for, the start of a UTC hour. Null before the first report."
                     },
                     "reportedBillableDeviceCountMonth": {
                       "anyOf": [
@@ -12447,7 +12448,8 @@
                           {
                             "type": "null"
                           }
-                        ]
+                        ],
+                        "description": "The hour bucket the count was reported for, the start of a UTC hour. Null before the first report."
                       },
                       "reportedBillableDeviceCountMonth": {
                         "anyOf": [
@@ -13064,7 +13066,8 @@
                         {
                           "type": "null"
                         }
-                      ]
+                      ],
+                      "description": "The hour bucket the count was reported for, the start of a UTC hour. Null before the first report."
                     },
                     "reportedBillableDeviceCountMonth": {
                       "anyOf": [
@@ -13552,7 +13555,8 @@
                         {
                           "type": "null"
                         }
-                      ]
+                      ],
+                      "description": "The hour bucket the count was reported for, the start of a UTC hour. Null before the first report."
                     },
                     "reportedBillableDeviceCountMonth": {
                       "anyOf": [
@@ -14984,7 +14988,7 @@
     "/v1/apps/{appId}/bundles": {
       "get": {
         "operationId": "getV1AppsByAppIdBundles",
-        "description": "The app's bundles, newest first, every source unless `source` selects one: `binary`, the bundle a store build ships, which carries no number and no fingerprint; `upload`, one the CLI uploaded. `isInUse` selects the bundles an active or paused release serves, `fingerprint` those built for that native layer, `query` those whose number contains it.",
+        "description": "The app's bundles, newest first, every source unless `source` selects one: `binary`, the bundle a store build ships, which carries no number and no fingerprint; `upload`, one the CLI uploaded. `isInUse` selects the bundles an active or paused release serves, `fingerprint` those built for that native layer, `number` the bundle of that number, `query` those whose number contains it.",
         "responses": {
           "200": {
             "content": {
@@ -15297,6 +15301,15 @@
                 "false",
                 "true"
               ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "number",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
             }
           },
           {
@@ -15971,6 +15984,15 @@
                 "false",
                 "true"
               ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "number",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
             }
           },
           {
@@ -20039,7 +20061,7 @@
       },
       "delete": {
         "operationId": "deleteV1AppsByAppIdChannelsByChannelId",
-        "description": "Deletes the channel with its releases: it leaves the frontier and starts its bundles' retention clocks; refused on the app's default channel.",
+        "description": "Deletes the channel with its releases: it stops serving them and starts the retention clocks of the bundles only it served; refused on the app's default channel.",
         "responses": {
           "204": {
             "description": "The channel is gone."
@@ -20404,7 +20426,7 @@
     "/v1/apps/{appId}/channels/{channelId}/resume": {
       "post": {
         "operationId": "postV1AppsByAppIdChannelsByChannelIdResume",
-        "description": "The channel serves its frontier again.",
+        "description": "The channel serves its active releases again.",
         "responses": {
           "200": {
             "content": {
@@ -33965,7 +33987,8 @@
                                   {
                                     "type": "null"
                                   }
-                                ]
+                                ],
+                                "description": "The hour bucket the count was reported for, the start of a UTC hour. Null before the first report."
                               },
                               "reportedBillableDeviceCountMonth": {
                                 "anyOf": [
