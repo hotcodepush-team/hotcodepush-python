@@ -42,11 +42,17 @@ def test_gets_the_release_with_the_linked_rows() -> None:
     api = StubApi(httpx.Response(200, json=RELEASE_ROW_WITH_RELATIONS))
 
     fetched_release = api.client.apps.releases.get(
-        app_id="app", relations=["releaseCounters"], release_id="release"
+        app_id="app",
+        relations=["bundleSet", "bundleSet.bundles", "releaseCounters"],
+        release_id="release",
     )
 
+    assert fetched_release.bundle_set is not None
+    assert fetched_release.bundle_set.bundles is not None
     assert fetched_release.release_counters is not None
-    assert api.sent_methods_and_urls == [f"GET {RELEASES_URL}/release?relations=releaseCounters"]
+    assert api.sent_methods_and_urls == [
+        f"GET {RELEASES_URL}/release?relations=bundleSet%2CbundleSet.bundles%2CreleaseCounters"
+    ]
 
 
 def test_lists_the_releases_of_the_app_filtered_by_channel_and_status() -> None:
@@ -67,16 +73,16 @@ def test_lists_the_release_of_one_number_in_the_channel_with_the_linked_rows() -
         app_id="app",
         channel_id="channel",
         number=3,
-        relations=["bundle", "channel", "releaseCounters"],
+        relations=["bundleSet", "channel", "releaseCounters"],
     )
 
     [fetched_release] = fetched_releases
-    assert fetched_release.bundle is not None
+    assert fetched_release.bundle_set is not None
     assert fetched_release.channel is not None
     assert fetched_release.release_counters is not None
     assert api.sent_methods_and_urls == [
         f"GET {RELEASES_URL}?channelId=channel&number=3"
-        "&relations=bundle%2Cchannel%2CreleaseCounters"
+        "&relations=bundleSet%2Cchannel%2CreleaseCounters"
     ]
 
 

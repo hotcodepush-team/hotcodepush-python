@@ -16,6 +16,7 @@ from pydantic.alias_generators import to_camel
 AppUsageMonthRelation = Literal["app"]
 AuditLogRelation = Literal["app", "user"]
 BundleDeltaRelation = Literal["baseBundle"]
+BundleSetRelation = Literal["bundles"]
 DeliveryStatus = Literal["failed", "pending", "succeeded"]
 DeviceRelation = Literal["channel", "currentRelease"]
 FailureAction = Literal["none", "notify", "pause", "revoke"]
@@ -40,7 +41,7 @@ NotificationRelation = Literal[
 ]
 Platform = Literal["android", "ios"]
 ReleaseDeviceEventRelation = Literal["release"]
-ReleaseRelation = Literal["bundle", "channel", "releaseCounters"]
+ReleaseRelation = Literal["bundleSet", "bundleSet.bundles", "channel", "releaseCounters"]
 Role = Literal["admin", "billing", "member", "owner"]
 TelemetrySignal = Literal["logs", "metrics"]
 UserRelation = Literal["accounts", "members", "members.organization"]
@@ -289,6 +290,24 @@ class BundleFile(HotCodePushModel):
     sha256: str
     size_bytes: int
     stored_at: datetime | None
+    updated_at: datetime
+
+
+class BundleSet(HotCodePushModel):
+    """The bundles that one release serves, one bundle per platform.
+
+    `bundle_ids` is sorted, so the same bundles always name the same set. `bundles` is set when
+    `relations` names it.
+    """
+
+    app_id: str
+    bundle_ids: list[str]
+    bundle_version: str
+    bundles: list[Bundle] | None = None
+    created_at: datetime
+    fingerprint: str | None
+    id: str
+    number: int
     updated_at: datetime
 
 
@@ -655,14 +674,15 @@ class ReasonCount(HotCodePushModel):
 
 
 class Release(HotCodePushModel):
-    """A release of a bundle in a channel.
+    """A release of a bundle set in a channel.
 
-    `bundle`, `channel` and `release_counters` are set when `relations` names them.
+    `bundle_set`, `channel` and `release_counters` are set when `relations` names them.
+    `bundleSet.bundles` fills `bundle_set.bundles` as well.
     """
 
     auto_paused_at: datetime | None
-    bundle: Bundle | None = None
-    bundle_id: str
+    bundle_set: BundleSet | None = None
+    bundle_set_id: str
     channel: Channel | None = None
     channel_id: str
     conditions: list[ReleaseCondition]

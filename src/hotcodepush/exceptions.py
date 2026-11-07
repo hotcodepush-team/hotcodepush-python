@@ -40,6 +40,7 @@ ErrorCode = Literal[
     "signature_invalid",
     "signature_required",
     "sole_owner",
+    "sso_domain_taken",
     "sso_required",
     "storage_limit_reached",
     "tokens_limit_reached",

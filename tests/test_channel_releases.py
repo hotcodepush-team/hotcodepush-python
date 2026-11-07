@@ -16,7 +16,7 @@ def test_posts_the_release_to_its_channel_with_its_idempotency_key() -> None:
 
     created_release = api.client.apps.channels.releases.create(
         app_id="app",
-        bundle_id="bundle",
+        bundle_set_id="bundle-set",
         channel_id="channel",
         idempotency_key="key",
         rollout_percent=10,
@@ -25,7 +25,10 @@ def test_posts_the_release_to_its_channel_with_its_idempotency_key() -> None:
     assert created_release == Release.model_validate(RELEASE_ROW)
     assert api.sent_methods_and_urls == [f"POST {RELEASES_URL}"]
     assert api.last_request.headers["Idempotency-Key"] == "key"
-    assert resolve_sent_json(api.last_request) == {"bundleId": "bundle", "rolloutPercent": 10}
+    assert resolve_sent_json(api.last_request) == {
+        "bundleSetId": "bundle-set",
+        "rolloutPercent": 10,
+    }
 
 
 def test_posts_the_conditions_and_the_progression_by_their_api_names() -> None:
@@ -33,7 +36,7 @@ def test_posts_the_conditions_and_the_progression_by_their_api_names() -> None:
 
     api.client.apps.channels.releases.create(
         app_id="app",
-        bundle_id="bundle",
+        bundle_set_id="bundle-set",
         channel_id="channel",
         conditions=[BinaryCondition(range=">=2.0.0")],
         progression=ReleaseProgression(
@@ -42,7 +45,7 @@ def test_posts_the_conditions_and_the_progression_by_their_api_names() -> None:
     )
 
     assert resolve_sent_json(api.last_request) == {
-        "bundleId": "bundle",
+        "bundleSetId": "bundle-set",
         "conditions": [{"range": ">=2.0.0", "type": "binary"}],
         "progression": {
             "rolloutPercents": [25, 50],
