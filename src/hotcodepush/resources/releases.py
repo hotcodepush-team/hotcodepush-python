@@ -19,6 +19,7 @@ class ReleasesResource(BaseResource):
         *,
         app_id: str,
         bundle_id: str | NotGiven = NOT_GIVEN,
+        bundle_set_id: str | NotGiven = NOT_GIVEN,
         channel_id: str | NotGiven = NOT_GIVEN,
         git_commit: str | NotGiven = NOT_GIVEN,
         number: int | NotGiven = NOT_GIVEN,
@@ -33,6 +34,7 @@ class ReleasesResource(BaseResource):
             path=resolve_path("/v1/apps/{appId}/releases/count", appId=app_id),
             query={
                 "bundleId": bundle_id,
+                "bundleSetId": bundle_set_id,
                 "channelId": channel_id,
                 "gitCommit": git_commit,
                 "number": number,
@@ -66,6 +68,7 @@ class ReleasesResource(BaseResource):
         *,
         app_id: str,
         bundle_id: str | NotGiven = NOT_GIVEN,
+        bundle_set_id: str | NotGiven = NOT_GIVEN,
         channel_id: str | NotGiven = NOT_GIVEN,
         git_commit: str | NotGiven = NOT_GIVEN,
         limit: int | NotGiven = NOT_GIVEN,
@@ -76,15 +79,17 @@ class ReleasesResource(BaseResource):
     ) -> list[Release]:
         """Lists every release of the app, newest first.
 
-        `git_commit` selects the releases whose bundle has a commit hash, ref or message that
-        contains it. `number` selects one release of the channel `channel_id`, since release
-        numbers count per channel; without `channel_id` the API answers `validation`.
+        `bundle_id` selects the releases whose set carries the bundle. `git_commit` selects the
+        releases whose bundle has a commit hash, ref or message that contains it. `number`
+        selects one release of the channel `channel_id`, since release numbers count per
+        channel; without `channel_id` the API answers `validation`.
         """
         return self._http_client.fetch_json(
             method="GET",
             path=resolve_path("/v1/apps/{appId}/releases", appId=app_id),
             query={
                 "bundleId": bundle_id,
+                "bundleSetId": bundle_set_id,
                 "channelId": channel_id,
                 "gitCommit": git_commit,
                 "limit": limit,

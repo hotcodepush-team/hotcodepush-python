@@ -34,6 +34,7 @@ from tests.stub_api import StubApi, resolve_sent_json
 APP_ID = "7c0f3a52-1d8e-4b6a-9f21-5e3c8a0d4b17"
 BINARY_ID = "3f6a9c2e-7b14-4d58-9e03-b2c8d6f1a475"
 BUNDLE_ID = "2a9e6c14-8b3f-4d70-a5e2-91c7f0b3d864"
+BUNDLE_SET_ID = "5d8b3e17-9c2a-4f60-b4e1-7a0c6f2d9e38"
 CHANNEL_ID = "e41b7d09-3c6a-4f85-b2d1-6a8f0c9e3b52"
 CREATED_SINCE = datetime(2026, 1, 1, tzinfo=UTC)
 CREATED_UNTIL = datetime(2026, 2, 1, tzinfo=UTC)
@@ -75,6 +76,31 @@ CALLS: dict[str, Callable[[HotCodePush], object]] = {
     ),
     "apps.binaries.list": lambda hot_code_push: hot_code_push.apps.binaries.list(
         app_id=APP_ID, fingerprint=f"fp1:{SHA256}", limit=10, offset=10, platform="ios"
+    ),
+    "apps.bundle_sets.count": lambda hot_code_push: hot_code_push.apps.bundle_sets.count(
+        app_id=APP_ID,
+        bundle_id=BUNDLE_ID,
+        bundle_version="1.0.0",
+        fingerprint=f"fp1:{SHA256}",
+        number=1,
+        platform="ios",
+    ),
+    "apps.bundle_sets.create": lambda hot_code_push: hot_code_push.apps.bundle_sets.create(
+        app_id=APP_ID, bundle_ids=[BUNDLE_ID]
+    ),
+    "apps.bundle_sets.get": lambda hot_code_push: hot_code_push.apps.bundle_sets.get(
+        app_id=APP_ID, bundle_set_id=BUNDLE_SET_ID, relations=["bundles"]
+    ),
+    "apps.bundle_sets.list": lambda hot_code_push: hot_code_push.apps.bundle_sets.list(
+        app_id=APP_ID,
+        bundle_id=BUNDLE_ID,
+        bundle_version="1.0.0",
+        fingerprint=f"fp1:{SHA256}",
+        limit=10,
+        number=1,
+        offset=10,
+        platform="ios",
+        relations=["bundles"],
     ),
     "apps.bundles.complete": lambda hot_code_push: hot_code_push.apps.bundles.complete(
         app_id=APP_ID, bundle_id=BUNDLE_ID
@@ -202,7 +228,7 @@ CALLS: dict[str, Callable[[HotCodePush], object]] = {
     "apps.channels.releases.create": lambda hot_code_push: (
         hot_code_push.apps.channels.releases.create(
             app_id=APP_ID,
-            bundle_id=BUNDLE_ID,
+            bundle_set_id=BUNDLE_SET_ID,
             channel_id=CHANNEL_ID,
             conditions=[BinaryCondition(range=">=2.0.0")],
             failure_action="pause",
@@ -321,23 +347,27 @@ CALLS: dict[str, Callable[[HotCodePush], object]] = {
     "apps.releases.count": lambda hot_code_push: hot_code_push.apps.releases.count(
         app_id=APP_ID,
         bundle_id=BUNDLE_ID,
+        bundle_set_id=BUNDLE_SET_ID,
         channel_id=CHANNEL_ID,
         git_commit="main",
         number=1,
         status="active",
     ),
     "apps.releases.get": lambda hot_code_push: hot_code_push.apps.releases.get(
-        app_id=APP_ID, relations=["bundle", "channel", "releaseCounters"], release_id=RELEASE_ID
+        app_id=APP_ID,
+        relations=["bundleSet", "bundleSet.bundles", "channel", "releaseCounters"],
+        release_id=RELEASE_ID,
     ),
     "apps.releases.list": lambda hot_code_push: hot_code_push.apps.releases.list(
         app_id=APP_ID,
         bundle_id=BUNDLE_ID,
+        bundle_set_id=BUNDLE_SET_ID,
         channel_id=CHANNEL_ID,
         git_commit="main",
         limit=10,
         number=1,
         offset=10,
-        relations=["bundle", "channel", "releaseCounters"],
+        relations=["bundleSet", "bundleSet.bundles", "channel", "releaseCounters"],
         status="active",
     ),
     "apps.releases.pause": lambda hot_code_push: hot_code_push.apps.releases.pause(

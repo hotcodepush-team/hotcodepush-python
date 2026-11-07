@@ -11,7 +11,7 @@ class ChannelReleasesResource(BaseResource):
         self,
         *,
         app_id: str,
-        bundle_id: str | NotGiven = NOT_GIVEN,
+        bundle_set_id: str | NotGiven = NOT_GIVEN,
         channel_id: str,
         conditions: list[ReleaseCondition] | NotGiven = NOT_GIVEN,
         failure_action: FailureAction | None | NotGiven = NOT_GIVEN,
@@ -26,12 +26,12 @@ class ChannelReleasesResource(BaseResource):
     ) -> Release:
         """Creates a release in the channel with the next number.
 
-        It releases either a ready bundle, `bundle_id`, or what another channel serves,
+        It releases either a bundle set, `bundle_set_id`, or what another channel serves,
         `from_channel_id`.
         """
         return self._http_client.fetch_creating_post(
             body={
-                "bundleId": bundle_id,
+                "bundleSetId": bundle_set_id,
                 "conditions": conditions,
                 "failureAction": failure_action,
                 "failureMinimumUpdateCount": failure_minimum_update_count,

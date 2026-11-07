@@ -5,6 +5,7 @@ from .._types import NOT_GIVEN, NotGiven
 from ..models import App, Framework
 from ._base import BaseResource
 from .binaries import BinariesResource
+from .bundle_sets import BundleSetsResource
 from .bundles import BundlesResource
 from .channels import ChannelsResource
 from .devices import DevicesResource
@@ -18,6 +19,7 @@ class AppsResource(BaseResource):
     def __init__(self, http_client: HttpClient) -> None:
         super().__init__(http_client)
         self.binaries = BinariesResource(http_client)
+        self.bundle_sets = BundleSetsResource(http_client)
         self.bundles = BundlesResource(http_client)
         self.channels = ChannelsResource(http_client)
         self.devices = DevicesResource(http_client)

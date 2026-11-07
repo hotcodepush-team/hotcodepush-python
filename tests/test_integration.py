@@ -144,7 +144,7 @@ def test_lists_no_releases_for_a_new_channel(
     hot_code_push: HotCodePush, *, app: App, channel: Channel
 ) -> None:
     fetched_releases = hot_code_push.apps.releases.list(
-        app_id=app.id, channel_id=channel.id, relations=["bundle"]
+        app_id=app.id, channel_id=channel.id, relations=["bundleSet"]
     )
 
     assert fetched_releases == []
