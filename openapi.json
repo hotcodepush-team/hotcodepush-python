@@ -14999,7 +14999,7 @@
     "/v1/apps/{appId}/bundle-sets": {
       "get": {
         "operationId": "getV1AppsByAppIdBundleSets",
-        "description": "The app's bundle sets, newest first, filtered by `bundleId`, a set that carries the bundle, `bundleVersion`, `fingerprint` and `platform`, a set that covers it; `?relations=bundles` embeds each set's bundles.",
+        "description": "The app's bundle sets, newest first, filtered by `bundleId`, a set that carries the bundle, `bundleVersion`, `fingerprint`, `number`, the set's number in the app, and `platform`, a set that covers it; `?relations=bundles` embeds each set's bundles.",
         "responses": {
           "200": {
             "content": {
@@ -15381,6 +15381,15 @@
           },
           {
             "in": "query",
+            "name": "number",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            }
+          },
+          {
+            "in": "query",
             "name": "platform",
             "schema": {
               "type": "string",
@@ -15419,7 +15428,7 @@
       },
       "post": {
         "operationId": "postV1AppsByAppIdBundleSets",
-        "description": "Finds the set of exactly the bundles named by `bundleIds`, or creates it with the app's next number: one ready uploaded bundle per platform, sharing one version label, one fingerprint and one framework, refused under `platforms_overlap`, `bundle_version_mismatch`, `fingerprint_mismatch` or `framework_mismatch` otherwise. A set is never changed, and releasing it checks the signing rule.",
+        "description": "Finds the set of exactly the bundles named by `bundleIds`, or creates it with the app's next number: one ready uploaded bundle per platform, sharing one version label, one fingerprint and one framework, otherwise a `validation` error on `bundleIds` with the rule `platforms_overlap`, `bundle_version_mismatch`, `fingerprint_mismatch` or `framework_mismatch`. A set is never changed, and releasing it checks the signing rule.",
         "responses": {
           "200": {
             "content": {
@@ -15814,6 +15823,15 @@
             "schema": {
               "type": "string",
               "pattern": "^fp1:[0-9a-f]{64}$"
+            }
+          },
+          {
+            "in": "query",
+            "name": "number",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
             }
           },
           {

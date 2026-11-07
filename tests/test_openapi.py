@@ -82,6 +82,7 @@ CALLS: dict[str, Callable[[HotCodePush], object]] = {
         bundle_id=BUNDLE_ID,
         bundle_version="1.0.0",
         fingerprint=f"fp1:{SHA256}",
+        number=1,
         platform="ios",
     ),
     "apps.bundle_sets.create": lambda hot_code_push: hot_code_push.apps.bundle_sets.create(
@@ -96,6 +97,7 @@ CALLS: dict[str, Callable[[HotCodePush], object]] = {
         bundle_version="1.0.0",
         fingerprint=f"fp1:{SHA256}",
         limit=10,
+        number=1,
         offset=10,
         platform="ios",
         relations=["bundles"],

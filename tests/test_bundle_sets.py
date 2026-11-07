@@ -12,13 +12,13 @@ BUNDLE_SET_ROW_WITH_RELATIONS = resolve_response_example(
 BUNDLE_SETS_URL = "https://api.hotcodepush.com/v1/apps/app/bundle-sets"
 
 
-def test_counts_the_bundle_sets_of_the_app_filtered_by_platform() -> None:
+def test_counts_the_bundle_sets_of_the_app_filtered_by_number_and_platform() -> None:
     api = StubApi(httpx.Response(200, json={"count": 1}))
 
-    fetched_count = api.client.apps.bundle_sets.count(app_id="app", platform="ios")
+    fetched_count = api.client.apps.bundle_sets.count(app_id="app", number=2, platform="ios")
 
     assert fetched_count == Count(count=1)
-    assert api.sent_methods_and_urls == [f"GET {BUNDLE_SETS_URL}/count?platform=ios"]
+    assert api.sent_methods_and_urls == [f"GET {BUNDLE_SETS_URL}/count?number=2&platform=ios"]
 
 
 def test_posts_the_bundle_ids_of_the_set() -> None:
@@ -51,12 +51,12 @@ def test_gets_the_bundle_set_with_its_bundles() -> None:
     assert api.sent_methods_and_urls == [f"GET {BUNDLE_SETS_URL}/bundle-set?relations=bundles"]
 
 
-def test_lists_the_bundle_sets_of_the_app_that_carry_the_bundle() -> None:
+def test_lists_the_bundle_sets_of_the_app_that_carry_the_bundle_by_number() -> None:
     api = StubApi(httpx.Response(200, json=[BUNDLE_SET_ROW]))
 
     fetched_bundle_sets = api.client.apps.bundle_sets.list(
-        app_id="app", bundle_id="bundle", limit=20
+        app_id="app", bundle_id="bundle", limit=20, number=2
     )
 
     assert fetched_bundle_sets == [BundleSet.model_validate(BUNDLE_SET_ROW)]
-    assert api.sent_methods_and_urls == [f"GET {BUNDLE_SETS_URL}?bundleId=bundle&limit=20"]
+    assert api.sent_methods_and_urls == [f"GET {BUNDLE_SETS_URL}?bundleId=bundle&limit=20&number=2"]

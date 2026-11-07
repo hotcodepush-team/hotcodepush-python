@@ -14,6 +14,7 @@ class BundleSetsResource(BaseResource):
         bundle_id: str | NotGiven = NOT_GIVEN,
         bundle_version: str | NotGiven = NOT_GIVEN,
         fingerprint: str | NotGiven = NOT_GIVEN,
+        number: int | NotGiven = NOT_GIVEN,
         platform: Platform | NotGiven = NOT_GIVEN,
     ) -> Count:
         """Counts the bundle sets of the app that match the filters."""
@@ -24,6 +25,7 @@ class BundleSetsResource(BaseResource):
                 "bundleId": bundle_id,
                 "bundleVersion": bundle_version,
                 "fingerprint": fingerprint,
+                "number": number,
                 "platform": platform,
             },
             response_type=Count,
@@ -69,6 +71,7 @@ class BundleSetsResource(BaseResource):
         bundle_version: str | NotGiven = NOT_GIVEN,
         fingerprint: str | NotGiven = NOT_GIVEN,
         limit: int | NotGiven = NOT_GIVEN,
+        number: int | NotGiven = NOT_GIVEN,
         offset: int | NotGiven = NOT_GIVEN,
         platform: Platform | NotGiven = NOT_GIVEN,
         relations: list[BundleSetRelation] | NotGiven = NOT_GIVEN,
@@ -85,6 +88,7 @@ class BundleSetsResource(BaseResource):
                 "bundleVersion": bundle_version,
                 "fingerprint": fingerprint,
                 "limit": limit,
+                "number": number,
                 "offset": offset,
                 "platform": platform,
                 "relations": relations,
