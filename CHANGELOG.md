@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.8.0](https://github.com/hotcodepush-team/hotcodepush-python/compare/v0.7.0...v0.8.0) (2026-11-08)
+
+
+### ⚠ BREAKING CHANGES
+
+* follow the API's per-platform release, bundle expiry and list filters ([#21](https://github.com/hotcodepush-team/hotcodepush-python/issues/21))
+
+### Features
+
+* follow the API's per-platform release, bundle expiry and list filters ([#21](https://github.com/hotcodepush-team/hotcodepush-python/issues/21)) ([da96675](https://github.com/hotcodepush-team/hotcodepush-python/commit/da966758f177f7b57b0d71ea089ce3296c8d6068))
+
 ## [0.7.0](https://github.com/hotcodepush-team/hotcodepush-python/compare/v0.6.0...v0.7.0) (2026-11-03)
 
 
