@@ -246,7 +246,10 @@ class BinaryCount(HotCodePushModel):
 
 
 class Bundle(HotCodePushModel):
-    """`expired_at` is when retention removed its objects. The row stays for the release log."""
+    """A version of the web assets of the app, made of its content-addressed files.
+
+    `expired_at` is when retention removed its objects. The row stays for the release log.
+    """
 
     app_id: str
     created_at: datetime
@@ -716,10 +719,14 @@ class ReleaseAdoption(HotCodePushModel):
 class ReleaseCount(HotCodePushModel):
     """The devices of one release. `value` is the release id.
 
-    `value`, `number` and `channel_id` are `None` for devices on the embedded bundle.
+    `value`, `number`, `channel_id`, `created_at`, `bundle_number` and `bundle_version` are
+    `None` for devices on the embedded bundle. `created_at` is the release's, not the bundle's.
     """
 
+    bundle_number: int | None
+    bundle_version: str | None
     channel_id: str | None
+    created_at: datetime | None
     device_count: int
     number: int | None
     value: str | None

@@ -80,7 +80,7 @@ def test_gets_the_bundle() -> None:
     assert api.sent_methods_and_urls == [f"GET {BUNDLES_URL}/bundle"]
 
 
-def test_lists_the_bundles_of_the_app_filtered_by_fingerprint_use_platform_and_status() -> None:
+def test_lists_the_bundles_of_the_app_filtered_by_fingerprint_platform_status_and_unused() -> None:
     api = StubApi(httpx.Response(200, json=[BUNDLE_ROW]))
 
     fetched_bundles = api.client.apps.bundles.list(

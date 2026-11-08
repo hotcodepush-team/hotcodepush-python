@@ -29,7 +29,7 @@ class ChannelReleasesResource(BaseResource):
 
         It releases either a ready bundle, `bundle_id`, or what another channel serves,
         `from_channel_id`. `platform` narrows it to one platform the bundle serves. With
-        `from_channel_id`, it takes the newest release there that serves that platform.
+        `from_channel_id`, it takes the newest active release there that serves that platform.
         """
         return self._http_client.fetch_creating_post(
             body={

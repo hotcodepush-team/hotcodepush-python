@@ -17,9 +17,9 @@ class RollbacksResource(BaseResource):
         platform: Platform | None | NotGiven = NOT_GIVEN,
         to_release_id: str | None | NotGiven = NOT_GIVEN,
     ) -> Release:
-        """Rolls the channel back to the release before its newest one.
+        """Rolls the channel back to the release before its newest active one.
 
-        `platform` undoes the newest release that serves it. `to_release_id` picks another
+        `platform` undoes the newest active release that serves it. `to_release_id` picks another
         earlier release instead. A rollback is a new release.
         """
         return self._http_client.fetch_creating_post(
