@@ -68,13 +68,17 @@ def test_gets_the_channel() -> None:
     assert api.sent_methods_and_urls == [f"GET {CHANNELS_URL}/channel"]
 
 
-def test_lists_the_channels_of_the_app() -> None:
+def test_lists_the_channels_of_the_app_filtered_by_pause_and_protection() -> None:
     api = StubApi(httpx.Response(200, json=[CHANNEL_ROW]))
 
-    fetched_channels = api.client.apps.channels.list(app_id="app", limit=100)
+    fetched_channels = api.client.apps.channels.list(
+        app_id="app", is_paused=False, is_protected=True, limit=100
+    )
 
     assert fetched_channels == [Channel.model_validate(CHANNEL_ROW)]
-    assert api.sent_methods_and_urls == [f"GET {CHANNELS_URL}?limit=100"]
+    assert api.sent_methods_and_urls == [
+        f"GET {CHANNELS_URL}?isPaused=false&isProtected=true&limit=100"
+    ]
 
 
 def test_posts_to_pause_the_channel() -> None:

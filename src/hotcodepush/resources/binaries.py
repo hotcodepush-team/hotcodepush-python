@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from .._http import resolve_path
 from .._types import NOT_GIVEN, NotGiven
-from ..models import Binary, Count, ManifestFile, Platform
+from ..models import Binary, BinaryRelation, Count, ManifestFile, Platform
 from ._base import BaseResource
 
 
@@ -13,12 +13,13 @@ class BinariesResource(BaseResource):
         app_id: str,
         fingerprint: str | NotGiven = NOT_GIVEN,
         platform: Platform | NotGiven = NOT_GIVEN,
+        version: str | NotGiven = NOT_GIVEN,
     ) -> Count:
         """Counts the store builds of the app that match the filters."""
         return self._http_client.fetch_json(
             method="GET",
             path=resolve_path("/v1/apps/{appId}/binaries/count", appId=app_id),
-            query={"fingerprint": fingerprint, "platform": platform},
+            query={"fingerprint": fingerprint, "platform": platform, "version": version},
             response_type=Count,
         )
 
@@ -53,12 +54,20 @@ class BinariesResource(BaseResource):
             response_type=Binary,
         )
 
-    def get(self, *, app_id: str, binary_id: str) -> Binary:
+    def get(
+        self,
+        *,
+        app_id: str,
+        binary_id: str,
+        relations: list[BinaryRelation] | NotGiven = NOT_GIVEN,
+    ) -> Binary:
+        """Gets a store build. `relations=["bundle"]` embeds the bundle it ships."""
         return self._http_client.fetch_json(
             method="GET",
             path=resolve_path(
                 "/v1/apps/{appId}/binaries/{binaryId}", appId=app_id, binaryId=binary_id
             ),
+            query={"relations": relations},
             response_type=Binary,
         )
 
@@ -70,8 +79,13 @@ class BinariesResource(BaseResource):
         limit: int | NotGiven = NOT_GIVEN,
         offset: int | NotGiven = NOT_GIVEN,
         platform: Platform | NotGiven = NOT_GIVEN,
+        relations: list[BinaryRelation] | NotGiven = NOT_GIVEN,
+        version: str | NotGiven = NOT_GIVEN,
     ) -> list[Binary]:
-        """Lists the store builds of the app, newest first."""
+        """Lists the store builds of the app, newest first.
+
+        `relations=["bundle"]` embeds the bundle each one ships.
+        """
         return self._http_client.fetch_json(
             method="GET",
             path=resolve_path("/v1/apps/{appId}/binaries", appId=app_id),
@@ -80,6 +94,8 @@ class BinariesResource(BaseResource):
                 "limit": limit,
                 "offset": offset,
                 "platform": platform,
+                "relations": relations,
+                "version": version,
             },
             response_type=list[Binary],
         )

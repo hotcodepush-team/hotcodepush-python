@@ -15,7 +15,9 @@ from pydantic.alias_generators import to_camel
 
 AppUsageMonthRelation = Literal["app"]
 AuditLogRelation = Literal["app", "user"]
+BinaryRelation = Literal["bundle"]
 BundleDeltaRelation = Literal["baseBundle"]
+BundleStatus = Literal["expired", "ready", "uploading"]
 DeliveryStatus = Literal["failed", "pending", "succeeded"]
 DeviceRelation = Literal["channel", "currentRelease"]
 FailureAction = Literal["none", "notify", "pause", "revoke"]
@@ -205,10 +207,14 @@ class AuditLog(HotCodePushModel):
 
 
 class Binary(HotCodePushModel):
-    """A store build. The fleet statistics count its devices in their `binary` buckets."""
+    """A store build. The fleet statistics count its devices in their `binary` buckets.
+
+    `bundle`, the bundle it ships, is set when `relations` names it.
+    """
 
     app_id: str
     build: str
+    bundle: Bundle | None = None
     bundle_id: str
     created_at: datetime
     fingerprint: str | None
@@ -240,8 +246,14 @@ class BinaryCount(HotCodePushModel):
 
 
 class Bundle(HotCodePushModel):
+    """A version of the web assets of the app, made of its content-addressed files.
+
+    `expired_at` is when retention removed its objects. The row stays for the release log.
+    """
+
     app_id: str
     created_at: datetime
+    expired_at: datetime | None
     expires_at: datetime | None
     fingerprint: str | None
     framework: Framework
@@ -258,7 +270,7 @@ class Bundle(HotCodePushModel):
     signature_key_id: str | None
     size_bytes: int
     source: Literal["binary", "upload"]
-    status: Literal["ready", "uploading"]
+    status: BundleStatus
     unused_since: datetime | None
     updated_at: datetime
     version: str
@@ -290,13 +302,6 @@ class BundleFile(HotCodePushModel):
     size_bytes: int
     stored_at: datetime | None
     updated_at: datetime
-
-
-class BundleSignature(HotCodePushModel):
-    """The signature of a bundle manifest: the key id of the signing key and the value."""
-
-    key_id: str
-    value: str
 
 
 class Channel(HotCodePushModel):
@@ -461,7 +466,10 @@ class FingerprintCondition(HotCodePushModel):
 class FleetStatistics(HotCodePushModel):
     """The devices seen in the last thirty days, with counts per dimension, most common first.
 
-    `current_device_count` counts the devices on the newest active release of their channel.
+    `current_device_count`, `pending_device_count` and `ineligible_device_count` split
+    `device_count` by the newest active release that serves each device's platform in its
+    channel: the devices on it, the devices that may still take it, and the devices it skipped
+    for targeting or compatibility.
     """
 
     binary: list[BinaryCount]
@@ -470,7 +478,9 @@ class FleetStatistics(HotCodePushModel):
     country: list[DeviceCount]
     current_device_count: int
     device_count: int
+    ineligible_device_count: int
     os_version: list[OsVersionCount]
+    pending_device_count: int
     platform: list[DeviceCount]
     release: list[ReleaseCount]
     sdk_version: list[DeviceCount]
@@ -563,6 +573,7 @@ class Notification(HotCodePushModel):
     read_at: datetime | None
     release: EmbeddedRelease | None = None
     release_id: str | None
+    telemetry_export_id: str | None
     type: str
     updated_at: datetime
     user_id: str
@@ -708,10 +719,14 @@ class ReleaseAdoption(HotCodePushModel):
 class ReleaseCount(HotCodePushModel):
     """The devices of one release. `value` is the release id.
 
-    `value`, `number` and `channel_id` are `None` for devices on the embedded bundle.
+    `value`, `number`, `channel_id`, `created_at`, `bundle_number` and `bundle_version` are
+    `None` for devices on the embedded bundle. `created_at` is the release's, not the bundle's.
     """
 
+    bundle_number: int | None
+    bundle_version: str | None
     channel_id: str | None
+    created_at: datetime | None
     device_count: int
     number: int | None
     value: str | None

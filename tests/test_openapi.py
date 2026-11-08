@@ -11,7 +11,6 @@ from pydantic import BaseModel
 
 from hotcodepush import (
     BinaryCondition,
-    BundleSignature,
     ErrorCode,
     HotCodePush,
     ManifestFile,
@@ -58,7 +57,7 @@ WEBHOOK_ID = "3b9e1d74-6a2f-4c58-8d03-f5a7c2e9b416"
 # Each call sends every option its method takes, so anything the snapshot lacks fails a test.
 CALLS: dict[str, Callable[[HotCodePush], object]] = {
     "apps.binaries.count": lambda hot_code_push: hot_code_push.apps.binaries.count(
-        app_id=APP_ID, fingerprint=f"fp1:{SHA256}", platform="ios"
+        app_id=APP_ID, fingerprint=f"fp1:{SHA256}", platform="ios", version="1.0.0"
     ),
     "apps.binaries.create": lambda hot_code_push: hot_code_push.apps.binaries.create(
         app_id=APP_ID,
@@ -71,10 +70,16 @@ CALLS: dict[str, Callable[[HotCodePush], object]] = {
         version="1.0.0",
     ),
     "apps.binaries.get": lambda hot_code_push: hot_code_push.apps.binaries.get(
-        app_id=APP_ID, binary_id=BINARY_ID
+        app_id=APP_ID, binary_id=BINARY_ID, relations=["bundle"]
     ),
     "apps.binaries.list": lambda hot_code_push: hot_code_push.apps.binaries.list(
-        app_id=APP_ID, fingerprint=f"fp1:{SHA256}", limit=10, offset=10, platform="ios"
+        app_id=APP_ID,
+        fingerprint=f"fp1:{SHA256}",
+        limit=10,
+        offset=10,
+        platform="ios",
+        relations=["bundle"],
+        version="1.0.0",
     ),
     "apps.bundles.complete": lambda hot_code_push: hot_code_push.apps.bundles.complete(
         app_id=APP_ID, bundle_id=BUNDLE_ID
@@ -82,10 +87,10 @@ CALLS: dict[str, Callable[[HotCodePush], object]] = {
     "apps.bundles.count": lambda hot_code_push: hot_code_push.apps.bundles.count(
         app_id=APP_ID,
         fingerprint=f"fp1:{SHA256}",
-        is_in_use=True,
+        is_unused=True,
+        number=12,
         platform="ios",
         query="12",
-        source="upload",
         status="ready",
         version="1.0.0",
     ),
@@ -100,7 +105,8 @@ CALLS: dict[str, Callable[[HotCodePush], object]] = {
         idempotency_key="key",
         is_git_dirty=False,
         platforms=["android"],
-        signature=BundleSignature(key_id="key", value="signature"),
+        signature="key:c2lnbmF0dXJl",
+        signature_key_id="key",
         version="1.0.0",
     ),
     "apps.bundles.delete": lambda hot_code_push: hot_code_push.apps.bundles.delete(
@@ -124,12 +130,12 @@ CALLS: dict[str, Callable[[HotCodePush], object]] = {
     "apps.bundles.list": lambda hot_code_push: hot_code_push.apps.bundles.list(
         app_id=APP_ID,
         fingerprint=f"fp1:{SHA256}",
-        is_in_use=True,
+        is_unused=True,
         limit=10,
+        number=12,
         offset=10,
         platform="ios",
         query="12",
-        source="upload",
         status="ready",
         version="1.0.0",
     ),
@@ -168,7 +174,7 @@ CALLS: dict[str, Callable[[HotCodePush], object]] = {
         rollout_percent=10,
     ),
     "apps.channels.count": lambda hot_code_push: hot_code_push.apps.channels.count(
-        app_id=APP_ID, query="stag"
+        app_id=APP_ID, is_paused=False, is_protected=True, query="stag"
     ),
     "apps.channels.create": lambda hot_code_push: hot_code_push.apps.channels.create(
         app_id=APP_ID,
@@ -191,7 +197,12 @@ CALLS: dict[str, Callable[[HotCodePush], object]] = {
         app_id=APP_ID, channel_id=CHANNEL_ID
     ),
     "apps.channels.list": lambda hot_code_push: hot_code_push.apps.channels.list(
-        app_id=APP_ID, limit=10, offset=10, query="stag"
+        app_id=APP_ID,
+        is_paused=False,
+        is_protected=True,
+        limit=10,
+        offset=10,
+        query="stag",
     ),
     "apps.channels.pause": lambda hot_code_push: hot_code_push.apps.channels.pause(
         app_id=APP_ID, channel_id=CHANNEL_ID
@@ -212,6 +223,7 @@ CALLS: dict[str, Callable[[HotCodePush], object]] = {
             idempotency_key="key",
             is_mandatory=True,
             notes="Fixes the login.",
+            platform="ios",
             progression=ReleaseProgression(
                 rollout_percents=[25, 50], step_minimum_seconds=3600, step_minimum_update_count=100
             ),
@@ -232,6 +244,7 @@ CALLS: dict[str, Callable[[HotCodePush], object]] = {
             channel_id=CHANNEL_ID,
             idempotency_key="key",
             is_mandatory=False,
+            platform="ios",
             to_release_id=RELEASE_ID,
         )
     ),
@@ -375,7 +388,7 @@ CALLS: dict[str, Callable[[HotCodePush], object]] = {
         app_id=APP_ID, limit=10, offset=10
     ),
     "apps.statistics.fleet.get": lambda hot_code_push: hot_code_push.apps.statistics.fleet.get(
-        app_id=APP_ID, channel_id=CHANNEL_ID
+        app_id=APP_ID, binary_id=BINARY_ID, channel_id=CHANNEL_ID
     ),
     "apps.statistics.updates.get": lambda hot_code_push: hot_code_push.apps.statistics.updates.get(
         app_id=APP_ID,

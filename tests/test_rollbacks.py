@@ -9,7 +9,7 @@ RELEASE_ROW = resolve_response_example(
 )
 
 
-def test_posts_the_rollback_to_its_channel_with_its_idempotency_key() -> None:
+def test_posts_the_rollback_of_one_platform_to_its_channel_with_its_idempotency_key() -> None:
     api = StubApi(httpx.Response(201, json=RELEASE_ROW))
 
     created_release = api.client.apps.channels.rollbacks.create(
@@ -17,6 +17,7 @@ def test_posts_the_rollback_to_its_channel_with_its_idempotency_key() -> None:
         channel_id="channel",
         idempotency_key="key",
         is_mandatory=False,
+        platform="android",
         to_release_id="target",
     )
 
@@ -25,4 +26,8 @@ def test_posts_the_rollback_to_its_channel_with_its_idempotency_key() -> None:
         "POST https://api.hotcodepush.com/v1/apps/app/channels/channel/rollbacks"
     ]
     assert api.last_request.headers["Idempotency-Key"] == "key"
-    assert resolve_sent_json(api.last_request) == {"isMandatory": False, "toReleaseId": "target"}
+    assert resolve_sent_json(api.last_request) == {
+        "isMandatory": False,
+        "platform": "android",
+        "toReleaseId": "target",
+    }

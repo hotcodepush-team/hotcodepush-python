@@ -9,12 +9,15 @@ FLEET_STATISTICS = resolve_response_example(
 )
 
 
-def test_gets_the_fleet_statistics_of_the_devices_of_one_channel() -> None:
+def test_gets_the_fleet_statistics_of_the_devices_of_one_binary_in_one_channel() -> None:
     api = StubApi(httpx.Response(200, json=FLEET_STATISTICS))
 
-    fetched_statistics = api.client.apps.statistics.fleet.get(app_id="app", channel_id="channel")
+    fetched_statistics = api.client.apps.statistics.fleet.get(
+        app_id="app", binary_id="binary", channel_id="channel"
+    )
 
     assert fetched_statistics == FleetStatistics.model_validate(FLEET_STATISTICS)
     assert api.sent_methods_and_urls == [
-        "GET https://api.hotcodepush.com/v1/apps/app/statistics/fleet?channelId=channel"
+        "GET https://api.hotcodepush.com/v1/apps/app/statistics/fleet"
+        "?binaryId=binary&channelId=channel"
     ]

@@ -1,10 +1,8 @@
 from __future__ import annotations
 
-from typing import Literal
-
 from .._http import HttpClient, resolve_path
 from .._types import NOT_GIVEN, NotGiven
-from ..models import Bundle, BundleSignature, Count, ManifestFile, Platform
+from ..models import Bundle, BundleStatus, Count, ManifestFile, Platform
 from ._base import BaseResource
 from .bundle_deltas import BundleDeltasResource
 from .bundle_files import BundleFilesResource
@@ -38,11 +36,11 @@ class BundlesResource(BaseResource):
         *,
         app_id: str,
         fingerprint: str | NotGiven = NOT_GIVEN,
-        is_in_use: bool | NotGiven = NOT_GIVEN,
+        is_unused: bool | NotGiven = NOT_GIVEN,
+        number: int | NotGiven = NOT_GIVEN,
         platform: Platform | NotGiven = NOT_GIVEN,
         query: str | NotGiven = NOT_GIVEN,
-        source: Literal["binary", "upload"] | NotGiven = NOT_GIVEN,
-        status: Literal["ready", "uploading"] | NotGiven = NOT_GIVEN,
+        status: BundleStatus | NotGiven = NOT_GIVEN,
         version: str | NotGiven = NOT_GIVEN,
     ) -> Count:
         """Counts the bundles of the app that match the filters."""
@@ -51,10 +49,10 @@ class BundlesResource(BaseResource):
             path=resolve_path("/v1/apps/{appId}/bundles/count", appId=app_id),
             query={
                 "fingerprint": fingerprint,
-                "isInUse": is_in_use,
+                "isUnused": is_unused,
+                "number": number,
                 "platform": platform,
                 "query": query,
-                "source": source,
                 "status": status,
                 "version": version,
             },
@@ -74,7 +72,8 @@ class BundlesResource(BaseResource):
         idempotency_key: str | NotGiven = NOT_GIVEN,
         is_git_dirty: bool | None | NotGiven = NOT_GIVEN,
         platforms: list[Platform],
-        signature: BundleSignature | None | NotGiven = NOT_GIVEN,
+        signature: str | None | NotGiven = NOT_GIVEN,
+        signature_key_id: str | None | NotGiven = NOT_GIVEN,
         version: str,
     ) -> Bundle:
         """Creates a bundle from its manifest. It stays `uploading` until it is completed.
@@ -93,6 +92,7 @@ class BundlesResource(BaseResource):
                 "isGitDirty": is_git_dirty,
                 "platforms": platforms,
                 "signature": signature,
+                "signatureKeyId": signature_key_id,
                 "version": version,
             },
             idempotency_key=idempotency_key,
@@ -126,27 +126,30 @@ class BundlesResource(BaseResource):
         *,
         app_id: str,
         fingerprint: str | NotGiven = NOT_GIVEN,
-        is_in_use: bool | NotGiven = NOT_GIVEN,
+        is_unused: bool | NotGiven = NOT_GIVEN,
         limit: int | NotGiven = NOT_GIVEN,
+        number: int | NotGiven = NOT_GIVEN,
         offset: int | NotGiven = NOT_GIVEN,
         platform: Platform | NotGiven = NOT_GIVEN,
         query: str | NotGiven = NOT_GIVEN,
-        source: Literal["binary", "upload"] | NotGiven = NOT_GIVEN,
-        status: Literal["ready", "uploading"] | NotGiven = NOT_GIVEN,
+        status: BundleStatus | NotGiven = NOT_GIVEN,
         version: str | NotGiven = NOT_GIVEN,
     ) -> list[Bundle]:
-        """Lists the bundles of the app, newest first."""
+        """Lists the uploaded bundles of the app, newest first.
+
+        The bundle a store build ships is read through `apps.binaries`.
+        """
         return self._http_client.fetch_json(
             method="GET",
             path=resolve_path("/v1/apps/{appId}/bundles", appId=app_id),
             query={
                 "fingerprint": fingerprint,
-                "isInUse": is_in_use,
+                "isUnused": is_unused,
                 "limit": limit,
+                "number": number,
                 "offset": offset,
                 "platform": platform,
                 "query": query,
-                "source": source,
                 "status": status,
                 "version": version,
             },

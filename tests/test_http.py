@@ -205,9 +205,9 @@ def test_repeats_the_parameter_of_any_other_list_in_the_query() -> None:
 
 
 def test_sends_a_boolean_in_the_query_as_true_or_false() -> None:
-    assert resolve_query_params({"isInUse": True, "isStored": False}) == (
-        ("isInUse", "true"),
+    assert resolve_query_params({"isStored": False, "isUnused": True}) == (
         ("isStored", "false"),
+        ("isUnused", "true"),
     )
 
 
