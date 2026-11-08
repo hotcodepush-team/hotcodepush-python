@@ -1,7 +1,7 @@
 import httpx
 import pytest
 
-from hotcodepush import Bundle, BundleSignature, Count, HotCodePushError, ManifestFile
+from hotcodepush import Bundle, Count, HotCodePushError, ManifestFile
 from tests.openapi_document import resolve_response_example
 from tests.stub_api import StubApi, resolve_sent_json
 
@@ -29,13 +29,13 @@ def test_retries_the_completion_when_the_api_is_unavailable() -> None:
     assert len(api.requests) == 3
 
 
-def test_counts_the_bundles_of_the_app_filtered_by_use_and_platform() -> None:
+def test_counts_the_unused_bundles_of_the_app_filtered_by_platform() -> None:
     api = StubApi(httpx.Response(200, json={"count": 3}))
 
-    fetched_count = api.client.apps.bundles.count(app_id="app", is_in_use=True, platform="ios")
+    fetched_count = api.client.apps.bundles.count(app_id="app", is_unused=True, platform="ios")
 
     assert fetched_count == Count(count=3)
-    assert api.sent_methods_and_urls == [f"GET {BUNDLES_URL}/count?isInUse=true&platform=ios"]
+    assert api.sent_methods_and_urls == [f"GET {BUNDLES_URL}/count?isUnused=true&platform=ios"]
 
 
 def test_posts_the_manifest_with_its_idempotency_key() -> None:
@@ -46,7 +46,8 @@ def test_posts_the_manifest_with_its_idempotency_key() -> None:
         files=[ManifestFile(path="index.html", sha256="a" * 64, size_bytes=5)],
         idempotency_key="key",
         platforms=["android", "ios"],
-        signature=BundleSignature(key_id="key", value="signature"),
+        signature="key:c2lnbmF0dXJl",
+        signature_key_id="key",
         version="1.0.0",
     )
 
@@ -56,7 +57,8 @@ def test_posts_the_manifest_with_its_idempotency_key() -> None:
     assert resolve_sent_json(api.last_request) == {
         "files": [{"path": "index.html", "sha256": "a" * 64, "sizeBytes": 5}],
         "platforms": ["android", "ios"],
-        "signature": {"keyId": "key", "value": "signature"},
+        "signature": "key:c2lnbmF0dXJl",
+        "signatureKeyId": "key",
         "version": "1.0.0",
     }
 
@@ -78,14 +80,14 @@ def test_gets_the_bundle() -> None:
     assert api.sent_methods_and_urls == [f"GET {BUNDLES_URL}/bundle"]
 
 
-def test_lists_the_bundles_of_the_app_filtered_by_fingerprint_use_platform_and_source() -> None:
+def test_lists_the_bundles_of_the_app_filtered_by_fingerprint_use_platform_and_status() -> None:
     api = StubApi(httpx.Response(200, json=[BUNDLE_ROW]))
 
     fetched_bundles = api.client.apps.bundles.list(
-        app_id="app", fingerprint=FINGERPRINT, is_in_use=False, platform="ios", source="upload"
+        app_id="app", fingerprint=FINGERPRINT, is_unused=False, platform="ios", status="expired"
     )
 
     assert fetched_bundles == [Bundle.model_validate(BUNDLE_ROW)]
     assert api.sent_methods_and_urls == [
-        f"GET {BUNDLES_URL}?fingerprint=fp1%3A{'a' * 64}&isInUse=false&platform=ios&source=upload"
+        f"GET {BUNDLES_URL}?fingerprint=fp1%3A{'a' * 64}&isUnused=false&platform=ios&status=expired"
     ]

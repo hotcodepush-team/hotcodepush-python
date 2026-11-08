@@ -3,7 +3,7 @@
   "components": {
     "parameters": {
       "ClientHeader": {
-        "description": "The calling client and its version, `<cli|console|mcp|node|python>/<version>`; a version listed as faulty answers `client_update_required`.",
+        "description": "The calling client and its version, `<cli|console|mcp|node|python>/<version>`, optionally followed by `ci/<provider>`, which the CLI adds in CI; a version listed as faulty answers `client_update_required`.",
         "in": "header",
         "name": "X-HotCodePush-Client",
         "required": false,
@@ -24,6 +24,7 @@
               "apps_limit_reached",
               "auth_flow_failed",
               "binary_conflict",
+              "bundle_expired",
               "bundle_in_use",
               "bundle_not_ready",
               "bundle_too_large",
@@ -55,6 +56,7 @@
               "signature_invalid",
               "signature_required",
               "sole_owner",
+              "sso_domain_taken",
               "sso_required",
               "storage_limit_reached",
               "tokens_limit_reached",
@@ -1171,6 +1173,18 @@
                           }
                         ]
                       },
+                      "telemetryExportId": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "format": "uuid",
+                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
                       "type": {
                         "type": "string"
                       },
@@ -1400,6 +1414,7 @@
                       "organizationName",
                       "readAt",
                       "releaseId",
+                      "telemetryExportId",
                       "type",
                       "updatedAt",
                       "userId",
@@ -1919,6 +1934,18 @@
                         }
                       ]
                     },
+                    "telemetryExportId": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
                     "type": {
                       "type": "string"
                     },
@@ -1968,6 +1995,7 @@
                     "organizationName",
                     "readAt",
                     "releaseId",
+                    "telemetryExportId",
                     "type",
                     "updatedAt",
                     "userId",
@@ -6072,7 +6100,7 @@
       },
       "put": {
         "operationId": "putV1OrganizationsByOrganizationIdSsoProvider",
-        "description": "Sets the OIDC or SAML provider and its domain, replacing the one before; one per organization, on a plan that includes single sign-on. A new or changed domain starts unverified, with a new token for its TXT record.",
+        "description": "Sets the OIDC or SAML provider and its domain, replacing the one before; one per organization, on a plan that includes single sign-on. A new or changed domain starts unverified, with a new token for its TXT record, and once verified the provider signs in addresses on the new domain alone.",
         "responses": {
           "200": {
             "content": {
@@ -6550,7 +6578,7 @@
     "/v1/organizations/{organizationId}/sso-provider/verifications": {
       "post": {
         "operationId": "postV1OrganizationsByOrganizationIdSsoProviderVerifications",
-        "description": "Looks up the domain's TXT record `_hotcodepush-sso-{providerId}.{domain}` for the provider's `domainVerificationToken` and sets `domainVerified` when the record carries it; the answer is the provider, verified or still waiting for the record. A verified provider answers unchanged without a lookup.",
+        "description": "Looks up the domain's TXT record `_hotcodepush-sso-{providerId}.{domain}` for the provider's `domainVerificationToken` and sets `domainVerified` when the record carries it; the answer is the provider, verified or still waiting for the record. A verified provider answers unchanged without a lookup, and a domain another provider verified answers `sso_domain_taken`.",
         "responses": {
           "200": {
             "content": {
@@ -6673,6 +6701,16 @@
               }
             },
             "description": "`not_found`"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "`sso_domain_taken`"
           },
           "429": {
             "content": {
@@ -11936,7 +11974,8 @@
                         {
                           "type": "null"
                         }
-                      ]
+                      ],
+                      "description": "The hour bucket the count was reported for, the start of a UTC hour. Null before the first report."
                     },
                     "reportedBillableDeviceCountMonth": {
                       "anyOf": [
@@ -12447,7 +12486,8 @@
                           {
                             "type": "null"
                           }
-                        ]
+                        ],
+                        "description": "The hour bucket the count was reported for, the start of a UTC hour. Null before the first report."
                       },
                       "reportedBillableDeviceCountMonth": {
                         "anyOf": [
@@ -13064,7 +13104,8 @@
                         {
                           "type": "null"
                         }
-                      ]
+                      ],
+                      "description": "The hour bucket the count was reported for, the start of a UTC hour. Null before the first report."
                     },
                     "reportedBillableDeviceCountMonth": {
                       "anyOf": [
@@ -13552,7 +13593,8 @@
                         {
                           "type": "null"
                         }
-                      ]
+                      ],
+                      "description": "The hour bucket the count was reported for, the start of a UTC hour. Null before the first report."
                     },
                     "reportedBillableDeviceCountMonth": {
                       "anyOf": [
@@ -14099,7 +14141,7 @@
     "/v1/apps/{appId}/binaries": {
       "get": {
         "operationId": "getV1AppsByAppIdBinaries",
-        "description": "The app's store builds, newest first, filtered by `platform` and `fingerprint`; the devices running each are the fleet statistics' `binary` buckets.",
+        "description": "The app's store builds, newest first, filtered by `platform`, `version` and `fingerprint`; `?relations=bundle` embeds the bundle each ships; the devices running each are the fleet statistics' `binary` buckets.",
         "responses": {
           "200": {
             "content": {
@@ -14152,6 +14194,200 @@
                       },
                       "version": {
                         "type": "string"
+                      },
+                      "bundle": {
+                        "type": "object",
+                        "properties": {
+                          "appId": {
+                            "type": "string",
+                            "format": "uuid",
+                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                          },
+                          "expiredAt": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "expiresAt": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "fingerprint": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "framework": {
+                            "type": "string",
+                            "enum": [
+                              "capacitor",
+                              "cordova",
+                              "expo",
+                              "react_native"
+                            ]
+                          },
+                          "gitMessage": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "gitRef": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "gitRemote": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "gitSha": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                          },
+                          "isGitDirty": {
+                            "type": [
+                              "boolean",
+                              "null"
+                            ]
+                          },
+                          "manifestSha256": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "number": {
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "platforms": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "enum": [
+                                "android",
+                                "ios"
+                              ]
+                            }
+                          },
+                          "signature": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "signatureKeyId": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "sizeBytes": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "source": {
+                            "type": "string",
+                            "enum": [
+                              "binary",
+                              "upload"
+                            ]
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "expired",
+                              "ready",
+                              "uploading"
+                            ]
+                          },
+                          "unusedSince": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "updatedAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                          },
+                          "version": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "appId",
+                          "createdAt",
+                          "expiredAt",
+                          "expiresAt",
+                          "fingerprint",
+                          "framework",
+                          "gitMessage",
+                          "gitRef",
+                          "gitRemote",
+                          "gitSha",
+                          "id",
+                          "isGitDirty",
+                          "manifestSha256",
+                          "number",
+                          "platforms",
+                          "signature",
+                          "signatureKeyId",
+                          "sizeBytes",
+                          "source",
+                          "status",
+                          "unusedSince",
+                          "updatedAt",
+                          "version"
+                        ]
                       }
                     },
                     "required": [
@@ -14292,6 +14528,26 @@
                 "android",
                 "ios"
               ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "version",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "relations",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "bundle"
+                ]
+              }
             }
           },
           {
@@ -14786,6 +15042,13 @@
             }
           },
           {
+            "in": "query",
+            "name": "version",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "schema": {
               "type": "string",
               "format": "uuid"
@@ -14803,7 +15066,7 @@
     "/v1/apps/{appId}/binaries/{binaryId}": {
       "get": {
         "operationId": "getV1AppsByAppIdBinariesByBinaryId",
-        "description": "One store build.",
+        "description": "One store build; `?relations=bundle` embeds the bundle it ships.",
         "responses": {
           "200": {
             "content": {
@@ -14854,6 +15117,200 @@
                     },
                     "version": {
                       "type": "string"
+                    },
+                    "bundle": {
+                      "type": "object",
+                      "properties": {
+                        "appId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "expiredAt": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "format": "date-time",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "expiresAt": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "format": "date-time",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "fingerprint": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "framework": {
+                          "type": "string",
+                          "enum": [
+                            "capacitor",
+                            "cordova",
+                            "expo",
+                            "react_native"
+                          ]
+                        },
+                        "gitMessage": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "gitRef": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "gitRemote": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "gitSha": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "id": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        },
+                        "isGitDirty": {
+                          "type": [
+                            "boolean",
+                            "null"
+                          ]
+                        },
+                        "manifestSha256": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "number": {
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "platforms": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "enum": [
+                              "android",
+                              "ios"
+                            ]
+                          }
+                        },
+                        "signature": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "signatureKeyId": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "sizeBytes": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "source": {
+                          "type": "string",
+                          "enum": [
+                            "binary",
+                            "upload"
+                          ]
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "expired",
+                            "ready",
+                            "uploading"
+                          ]
+                        },
+                        "unusedSince": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "format": "date-time",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "updatedAt": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "version": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "appId",
+                        "createdAt",
+                        "expiredAt",
+                        "expiresAt",
+                        "fingerprint",
+                        "framework",
+                        "gitMessage",
+                        "gitRef",
+                        "gitRemote",
+                        "gitSha",
+                        "id",
+                        "isGitDirty",
+                        "manifestSha256",
+                        "number",
+                        "platforms",
+                        "signature",
+                        "signatureKeyId",
+                        "sizeBytes",
+                        "source",
+                        "status",
+                        "unusedSince",
+                        "updatedAt",
+                        "version"
+                      ]
                     }
                   },
                   "required": [
@@ -14967,6 +15424,19 @@
             "required": true
           },
           {
+            "in": "query",
+            "name": "relations",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "bundle"
+                ]
+              }
+            }
+          },
+          {
             "schema": {
               "type": "string",
               "format": "uuid"
@@ -14984,7 +15454,7 @@
     "/v1/apps/{appId}/bundles": {
       "get": {
         "operationId": "getV1AppsByAppIdBundles",
-        "description": "The app's bundles, newest first, every source unless `source` selects one: `binary`, the bundle a store build ships, which carries no number and no fingerprint; `upload`, one the CLI uploaded. `isInUse` selects the bundles an active or paused release serves, `fingerprint` those built for that native layer, `query` those whose number contains it.",
+        "description": "The app's uploaded bundles, newest first; the bundle a store build ships is read through its binary. `isUnused` selects the bundles with an `unusedSince`, counting down to their expiry, `fingerprint` those built for that native layer, `number` the bundle of that number, `query` those whose number contains it.",
         "responses": {
           "200": {
             "content": {
@@ -15003,6 +15473,18 @@
                         "type": "string",
                         "format": "date-time",
                         "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                      },
+                      "expiredAt": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
                       },
                       "expiresAt": {
                         "anyOf": [
@@ -15121,6 +15603,7 @@
                       "status": {
                         "type": "string",
                         "enum": [
+                          "expired",
                           "ready",
                           "uploading"
                         ]
@@ -15149,6 +15632,7 @@
                     "required": [
                       "appId",
                       "createdAt",
+                      "expiredAt",
                       "expiresAt",
                       "fingerprint",
                       "framework",
@@ -15290,13 +15774,22 @@
           },
           {
             "in": "query",
-            "name": "isInUse",
+            "name": "isUnused",
             "schema": {
               "type": "string",
               "enum": [
                 "false",
                 "true"
               ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "number",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
             }
           },
           {
@@ -15319,21 +15812,11 @@
           },
           {
             "in": "query",
-            "name": "source",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "binary",
-                "upload"
-              ]
-            }
-          },
-          {
-            "in": "query",
             "name": "status",
             "schema": {
               "type": "string",
               "enum": [
+                "expired",
                 "ready",
                 "uploading"
               ]
@@ -15404,6 +15887,18 @@
                       "type": "string",
                       "format": "date-time",
                       "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                    },
+                    "expiredAt": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
                     },
                     "expiresAt": {
                       "anyOf": [
@@ -15522,6 +16017,7 @@
                     "status": {
                       "type": "string",
                       "enum": [
+                        "expired",
                         "ready",
                         "uploading"
                       ]
@@ -15550,6 +16046,7 @@
                   "required": [
                     "appId",
                     "createdAt",
+                    "expiredAt",
                     "expiresAt",
                     "fingerprint",
                     "framework",
@@ -15806,22 +16303,20 @@
                     "default": null,
                     "anyOf": [
                       {
-                        "type": "object",
-                        "properties": {
-                          "keyId": {
-                            "type": "string",
-                            "minLength": 1
-                          },
-                          "value": {
-                            "type": "string",
-                            "pattern": "^[a-z0-9_-]+:[A-Za-z0-9+/]+=*$"
-                          }
-                        },
-                        "required": [
-                          "keyId",
-                          "value"
-                        ],
-                        "additionalProperties": {}
+                        "type": "string",
+                        "pattern": "^[a-z0-9_-]+:[A-Za-z0-9+/]+=*$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "signatureKeyId": {
+                    "default": null,
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1
                       },
                       {
                         "type": "null"
@@ -15964,13 +16459,22 @@
           },
           {
             "in": "query",
-            "name": "isInUse",
+            "name": "isUnused",
             "schema": {
               "type": "string",
               "enum": [
                 "false",
                 "true"
               ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "number",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
             }
           },
           {
@@ -15993,21 +16497,11 @@
           },
           {
             "in": "query",
-            "name": "source",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "binary",
-                "upload"
-              ]
-            }
-          },
-          {
-            "in": "query",
             "name": "status",
             "schema": {
               "type": "string",
               "enum": [
+                "expired",
                 "ready",
                 "uploading"
               ]
@@ -16038,7 +16532,7 @@
     "/v1/apps/{appId}/bundles/{bundleId}": {
       "get": {
         "operationId": "getV1AppsByAppIdBundlesByBundleId",
-        "description": "One bundle; while it is in use nowhere, `expiresAt` is `unusedSince` plus the organization's retention, written with it; its deltas are the `deltas` list beside it.",
+        "description": "One bundle, the one a binary ships included; while it is in use nowhere, `expiresAt` is `unusedSince` plus the organization's retention, written with it, and a day after the create while it is uploading; once retention removed its objects it is `expired` with `expiredAt`, the row staying for the release log; its deltas are the `deltas` list beside it.",
         "responses": {
           "200": {
             "content": {
@@ -16055,6 +16549,18 @@
                       "type": "string",
                       "format": "date-time",
                       "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                    },
+                    "expiredAt": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
                     },
                     "expiresAt": {
                       "anyOf": [
@@ -16173,6 +16679,7 @@
                     "status": {
                       "type": "string",
                       "enum": [
+                        "expired",
                         "ready",
                         "uploading"
                       ]
@@ -16201,6 +16708,7 @@
                   "required": [
                     "appId",
                     "createdAt",
+                    "expiredAt",
                     "expiresAt",
                     "fingerprint",
                     "framework",
@@ -16480,6 +16988,18 @@
                       "format": "date-time",
                       "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
                     },
+                    "expiredAt": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
                     "expiresAt": {
                       "anyOf": [
                         {
@@ -16597,6 +17117,7 @@
                     "status": {
                       "type": "string",
                       "enum": [
+                        "expired",
                         "ready",
                         "uploading"
                       ]
@@ -16625,6 +17146,7 @@
                   "required": [
                     "appId",
                     "createdAt",
+                    "expiredAt",
                     "expiresAt",
                     "fingerprint",
                     "framework",
@@ -16795,6 +17317,18 @@
                             "format": "date-time",
                             "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
                           },
+                          "expiredAt": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
                           "expiresAt": {
                             "anyOf": [
                               {
@@ -16912,6 +17446,7 @@
                           "status": {
                             "type": "string",
                             "enum": [
+                              "expired",
                               "ready",
                               "uploading"
                             ]
@@ -16940,6 +17475,7 @@
                         "required": [
                           "appId",
                           "createdAt",
+                          "expiredAt",
                           "expiresAt",
                           "fingerprint",
                           "framework",
@@ -17735,6 +18271,16 @@
             },
             "description": "`not_found`"
           },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "`bundle_expired`"
+          },
           "413": {
             "content": {
               "application/json": {
@@ -17885,6 +18431,16 @@
               }
             },
             "description": "`not_found`"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "`bundle_expired`"
           },
           "429": {
             "content": {
@@ -18042,7 +18598,7 @@
                 }
               }
             },
-            "description": "`upload_incomplete`"
+            "description": "`bundle_expired` or `upload_incomplete`"
           },
           "413": {
             "content": {
@@ -18224,7 +18780,7 @@
                 }
               }
             },
-            "description": "`upload_incomplete`"
+            "description": "`bundle_expired` or `upload_incomplete`"
           },
           "413": {
             "content": {
@@ -18622,7 +19178,7 @@
     "/v1/apps/{appId}/channels": {
       "get": {
         "operationId": "getV1AppsByAppIdChannels",
-        "description": "The app's channels, newest first; `query` selects those whose name contains it, case-insensitively.",
+        "description": "The app's channels, newest first; `query` selects those whose name contains it, case-insensitively, `isPaused` those paused or not, and `isProtected` those protected or not.",
         "responses": {
           "200": {
             "content": {
@@ -18855,6 +19411,28 @@
               "type": "integer",
               "minimum": 0,
               "maximum": 9007199254740991
+            }
+          },
+          {
+            "in": "query",
+            "name": "isPaused",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "false",
+                "true"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "isProtected",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "false",
+                "true"
+              ]
             }
           },
           {
@@ -19349,7 +19927,7 @@
     "/v1/apps/{appId}/channels/count": {
       "get": {
         "operationId": "getV1AppsByAppIdChannelsCount",
-        "description": "The number of the app's channels under the list's filter, `query`, which the list pages through.",
+        "description": "The number of the app's channels under the list's filters, `query`, `isPaused` and `isProtected`, which the list pages through.",
         "responses": {
           "200": {
             "content": {
@@ -19455,6 +20033,28 @@
           "Channels"
         ],
         "parameters": [
+          {
+            "in": "query",
+            "name": "isPaused",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "false",
+                "true"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "isProtected",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "false",
+                "true"
+              ]
+            }
+          },
           {
             "in": "query",
             "name": "query",
@@ -20039,7 +20639,7 @@
       },
       "delete": {
         "operationId": "deleteV1AppsByAppIdChannelsByChannelId",
-        "description": "Deletes the channel with its releases: it leaves the frontier and starts its bundles' retention clocks; refused on the app's default channel.",
+        "description": "Deletes the channel with its releases: it stops serving them and starts the retention clocks of the bundles only it served; refused on the app's default channel.",
         "responses": {
           "204": {
             "description": "The channel is gone."
@@ -20404,7 +21004,7 @@
     "/v1/apps/{appId}/channels/{channelId}/resume": {
       "post": {
         "operationId": "postV1AppsByAppIdChannelsByChannelIdResume",
-        "description": "The channel serves its frontier again.",
+        "description": "The channel serves its active releases again.",
         "responses": {
           "200": {
             "content": {
@@ -20643,7 +21243,7 @@
     "/v1/apps/{appId}/channels/{channelId}/releases": {
       "post": {
         "operationId": "postV1AppsByAppIdChannelsByChannelIdReleases",
-        "description": "Creates a release in the channel of a ready bundle, `bundleId`, or of what another channel's newest active release serves, `fromChannelId`, recorded as the provenance, with its conditions, rollout, mandatory flag, notes, the nullable auto-pause overrides and the nullable progression schedule, whose last rollout percent lies above the rollout, numbered next in the channel; refused on a protected channel below Admin, past `release_count_per_app_per_day_limit` and, once the app has a signing key, for an unsigned bundle; an `Idempotency-Key` answers the same release again for 24 hours. The audience preview, `GET …/channels/{channelId}/audience`, answers the warnings for the same conditions before the create.",
+        "description": "Creates a release in the channel of a ready bundle, `bundleId`, or of what another channel's newest active release serves, `fromChannelId`, the newest serving `platform` when given, recorded as the provenance, with its conditions, rollout, mandatory flag, notes, the nullable auto-pause overrides and the nullable progression schedule, whose last rollout percent lies above the rollout, numbered next in the channel; refused on a protected channel below Admin, past `release_count_per_app_per_day_limit` and, once the app has a signing key, for an unsigned bundle; an `Idempotency-Key` answers the same release again for 24 hours. The audience preview, `GET …/channels/{channelId}/audience`, answers the warnings for the same conditions before the create.",
         "parameters": [
           {
             "description": "Makes the request safe to retry: the same key with the same body within 24 hours answers the first response again and creates nothing, the same key with another body is refused with `idempotency_key_reused`. A key is scoped to the caller.",
@@ -21111,7 +21711,7 @@
                 }
               }
             },
-            "description": "`bundle_not_ready` or `idempotency_key_reused`"
+            "description": "`bundle_expired`, `bundle_not_ready` or `idempotency_key_reused`"
           },
           "422": {
             "content": {
@@ -21348,6 +21948,21 @@
                       }
                     ]
                   },
+                  "platform": {
+                    "default": null,
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "enum": [
+                          "android",
+                          "ios"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
                   "progression": {
                     "default": null,
                     "anyOf": [
@@ -21402,7 +22017,7 @@
     "/v1/apps/{appId}/channels/{channelId}/rollbacks": {
       "post": {
         "operationId": "postV1AppsByAppIdChannelsByChannelIdRollbacks",
-        "description": "Creates a release of the channel's previous bundle, or of the release named by `toReleaseId`, with the rollback recorded as its provenance; a rollback is a release, never a mutation, and mandatory unless `isMandatory` is false, since an incident fix should land now.",
+        "description": "Creates a release of the release before the channel's newest active one, or before the newest active one serving `platform` when given: the newest earlier active release whose bundle serves every platform the undone release's bundle serves, the same bundle included. `toReleaseId` names the target instead, refused when its bundle does not serve `platform`. The target is recorded in `createdFromReleaseId` and the undone release in `rolledBackFromReleaseId`; a rollback is a release, never a mutation, and mandatory unless `isMandatory` is false, since an incident fix should land now.",
         "parameters": [
           {
             "description": "Makes the request safe to retry: the same key with the same body within 24 hours answers the first response again and creates nothing, the same key with another body is refused with `idempotency_key_reused`. A key is scoped to the caller.",
@@ -21870,7 +22485,7 @@
                 }
               }
             },
-            "description": "`release_revoked` or `idempotency_key_reused`"
+            "description": "`bundle_expired`, `release_revoked` or `idempotency_key_reused`"
           },
           "422": {
             "content": {
@@ -21935,6 +22550,21 @@
                   "isMandatory": {
                     "default": true,
                     "type": "boolean"
+                  },
+                  "platform": {
+                    "default": null,
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "enum": [
+                          "android",
+                          "ios"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
                   },
                   "toReleaseId": {
                     "default": null,
@@ -26864,6 +27494,18 @@
                             "format": "date-time",
                             "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
                           },
+                          "expiredAt": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
                           "expiresAt": {
                             "anyOf": [
                               {
@@ -26981,6 +27623,7 @@
                           "status": {
                             "type": "string",
                             "enum": [
+                              "expired",
                               "ready",
                               "uploading"
                             ]
@@ -27009,6 +27652,7 @@
                         "required": [
                           "appId",
                           "createdAt",
+                          "expiredAt",
                           "expiresAt",
                           "fingerprint",
                           "framework",
@@ -27970,6 +28614,18 @@
                           "format": "date-time",
                           "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
                         },
+                        "expiredAt": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "format": "date-time",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
                         "expiresAt": {
                           "anyOf": [
                             {
@@ -28087,6 +28743,7 @@
                         "status": {
                           "type": "string",
                           "enum": [
+                            "expired",
                             "ready",
                             "uploading"
                           ]
@@ -28115,6 +28772,7 @@
                       "required": [
                         "appId",
                         "createdAt",
+                        "expiredAt",
                         "expiresAt",
                         "fingerprint",
                         "framework",
@@ -31475,7 +32133,7 @@
     "/v1/apps/{appId}/statistics/fleet": {
       "get": {
         "operationId": "getV1AppsByAppIdStatisticsFleet",
-        "description": "The registry's snapshot of the devices seen in the last thirty days: their count, the ones running the newest active release of their channel, and their counts per binary with its platform, version and newest report, per release with its number and channel and the embedded bundles as `null`, per channel by id, binary version, SDK version, platform, OS version and country, each the most common first and each summing to the count; `channelId` narrows it to one channel's devices.",
+        "description": "The registry's snapshot of the devices seen in the last thirty days: their count, split by the newest active release serving each device's platform in its channel into the ones on its bundle, the ones its first check skipped for a targeting or compatibility reason and the pending rest, and their counts per binary with its platform, version and newest report, per release with its number and channel and the embedded bundles as `null`, per channel by id, binary version, SDK version, platform, OS version and country, each the most common first and each summing to the count; `channelId` narrows it to one channel's devices and `binaryId` to the devices on one binary.",
         "responses": {
           "200": {
             "content": {
@@ -31613,6 +32271,11 @@
                       "minimum": -9007199254740991,
                       "maximum": 9007199254740991
                     },
+                    "ineligibleDeviceCount": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
                     "osVersion": {
                       "type": "array",
                       "items": {
@@ -31643,6 +32306,11 @@
                           "platform"
                         ]
                       }
+                    },
+                    "pendingDeviceCount": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
                     },
                     "platform": {
                       "type": "array",
@@ -31747,7 +32415,9 @@
                     "country",
                     "currentDeviceCount",
                     "deviceCount",
+                    "ineligibleDeviceCount",
                     "osVersion",
+                    "pendingDeviceCount",
                     "platform",
                     "release",
                     "sdkVersion"
@@ -31841,6 +32511,15 @@
           "Statistics"
         ],
         "parameters": [
+          {
+            "in": "query",
+            "name": "binaryId",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            }
+          },
           {
             "in": "query",
             "name": "channelId",
@@ -33965,7 +34644,8 @@
                                   {
                                     "type": "null"
                                   }
-                                ]
+                                ],
+                                "description": "The hour bucket the count was reported for, the start of a UTC hour. Null before the first report."
                               },
                               "reportedBillableDeviceCountMonth": {
                                 "anyOf": [

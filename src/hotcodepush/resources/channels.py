@@ -20,12 +20,19 @@ class ChannelsResource(BaseResource):
         self.releases = ChannelReleasesResource(http_client)
         self.rollbacks = RollbacksResource(http_client)
 
-    def count(self, *, app_id: str, query: str | NotGiven = NOT_GIVEN) -> Count:
+    def count(
+        self,
+        *,
+        app_id: str,
+        is_paused: bool | NotGiven = NOT_GIVEN,
+        is_protected: bool | NotGiven = NOT_GIVEN,
+        query: str | NotGiven = NOT_GIVEN,
+    ) -> Count:
         """Counts the channels of the app that match the filters."""
         return self._http_client.fetch_json(
             method="GET",
             path=resolve_path("/v1/apps/{appId}/channels/count", appId=app_id),
-            query={"query": query},
+            query={"isPaused": is_paused, "isProtected": is_protected, "query": query},
             response_type=Count,
         )
 
@@ -99,6 +106,8 @@ class ChannelsResource(BaseResource):
         self,
         *,
         app_id: str,
+        is_paused: bool | NotGiven = NOT_GIVEN,
+        is_protected: bool | NotGiven = NOT_GIVEN,
         limit: int | NotGiven = NOT_GIVEN,
         offset: int | NotGiven = NOT_GIVEN,
         query: str | NotGiven = NOT_GIVEN,
@@ -110,7 +119,13 @@ class ChannelsResource(BaseResource):
         return self._http_client.fetch_json(
             method="GET",
             path=resolve_path("/v1/apps/{appId}/channels", appId=app_id),
-            query={"limit": limit, "offset": offset, "query": query},
+            query={
+                "isPaused": is_paused,
+                "isProtected": is_protected,
+                "limit": limit,
+                "offset": offset,
+                "query": query,
+            },
             response_type=list[Channel],
         )
 

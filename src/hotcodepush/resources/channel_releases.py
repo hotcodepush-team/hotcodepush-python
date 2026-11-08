@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from .._http import resolve_path
 from .._types import NOT_GIVEN, NotGiven
-from ..models import FailureAction, Release, ReleaseCondition, ReleaseProgression
+from ..models import FailureAction, Platform, Release, ReleaseCondition, ReleaseProgression
 from ._base import BaseResource
 
 
@@ -21,13 +21,15 @@ class ChannelReleasesResource(BaseResource):
         idempotency_key: str | NotGiven = NOT_GIVEN,
         is_mandatory: bool | NotGiven = NOT_GIVEN,
         notes: str | None | NotGiven = NOT_GIVEN,
+        platform: Platform | None | NotGiven = NOT_GIVEN,
         progression: ReleaseProgression | None | NotGiven = NOT_GIVEN,
         rollout_percent: int | NotGiven = NOT_GIVEN,
     ) -> Release:
         """Creates a release in the channel with the next number.
 
         It releases either a ready bundle, `bundle_id`, or what another channel serves,
-        `from_channel_id`.
+        `from_channel_id`. `platform` narrows it to one platform the bundle serves. With
+        `from_channel_id`, it takes the newest release there that serves that platform.
         """
         return self._http_client.fetch_creating_post(
             body={
@@ -39,6 +41,7 @@ class ChannelReleasesResource(BaseResource):
                 "fromChannelId": from_channel_id,
                 "isMandatory": is_mandatory,
                 "notes": notes,
+                "platform": platform,
                 "progression": progression,
                 "rolloutPercent": rollout_percent,
             },

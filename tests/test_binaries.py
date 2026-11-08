@@ -9,16 +9,16 @@ BINARY_ROW = resolve_response_example(method="GET", template="/v1/apps/{appId}/b
 FINGERPRINT = f"fp1:{'a' * 64}"
 
 
-def test_counts_the_binaries_of_the_app_filtered_by_fingerprint_and_platform() -> None:
+def test_counts_the_binaries_of_the_app_filtered_by_fingerprint_platform_and_version() -> None:
     api = StubApi(httpx.Response(200, json={"count": 3}))
 
     fetched_count = api.client.apps.binaries.count(
-        app_id="app", fingerprint=FINGERPRINT, platform="ios"
+        app_id="app", fingerprint=FINGERPRINT, platform="ios", version="2.4.1"
     )
 
     assert fetched_count == Count(count=3)
     assert api.sent_methods_and_urls == [
-        f"GET {BINARIES_URL}/count?fingerprint=fp1%3A{'a' * 64}&platform=ios"
+        f"GET {BINARIES_URL}/count?fingerprint=fp1%3A{'a' * 64}&platform=ios&version=2.4.1"
     ]
 
 
@@ -56,14 +56,25 @@ def test_gets_the_binary() -> None:
     assert api.sent_methods_and_urls == [f"GET {BINARIES_URL}/binary"]
 
 
-def test_lists_the_binaries_of_the_app_filtered_by_fingerprint_and_platform() -> None:
+def test_gets_the_binary_with_the_bundle_it_ships_when_the_bundle_relation_is_set() -> None:
+    api = StubApi(httpx.Response(200, json=BINARY_ROW))
+
+    fetched_binary = api.client.apps.binaries.get(
+        app_id="app", binary_id="binary", relations=["bundle"]
+    )
+
+    assert fetched_binary.bundle is not None
+    assert api.sent_methods_and_urls == [f"GET {BINARIES_URL}/binary?relations=bundle"]
+
+
+def test_lists_the_binaries_of_the_app_filtered_by_fingerprint_platform_and_version() -> None:
     api = StubApi(httpx.Response(200, json=[BINARY_ROW]))
 
     fetched_binaries = api.client.apps.binaries.list(
-        app_id="app", fingerprint=FINGERPRINT, limit=20, platform="android"
+        app_id="app", fingerprint=FINGERPRINT, limit=20, platform="android", version="2.4.1"
     )
 
     assert fetched_binaries == [Binary.model_validate(BINARY_ROW)]
     assert api.sent_methods_and_urls == [
-        f"GET {BINARIES_URL}?fingerprint=fp1%3A{'a' * 64}&limit=20&platform=android"
+        f"GET {BINARIES_URL}?fingerprint=fp1%3A{'a' * 64}&limit=20&platform=android&version=2.4.1"
     ]

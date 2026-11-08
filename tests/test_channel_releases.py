@@ -52,7 +52,7 @@ def test_posts_the_conditions_and_the_progression_by_their_api_names() -> None:
     }
 
 
-def test_posts_a_release_of_what_another_channel_serves_with_its_auto_pause_overrides() -> None:
+def test_posts_a_release_of_what_another_channel_serves_on_one_platform_with_overrides() -> None:
     api = StubApi(httpx.Response(201, json=RELEASE_ROW))
 
     api.client.apps.channels.releases.create(
@@ -62,6 +62,7 @@ def test_posts_a_release_of_what_another_channel_serves_with_its_auto_pause_over
         failure_minimum_update_count=20,
         failure_threshold_percent=10,
         from_channel_id="source",
+        platform="ios",
     )
 
     assert resolve_sent_json(api.last_request) == {
@@ -69,6 +70,7 @@ def test_posts_a_release_of_what_another_channel_serves_with_its_auto_pause_over
         "failureMinimumUpdateCount": 20,
         "failureThresholdPercent": 10,
         "fromChannelId": "source",
+        "platform": "ios",
     }
 
 
