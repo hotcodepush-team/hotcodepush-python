@@ -17,12 +17,18 @@ class ChannelAudienceResource(BaseResource):
         device: list[str] | NotGiven = NOT_GIVEN,
         fingerprint: list[str] | NotGiven = NOT_GIVEN,
         os: list[str] | NotGiven = NOT_GIVEN,
+        progression_rollout_percent: list[int] | NotGiven = NOT_GIVEN,
+        progression_step_minimum_update_count: int | NotGiven = NOT_GIVEN,
         rollout_percent: int | NotGiven = NOT_GIVEN,
     ) -> Audience:
         """Gets the devices that a release with these conditions would reach in the channel.
 
         Use it before creating the release. Each condition can repeat, and all conditions must
         match. An `attribute` is `key=value`, and a `device` is a device id.
+
+        `progression_rollout_percent` is valid only beside `progression_step_minimum_update_count`.
+        Together they add the warning `progression_step_too_small` when a step adds fewer devices
+        than the applied updates it waits for.
         """
         return self._http_client.fetch_json(
             method="GET",
@@ -37,6 +43,8 @@ class ChannelAudienceResource(BaseResource):
                 "device": device,
                 "fingerprint": fingerprint,
                 "os": os,
+                "progressionRolloutPercent": progression_rollout_percent,
+                "progressionStepMinimumUpdateCount": progression_step_minimum_update_count,
                 "rolloutPercent": rollout_percent,
             },
             response_type=Audience,
