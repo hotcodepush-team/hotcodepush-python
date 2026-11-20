@@ -13,6 +13,7 @@ from typing import Annotated, Literal
 from pydantic import BaseModel, ConfigDict, Field
 from pydantic.alias_generators import to_camel
 
+AppRelation = Literal["defaultChannel"]
 AppUsageMonthRelation = Literal["app"]
 AuditLogRelation = Literal["app", "user"]
 BinaryRelation = Literal["bundle"]
@@ -117,6 +118,8 @@ class AdoptionPoint(HotCodePushModel):
 
 
 class App(HotCodePushModel):
+    """An app of an organization. `default_channel` is set when `relations` names it."""
+
     channel_link_template: str | None
     created_at: datetime
     default_channel: Channel | None = None

@@ -17,13 +17,14 @@ def test_deletes_the_app() -> None:
     assert api.sent_methods_and_urls == [f"DELETE {APP_URL}"]
 
 
-def test_gets_the_app() -> None:
+def test_gets_the_app_with_its_default_channel() -> None:
     api = StubApi(httpx.Response(200, json=APP_ROW))
 
-    fetched_app = api.client.apps.get(app_id="app")
+    fetched_app = api.client.apps.get(app_id="app", relations=["defaultChannel"])
 
     assert fetched_app == App.model_validate(APP_ROW)
-    assert api.sent_methods_and_urls == [f"GET {APP_URL}"]
+    assert fetched_app.default_channel is not None
+    assert api.sent_methods_and_urls == [f"GET {APP_URL}?relations=defaultChannel"]
 
 
 def test_posts_the_target_organization_to_transfer_the_app() -> None:

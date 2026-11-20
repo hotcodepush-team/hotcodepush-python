@@ -330,7 +330,9 @@ CALLS: dict[str, Callable[[HotCodePush], object]] = {
             app_id=APP_ID, body=b"part", part_number=1, sha256=SHA256, upload_id=UPLOAD_ID
         )
     ),
-    "apps.get": lambda hot_code_push: hot_code_push.apps.get(app_id=APP_ID),
+    "apps.get": lambda hot_code_push: hot_code_push.apps.get(
+        app_id=APP_ID, relations=["defaultChannel"]
+    ),
     "apps.releases.audience.get": lambda hot_code_push: hot_code_push.apps.releases.audience.get(
         app_id=APP_ID, release_id=RELEASE_ID
     ),
