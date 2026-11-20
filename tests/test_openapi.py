@@ -10,6 +10,7 @@ import pytest
 from pydantic import BaseModel
 
 from hotcodepush import (
+    AudienceWarning,
     BinaryCondition,
     ErrorCode,
     HotCodePush,
@@ -171,6 +172,8 @@ CALLS: dict[str, Callable[[HotCodePush], object]] = {
         device=[DEVICE_ID],
         fingerprint=[f"fp1:{SHA256}"],
         os=[">=17"],
+        progression_rollout_percent=[10, 50, 100],
+        progression_step_minimum_update_count=50,
         rollout_percent=10,
     ),
     "apps.channels.count": lambda hot_code_push: hot_code_push.apps.channels.count(
@@ -327,7 +330,9 @@ CALLS: dict[str, Callable[[HotCodePush], object]] = {
             app_id=APP_ID, body=b"part", part_number=1, sha256=SHA256, upload_id=UPLOAD_ID
         )
     ),
-    "apps.get": lambda hot_code_push: hot_code_push.apps.get(app_id=APP_ID),
+    "apps.get": lambda hot_code_push: hot_code_push.apps.get(
+        app_id=APP_ID, relations=["defaultChannel"]
+    ),
     "apps.releases.audience.get": lambda hot_code_push: hot_code_push.apps.releases.audience.get(
         app_id=APP_ID, release_id=RELEASE_ID
     ),
@@ -892,6 +897,17 @@ def test_types_the_error_code_as_the_catalog_of_the_snapshot_and_unexpected_resp
     documented_codes = OPENAPI_DOCUMENT["components"]["schemas"]["Error"]["properties"]["code"]
 
     assert sorted(get_args(ErrorCode)) == sorted([*documented_codes["enum"], "unexpected_response"])
+
+
+def test_types_the_audience_warning_code_as_the_catalog_of_the_snapshot() -> None:
+    audience = resolve_operation(
+        method="GET", template="/v1/apps/{appId}/channels/{channelId}/audience"
+    )["responses"]["200"]["content"]["application/json"]["schema"]
+    documented_codes = audience["properties"]["warnings"]["items"]["properties"]["code"]
+
+    assert sorted(get_args(AudienceWarning.model_fields["code"].annotation)) == sorted(
+        documented_codes["enum"]
+    )
 
 
 def resolve_resource_method_names(resource: BaseResource, *, path: str) -> list[str]:

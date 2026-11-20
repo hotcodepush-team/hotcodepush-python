@@ -32,7 +32,7 @@ UPLOAD_TIMEOUT_SECONDS = 600.0
 
 HttpMethod = Literal["DELETE", "GET", "PATCH", "POST", "PUT"]
 JsonBody = Mapping[str, object]
-Query = Mapping[str, bool | date | datetime | int | str | Sequence[str] | NotGiven]
+Query = Mapping[str, bool | date | datetime | int | str | Sequence[int | str] | NotGiven]
 UploadBody = bytes | BinaryIO
 """The body of an upload: bytes, which a failed attempt sends again, or a file object, read once
 and never retried."""
@@ -232,8 +232,8 @@ def resolve_query_params(query: Query) -> tuple[tuple[str, str], ...]:
             continue
         if isinstance(value, list):
             # Other lists repeat their parameter, since their values may hold a comma.
-            values = [",".join(value)] if name in COMMA_LIST_QUERY_NAMES else value
-            params.extend((name, item) for item in values)
+            values = [",".join(map(str, value))] if name in COMMA_LIST_QUERY_NAMES else value
+            params.extend((name, str(item)) for item in values)
         elif isinstance(value, bool):
             params.append((name, "true" if value else "false"))
         elif isinstance(value, datetime):

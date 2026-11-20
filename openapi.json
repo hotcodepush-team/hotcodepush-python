@@ -15454,7 +15454,7 @@
     "/v1/apps/{appId}/bundles": {
       "get": {
         "operationId": "getV1AppsByAppIdBundles",
-        "description": "The app's uploaded bundles, newest first; the bundle a store build ships is read through its binary. `isUnused` selects the bundles with an `unusedSince`, counting down to their expiry, `fingerprint` those built for that native layer, `number` the bundle of that number, `query` those whose number contains it.",
+        "description": "The app's uploaded bundles, newest first; the bundle a store build ships is read through its binary. `isUnused` selects the bundles with an `unusedSince`, counting down to their expiry, `fingerprint` those built for that native layer, `number` the bundle of that number, `query` those whose number or version contains it.",
         "responses": {
           "200": {
             "content": {
@@ -21243,7 +21243,7 @@
     "/v1/apps/{appId}/channels/{channelId}/releases": {
       "post": {
         "operationId": "postV1AppsByAppIdChannelsByChannelIdReleases",
-        "description": "Creates a release in the channel of a ready bundle, `bundleId`, or of what another channel's newest active release serves, `fromChannelId`, the newest serving `platform` when given, recorded as the provenance, with its conditions, rollout, mandatory flag, notes, the nullable auto-pause overrides and the nullable progression schedule, whose last rollout percent lies above the rollout, numbered next in the channel; refused on a protected channel below Admin, past `release_count_per_app_per_day_limit` and, once the app has a signing key, for an unsigned bundle; an `Idempotency-Key` answers the same release again for 24 hours. The audience preview, `GET …/channels/{channelId}/audience`, answers the warnings for the same conditions before the create.",
+        "description": "Creates a release in the channel of a ready bundle, `bundleId`, or of what another channel's newest active release serves, `fromChannelId`, the newest serving `platform` when given, recorded as the provenance, with its conditions, rollout, mandatory flag, notes, the nullable auto-pause overrides and the nullable progression schedule, whose last rollout percent lies above the rollout, numbered next in the channel; refused on a protected channel below Admin, past `release_count_per_app_per_day_limit` and, once the app has a signing key, for an unsigned bundle; an `Idempotency-Key` answers the same release again for 24 hours. `rolloutPercent` defaults to the schedule's first step, or to 100 without a schedule. The audience preview, `GET …/channels/{channelId}/audience`, answers the warnings for the same conditions and schedule before the create, `progression_step_too_small` among them.",
         "parameters": [
           {
             "description": "Makes the request safe to retry: the same key with the same body within 24 hours answers the first response again and creates nothing, the same key with another body is refused with `idempotency_key_reused`. A key is scoped to the caller.",
@@ -22002,7 +22002,6 @@
                     ]
                   },
                   "rolloutPercent": {
-                    "default": 100,
                     "type": "integer",
                     "minimum": 0,
                     "maximum": 100
@@ -23116,7 +23115,7 @@
     "/v1/apps/{appId}/channels/{channelId}/audience": {
       "get": {
         "operationId": "getV1AppsByAppIdChannelsByChannelIdAudience",
-        "description": "The channel's devices seen in the last thirty days that a release's conditions would reach, each condition evaluated exactly over the registry the way the device evaluates it: `binary` and `os` ranges in the shared subset, refused under `range_syntax` otherwise, `fingerprint` values, `device` ids and `attribute` as `key=value`, each repeatable and all of them required; `rolloutPercent`, 100 by default, estimated as its share of the reached devices, since a bucket is a hash of the release id. `warnings` carries `unsupported_condition_share` with the share of the channel's active devices whose SDK does not know a condition type asked for, and `fingerprint_unknown` for each `fingerprint` no binary of the app carries once the app has a binary.",
+        "description": "The channel's devices seen in the last thirty days that a release's conditions would reach, each condition evaluated exactly over the registry the way the device evaluates it: `binary` and `os` ranges in the shared subset, refused under `range_syntax` otherwise, `fingerprint` values, `device` ids and `attribute` as `key=value`, each repeatable and all of them required; `rolloutPercent`, by default the schedule's first step or 100 without one, estimated as its share of the reached devices, since a bucket is a hash of the release id. The schedule comes as `progressionRolloutPercent`, repeatable, and `progressionStepMinimumUpdateCount`, both or neither, under the rules of a release's `progression`. `warnings` carries `unsupported_condition_share` with the share of the channel's active devices whose SDK does not know a condition type asked for, `fingerprint_unknown` for each `fingerprint` no binary of the app carries once the app has a binary, and `progression_step_too_small` with the `rolloutPercent` of the schedule's smallest step when that step adds fewer devices than the applied updates it waits for.",
         "responses": {
           "200": {
             "content": {
@@ -23194,6 +23193,7 @@
                             "type": "string",
                             "enum": [
                               "fingerprint_unknown",
+                              "progression_step_too_small",
                               "unsupported_condition_share"
                             ]
                           },
@@ -23375,9 +23375,25 @@
           },
           {
             "in": "query",
+            "name": "progressionRolloutPercent",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            }
+          },
+          {
+            "in": "query",
+            "name": "progressionStepMinimumUpdateCount",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
             "name": "rolloutPercent",
             "schema": {
-              "default": 100,
               "type": "integer",
               "minimum": 0,
               "maximum": 100
@@ -29833,6 +29849,7 @@
                             "type": "string",
                             "enum": [
                               "fingerprint_unknown",
+                              "progression_step_too_small",
                               "unsupported_condition_share"
                             ]
                           },
@@ -33114,7 +33131,7 @@
     "/v1/apps/{appId}": {
       "get": {
         "operationId": "getV1AppsByAppId",
-        "description": "One app.",
+        "description": "One app; `?relations=defaultChannel` embeds the channel new builds follow.",
         "responses": {
           "200": {
             "content": {
@@ -33188,6 +33205,125 @@
                       "type": "string",
                       "format": "date-time",
                       "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                    },
+                    "defaultChannel": {
+                      "type": "object",
+                      "properties": {
+                        "appId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "expiresAt": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "format": "date-time",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "failureAction": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "enum": [
+                                "none",
+                                "notify",
+                                "pause",
+                                "revoke"
+                              ],
+                              "description": "What auto-pause does when a release fails above the threshold: `pause` stops offering it, and devices running it keep it; `revoke` also moves those devices to the newest eligible release or the embedded bundle; `notify` only notifies; `none` evaluates the rule but acts on nothing and sends nothing, while a progression still stops widening."
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "failureMinimumUpdateCount": {
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "failureThresholdPercent": {
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "id": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        },
+                        "isDiscoverable": {
+                          "type": "boolean"
+                        },
+                        "isProtected": {
+                          "type": "boolean"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "nextReleaseNumber": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "pausedAt": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "format": "date-time",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "updatedAt": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        }
+                      },
+                      "required": [
+                        "appId",
+                        "createdAt",
+                        "expiresAt",
+                        "failureAction",
+                        "failureMinimumUpdateCount",
+                        "failureThresholdPercent",
+                        "id",
+                        "isDiscoverable",
+                        "isProtected",
+                        "name",
+                        "nextReleaseNumber",
+                        "pausedAt",
+                        "updatedAt"
+                      ]
                     }
                   },
                   "required": [
@@ -33291,6 +33427,19 @@
           "Apps"
         ],
         "parameters": [
+          {
+            "in": "query",
+            "name": "relations",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "defaultChannel"
+                ]
+              }
+            }
+          },
           {
             "schema": {
               "type": "string",

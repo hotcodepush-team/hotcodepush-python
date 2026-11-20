@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from .._http import HttpClient, resolve_path
 from .._types import NOT_GIVEN, NotGiven
-from ..models import App, Framework
+from ..models import App, AppRelation, Framework
 from ._base import BaseResource
 from .binaries import BinariesResource
 from .bundles import BundlesResource
@@ -35,9 +35,12 @@ class AppsResource(BaseResource):
             method="DELETE", path=resolve_path("/v1/apps/{appId}", appId=app_id)
         )
 
-    def get(self, *, app_id: str) -> App:
+    def get(self, *, app_id: str, relations: list[AppRelation] | NotGiven = NOT_GIVEN) -> App:
         return self._http_client.fetch_json(
-            method="GET", path=resolve_path("/v1/apps/{appId}", appId=app_id), response_type=App
+            method="GET",
+            path=resolve_path("/v1/apps/{appId}", appId=app_id),
+            query={"relations": relations},
+            response_type=App,
         )
 
     def transfer(self, *, app_id: str, organization_id: str) -> App:

@@ -13,6 +13,7 @@ from typing import Annotated, Literal
 from pydantic import BaseModel, ConfigDict, Field
 from pydantic.alias_generators import to_camel
 
+AppRelation = Literal["defaultChannel"]
 AppUsageMonthRelation = Literal["app"]
 AuditLogRelation = Literal["app", "user"]
 BinaryRelation = Literal["bundle"]
@@ -117,8 +118,11 @@ class AdoptionPoint(HotCodePushModel):
 
 
 class App(HotCodePushModel):
+    """An app of an organization. `default_channel` is set when `relations` names it."""
+
     channel_link_template: str | None
     created_at: datetime
+    default_channel: Channel | None = None
     default_channel_id: str | None
     deleted_at: datetime | None
     framework: Framework
@@ -171,11 +175,13 @@ class Audience(HotCodePushModel):
 
 
 class AudienceWarning(HotCodePushModel):
-    """A problem the release would likely have, based on the device registry and the
-    registered binaries.
+    """A problem the release would likely have, based on the device registry, the registered
+    binaries and the schedule.
     """
 
-    code: Literal["fingerprint_unknown", "unsupported_condition_share"]
+    code: Literal[
+        "fingerprint_unknown", "progression_step_too_small", "unsupported_condition_share"
+    ]
     details: dict[str, object] | None
     message: str
 
