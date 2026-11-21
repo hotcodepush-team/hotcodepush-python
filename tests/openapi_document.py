@@ -28,16 +28,21 @@ def resolve_documented_operation_names() -> set[str]:
     }
 
 
-def resolve_object_example(schema: dict[str, Any]) -> dict[str, object]:
+def resolve_object_example(
+    schema: dict[str, Any], *, enum_override: str | None
+) -> dict[str, object]:
     example = {
-        name: resolve_schema_example(property_schema)
+        name: resolve_schema_example(property_schema, enum_override=enum_override)
         for name, property_schema in schema.get("properties", {}).items()
     }
     value_schema = schema.get("additionalProperties")
     # An empty schema allows any value and adds no entry.
     if isinstance(value_schema, dict) and value_schema:
         names = schema.get("propertyNames", {}).get("enum", ["key"])
-        example |= {name: resolve_schema_example(value_schema) for name in names}
+        example |= {
+            name: resolve_schema_example(value_schema, enum_override=enum_override)
+            for name in names
+        }
     return example
 
 
@@ -64,22 +69,25 @@ def resolve_response_example(*, method: str, template: str) -> object:
         for status, response in responses.items()
         if status.startswith("2") and "application/json" in response.get("content", {})
     )
-    return resolve_schema_example(schema)
+    return resolve_schema_example(schema, enum_override=None)
 
 
-def resolve_schema_example(schema: dict[str, Any]) -> object:
+def resolve_schema_example(schema: dict[str, Any], *, enum_override: str | None) -> object:
     branches = [branch for branch in resolve_branches(schema) if branch.get("type") != "null"]
     if branches != [schema]:
-        return resolve_schema_example(branches[0])
+        return resolve_schema_example(branches[0], enum_override=enum_override)
     if "const" in schema:
         return schema["const"]
     if "enum" in schema:
-        return schema["enum"][0]
+        return schema["enum"][0] if enum_override is None else enum_override
     schema_type = resolve_schema_type(schema)
     if schema_type == "object":
-        return resolve_object_example(schema)
+        return resolve_object_example(schema, enum_override=enum_override)
     if schema_type == "array":
-        return [resolve_schema_example(branch) for branch in resolve_branches(schema["items"])]
+        return [
+            resolve_schema_example(branch, enum_override=enum_override)
+            for branch in resolve_branches(schema["items"])
+        ]
     if schema_type == "string":
         return EXAMPLE_STRINGS_BY_FORMAT.get(schema.get("format", ""), "string")
     if schema_type == "integer":

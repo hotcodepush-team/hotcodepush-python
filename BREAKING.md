@@ -4,7 +4,39 @@ This is a comprehensive list of the breaking changes introduced in the minor ver
 
 ## Versions
 
+- [Version 0.9.x](#version-09x)
 - [Version 0.8.x](#version-08x)
+
+## Version 0.9.x
+
+### Open Catalogs in Responses
+
+Every catalog field of a returned model is typed `Literal[...] | str`, such as `App.framework` as `Framework | str`. A value newer than your client now arrives as it is. Before, the whole call raised a pydantic `ValidationError`. Method arguments keep their closed types, and so does the `type` of a release condition.
+
+Nothing changes at runtime for the values your client knows. Only code checked with mypy or pyright must change, in two cases.
+
+Code that handles every value needs a branch for a value it does not know:
+
+```diff
+  match app.framework:
+      case "capacitor" | "cordova":
+          ...
+      case "expo" | "react_native":
+          ...
+-     case _ as unreachable:
+-         assert_never(unreachable)
++     case _:
++         ...
+```
+
+A value from a response that goes into a method argument, or into anything typed with the closed alias, must be narrowed first. A `match` on the known values narrows it, and so does a `TypeGuard` function. `==` and `in` do not narrow it under mypy:
+
+```diff
+- client.organizations.apps.create(framework=app.framework, ...)
++ match app.framework:
++     case "capacitor" | "cordova" | "expo" | "react_native":
++         client.organizations.apps.create(framework=app.framework, ...)
+```
 
 ## Version 0.8.x
 

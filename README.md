@@ -34,6 +34,7 @@ Every method takes keyword arguments and returns pydantic models with snake_case
 Uploads take `bytes` or a file object with its `content_length` and stream it.
 Creating calls send an `Idempotency-Key` and are retried. Pass `idempotency_key` to reuse one across your own retries.
 A failed request raises a `HotCodePushError` with the API's `code`, `message`, `details` and the HTTP `status`. `code` is a `str`, so a code newer than your client passes through, and `ErrorCode` lists the codes this version knows.
+A catalog field of a model, such as `App.framework`, is typed `Framework | str` for the same reason.
 
 ## Documentation
 

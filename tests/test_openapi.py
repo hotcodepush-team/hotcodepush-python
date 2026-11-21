@@ -51,6 +51,7 @@ SESSION_ONLY_NOTE = "An API token answers `forbidden`; sign in with a session."
 SHA256 = "a" * 64
 SIGNING_KEY_ID = "1c4f8a6d-3e92-4b57-a0d8-5f2b7c9e1a34"
 TOKEN_ID = "8a3f1c6e-2d94-4b70-9e15-c7b4a2d8f063"
+UNKNOWN_CATALOG_VALUE = "value_newer_than_the_client"
 UPLOAD_ID = "upload"
 USER_ID = "2d5c8f1a-7b36-4e09-a4c2-6f1e9b3d7a58"
 WEBHOOK_ID = "3b9e1d74-6a2f-4c58-8d03-f5a7c2e9b416"
@@ -788,6 +789,10 @@ UNDOCUMENTED_RESOURCES = frozenset({"health"})
 
 
 class SnapshotApi(StubApi):
+    def __init__(self, *, enum_override: str | None = None) -> None:
+        super().__init__()
+        self._enum_override = enum_override
+
     def respond(self, request: httpx.Request) -> httpx.Response:
         template = resolve_path_template(request.url.path)
         if template is None:
@@ -799,7 +804,10 @@ class SnapshotApi(StubApi):
         content = response.get("content", {})
         if "application/json" in content:
             return httpx.Response(
-                int(status), json=resolve_schema_example(content["application/json"]["schema"])
+                int(status),
+                json=resolve_schema_example(
+                    content["application/json"]["schema"], enum_override=self._enum_override
+                ),
             )
         return httpx.Response(int(status))
 
@@ -875,6 +883,16 @@ def test_declares_every_field_of_the_response_a_call_reads(name: str) -> None:
 
 
 @pytest.mark.parametrize("name", sorted(CALLS))
+def test_reads_the_response_a_call_gets_when_every_catalog_value_is_newer_than_the_client(
+    name: str,
+) -> None:
+    # A discriminator is a const in the snapshot, not an enum, so each condition keeps its type.
+    api = SnapshotApi(enum_override=UNKNOWN_CATALOG_VALUE)
+
+    CALLS[name](api.client)
+
+
+@pytest.mark.parametrize("name", sorted(CALLS))
 def test_notes_the_refusal_of_an_api_token_exactly_where_the_operation_is_session_only(
     name: str,
 ) -> None:
@@ -905,9 +923,8 @@ def test_types_the_audience_warning_code_as_the_catalog_of_the_snapshot() -> Non
     )["responses"]["200"]["content"]["application/json"]["schema"]
     documented_codes = audience["properties"]["warnings"]["items"]["properties"]["code"]
 
-    assert sorted(get_args(AudienceWarning.model_fields["code"].annotation)) == sorted(
-        documented_codes["enum"]
-    )
+    known_code_literal, _ = get_args(AudienceWarning.model_fields["code"].annotation)
+    assert sorted(get_args(known_code_literal)) == sorted(documented_codes["enum"])
 
 
 def resolve_resource_method_names(resource: BaseResource, *, path: str) -> list[str]:
