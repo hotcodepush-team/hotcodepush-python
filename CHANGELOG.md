@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.9.0](https://github.com/hotcodepush-team/hotcodepush-python/compare/v0.8.0...v0.9.0) (2026-11-21)
+
+
+### ⚠ BREAKING CHANGES
+
+* a catalog field of a returned model is typed `Literal[...] | str`, and `Release.conditions` is a list of `ReleaseCondition | UnknownCondition`. Code checked with mypy or pyright needs a branch for an unknown value and for `UnknownCondition`, and must narrow a response value before it passes it to a method argument. See BREAKING.md.
+
+### Features
+
+* pass a catalog value newer than the client through ([#25](https://github.com/hotcodepush-team/hotcodepush-python/issues/25)) ([f9d8ed8](https://github.com/hotcodepush-team/hotcodepush-python/commit/f9d8ed8696f7447402552d3d891f35e80aa5dbea))
+* the audience schedule and the app's default channel ([#23](https://github.com/hotcodepush-team/hotcodepush-python/issues/23)) ([1c83437](https://github.com/hotcodepush-team/hotcodepush-python/commit/1c834379e845dbd32e4a674fc0b619134bf21cd0))
+
 ## [0.8.0](https://github.com/hotcodepush-team/hotcodepush-python/compare/v0.7.0...v0.8.0) (2026-11-08)
 
 
