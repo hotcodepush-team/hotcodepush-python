@@ -74,7 +74,7 @@ Run `uv run ruff format .` before every commit; the format check, lint, type che
 - Every path goes through `resolve_path` with the snapshot's template verbatim, `resolve_path("/v1/apps/{appId}", appId=app_id)`.
 - A method returns a model or a list of models, as the API answers; a status-only answer returns `None` through `fetch_status`.
 - A model is a `HotCodePushModel` named after the API's entity, its fields the snapshot's properties in snake_case: required ones without a default, nullable ones `X | None`, a relation `X | None = None`; a date-time is a `datetime`, an enum the caller sends a `Literal`, an alias in `models.py` when two types share it.
-- An enum a model reads from a response is that `Literal` or alias with `| str`, as in `Framework | str`, so a value newer than the client passes through. The `type` of a release condition is the one exception, closed because it picks the model.
+- An enum a model reads from a response is that `Literal` or alias with `| str`, as in `Framework | str`, so a value newer than the client passes through. The `type` of a release condition picks the model, so it stays a closed `Literal`, and a condition the client cannot read, such as one of a type newer than the client, is read as an `UnknownCondition`.
 - A query flag documented as `"true" | "false"` is a `bool`.
 - After a resource's `list` method, an annotation writes `builtins.list`, since the method shadows the builtin in the class body.
 - A method whose operation the document marks with `sessionAuth` carries ``An API token answers `forbidden`; sign in with a session.`` in its docstring; the contract test holds the note to the document.

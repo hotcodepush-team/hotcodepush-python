@@ -789,9 +789,9 @@ UNDOCUMENTED_RESOURCES = frozenset({"health"})
 
 
 class SnapshotApi(StubApi):
-    def __init__(self, *, enum_override: str | None = None) -> None:
+    def __init__(self, *, catalog_override: str | None = None) -> None:
         super().__init__()
-        self._enum_override = enum_override
+        self._catalog_override = catalog_override
 
     def respond(self, request: httpx.Request) -> httpx.Response:
         template = resolve_path_template(request.url.path)
@@ -806,7 +806,7 @@ class SnapshotApi(StubApi):
             return httpx.Response(
                 int(status),
                 json=resolve_schema_example(
-                    content["application/json"]["schema"], enum_override=self._enum_override
+                    content["application/json"]["schema"], catalog_override=self._catalog_override
                 ),
             )
         return httpx.Response(int(status))
@@ -886,8 +886,7 @@ def test_declares_every_field_of_the_response_a_call_reads(name: str) -> None:
 def test_reads_the_response_a_call_gets_when_every_catalog_value_is_newer_than_the_client(
     name: str,
 ) -> None:
-    # A discriminator is a const in the snapshot, not an enum, so each condition keeps its type.
-    api = SnapshotApi(enum_override=UNKNOWN_CATALOG_VALUE)
+    api = SnapshotApi(catalog_override=UNKNOWN_CATALOG_VALUE)
 
     CALLS[name](api.client)
 

@@ -11,7 +11,7 @@ This is a comprehensive list of the breaking changes introduced in the minor ver
 
 ### Open Catalogs in Responses
 
-Every catalog field of a returned model is typed `Literal[...] | str`, such as `App.framework` as `Framework | str`. A value newer than your client now arrives as it is. Before, the whole call raised a pydantic `ValidationError`. Method arguments keep their closed types, and so does the `type` of a release condition.
+Every catalog field of a returned model is typed `Literal[...] | str`, such as `App.framework` as `Framework | str`. A value newer than your client now arrives as it is. Before, the whole call raised a pydantic `ValidationError`. Method arguments keep their closed types.
 
 Nothing changes at runtime for the values your client knows. Only code checked with mypy or pyright must change, in two cases.
 
@@ -37,6 +37,22 @@ A value from a response that goes into a method argument, or into anything typed
 +     case "capacitor" | "cordova" | "expo" | "react_native":
 +         client.organizations.apps.create(framework=app.framework, ...)
 ```
+
+### Unknown Release Conditions
+
+`Release.conditions` is typed as a list of `ReleaseCondition | UnknownCondition`. A condition your client cannot read, such as one of a type newer than your client, arrives as an `UnknownCondition`. It keeps its `type`. Its other fields are in `model_extra`, under the API's camelCase names. Before, the whole call raised a pydantic `ValidationError`.
+
+Code checked with mypy or pyright that handles every condition model needs a branch for `UnknownCondition`. A check of `condition.type` no longer narrows the model, so use `isinstance` or a class pattern:
+
+```diff
+  match condition:
+      case AttributeCondition():
+          ...
++     case UnknownCondition():
++         ...
+```
+
+The `conditions` argument of `apps.channels.releases.create` takes only the five known models. When a release holds an `UnknownCondition`, stop and update the client before you pass its conditions on. Never leave the condition out, since that widens the audience.
 
 ## Version 0.8.x
 

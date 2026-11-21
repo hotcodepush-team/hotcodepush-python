@@ -1,10 +1,10 @@
 """The types that resource methods take and return, derived from the OpenAPI snapshot.
 
 Fields are the API's camelCase names in snake_case. A field the API adds later lands in
-`model_extra`, so it never breaks a caller. A catalog value the API adds later passes through as
-a `str`, so a catalog in a response is typed `Literal[...] | str`. In a response, only the `type`
-of a release condition stays closed, since it picks the model. The rows a `relations` argument
-names fill the optional fields of the same name.
+`model_extra`, so it never breaks a caller. A catalog value the API adds later passes through as a
+`str`, so a catalog in a response is typed `Literal[...] | str`. A release condition the client
+cannot read, such as one of a type the API adds later, is an `UnknownCondition`. The rows a
+`relations` argument names fill the optional fields of the same name.
 """
 
 from __future__ import annotations
@@ -685,7 +685,9 @@ class Release(HotCodePushModel):
     bundle_id: str
     channel: Channel | None = None
     channel_id: str
-    conditions: list[ReleaseCondition]
+    conditions: list[
+        Annotated[ReleaseCondition | UnknownCondition, Field(union_mode="left_to_right")]
+    ]
     created_at: datetime
     created_from_release_id: str | None
     failure_action: FailureAction | str | None
@@ -850,6 +852,15 @@ class TimeToAdoption(HotCodePushModel):
 
     percent50_at: datetime | None
     percent90_at: datetime | None
+
+
+class UnknownCondition(HotCodePushModel):
+    """A condition the client cannot read, such as one of a type newer than the client.
+
+    Its other fields are in `model_extra`, under the API's camelCase names.
+    """
+
+    type: str
 
 
 class UpdateStatistics(HotCodePushModel):
