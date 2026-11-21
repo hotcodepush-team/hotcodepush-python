@@ -1,8 +1,10 @@
 """The types that resource methods take and return, derived from the OpenAPI snapshot.
 
 Fields are the API's camelCase names in snake_case. A field the API adds later lands in
-`model_extra`, so it never breaks a caller. The rows a `relations` argument names fill the
-optional fields of the same name.
+`model_extra`, so it never breaks a caller. A catalog value the API adds later passes through as a
+`str`, so a catalog in a response is typed `Literal[...] | str`. A release condition the client
+cannot read, such as one of a type the API adds later, is an `UnknownCondition`. The rows a
+`relations` argument names fill the optional fields of the same name.
 """
 
 from __future__ import annotations
@@ -125,7 +127,7 @@ class App(HotCodePushModel):
     default_channel: Channel | None = None
     default_channel_id: str | None
     deleted_at: datetime | None
-    framework: Framework
+    framework: Framework | str
     id: str
     name: str
     next_bundle_number: int
@@ -179,9 +181,10 @@ class AudienceWarning(HotCodePushModel):
     binaries and the schedule.
     """
 
-    code: Literal[
-        "fingerprint_unknown", "progression_step_too_small", "unsupported_condition_share"
-    ]
+    code: (
+        Literal["fingerprint_unknown", "progression_step_too_small", "unsupported_condition_share"]
+        | str
+    )
     details: dict[str, object] | None
     message: str
 
@@ -192,7 +195,7 @@ class AuditLog(HotCodePushModel):
     `app` and `user` are set when `relations` names them and the app or user still exists.
     """
 
-    actor_type: Literal["system", "user"]
+    actor_type: Literal["system", "user"] | str
     app: NamedEmbed | None = None
     app_id: str | None
     country: str | None
@@ -225,7 +228,7 @@ class Binary(HotCodePushModel):
     created_at: datetime
     fingerprint: str | None
     id: str
-    platform: Platform
+    platform: Platform | str
     updated_at: datetime
     version: str
 
@@ -246,7 +249,7 @@ class BinaryCount(HotCodePushModel):
 
     device_count: int
     last_seen_at: datetime
-    platform: Platform | None
+    platform: Platform | str | None
     value: str | None
     version: str | None
 
@@ -262,7 +265,7 @@ class Bundle(HotCodePushModel):
     expired_at: datetime | None
     expires_at: datetime | None
     fingerprint: str | None
-    framework: Framework
+    framework: Framework | str
     git_message: str | None
     git_ref: str | None
     git_remote: str | None
@@ -271,12 +274,12 @@ class Bundle(HotCodePushModel):
     is_git_dirty: bool | None
     manifest_sha256: str | None
     number: int | None
-    platforms: list[Platform]
+    platforms: list[Platform | str]
     signature: str | None
     signature_key_id: str | None
     size_bytes: int
-    source: Literal["binary", "upload"]
-    status: BundleStatus
+    source: Literal["binary", "upload"] | str
+    status: BundleStatus | str
     unused_since: datetime | None
     updated_at: datetime
     version: str
@@ -294,7 +297,7 @@ class BundleDelta(HotCodePushModel):
     patch_count: int | None
     requested_at: datetime
     size_bytes: int | None
-    status: Literal["built", "failed", "requested"]
+    status: Literal["built", "failed", "requested"] | str
     updated_at: datetime
 
 
@@ -314,7 +317,7 @@ class Channel(HotCodePushModel):
     app_id: str
     created_at: datetime
     expires_at: datetime | None
-    failure_action: FailureAction | None
+    failure_action: FailureAction | str | None
     failure_minimum_update_count: int | None
     failure_threshold_percent: int | None
     id: str
@@ -369,7 +372,7 @@ class Device(HotCodePushModel):
     binary_version: str
     channel: Channel | None = None
     channel_id: str | None
-    channel_source: Literal["config", "runtime"]
+    channel_source: Literal["config", "runtime"] | str
     country: str | None
     created_at: datetime
     current_release: Release | None = None
@@ -379,7 +382,7 @@ class Device(HotCodePushModel):
     fingerprint: str | None
     last_seen_at: datetime
     os_version: str
-    platform: Platform
+    platform: Platform | str
     sdk_version: str
     updated_at: datetime
 
@@ -407,7 +410,7 @@ class Delivery(HotCodePushModel):
     next_attempt_at: datetime | None
     response_body: str | None
     response_code: int | None
-    status: DeliveryStatus
+    status: DeliveryStatus | str
     telemetry_export_id: str | None
     type: str
     updated_at: datetime
@@ -505,8 +508,8 @@ class Invitation(HotCodePushModel):
     inviter_id: str
     organization: NamedEmbed | None = None
     organization_id: str
-    role: InvitationRole
-    status: Literal["accepted", "pending"]
+    role: InvitationRole | str
+    status: Literal["accepted", "pending"] | str
     updated_at: datetime
 
 
@@ -536,7 +539,7 @@ class Member(HotCodePushModel):
     last_seen_at: datetime | None
     organization: Organization | None = None
     organization_id: str
-    role: Role
+    role: Role | str
     updated_at: datetime
     user: EmbeddedUser | None = None
     user_id: str
@@ -595,9 +598,9 @@ class NotificationPreference(HotCodePushModel):
     It applies to the caller's account, or to one membership when `organization_id` is set.
     """
 
-    category: NotificationCategory
+    category: NotificationCategory | str
     is_enabled: bool
-    medium: NotificationMedium
+    medium: NotificationMedium | str
     organization_id: str | None
 
 
@@ -633,7 +636,7 @@ class Organization(HotCodePushModel):
     member_count_limit: int | None
     name: str
     past_due_at: datetime | None
-    plan: Literal["enterprise", "free", "pay_as_you_go"]
+    plan: Literal["enterprise", "free", "pay_as_you_go"] | str
     region: str
     release_count_per_app_per_day_limit: int | None
     reported_billable_device_count: int
@@ -643,7 +646,7 @@ class Organization(HotCodePushModel):
     spending_cap_cents: int
     storage_bytes: int
     storage_bytes_limit: int | None
-    subscription_provider: Literal["polar"] | None
+    subscription_provider: Literal["polar"] | str | None
     subscription_status: str | None
     unsent_billable_device_count: int
     updated_at: datetime
@@ -660,7 +663,7 @@ class OsVersionCount(HotCodePushModel):
     """The devices on one operating system version of one platform."""
 
     device_count: int
-    platform: Platform
+    platform: Platform | str
     value: str | None
 
 
@@ -682,10 +685,12 @@ class Release(HotCodePushModel):
     bundle_id: str
     channel: Channel | None = None
     channel_id: str
-    conditions: list[ReleaseCondition]
+    conditions: list[
+        Annotated[ReleaseCondition | UnknownCondition, Field(union_mode="left_to_right")]
+    ]
     created_at: datetime
     created_from_release_id: str | None
-    failure_action: FailureAction | None
+    failure_action: FailureAction | str | None
     failure_minimum_update_count: int | None
     failure_notified_at: datetime | None
     failure_threshold_percent: int | None
@@ -701,7 +706,7 @@ class Release(HotCodePushModel):
     release_counters: ReleaseCounters | None = None
     rolled_back_from_release_id: str | None
     rollout_percent: int
-    status: Literal["active", "paused", "revoked"]
+    status: Literal["active", "paused", "revoked"] | str
     step_start_applied_update_count: int
     updated_at: datetime
     window_start_applied_update_count: int
@@ -761,7 +766,7 @@ class ReleaseDeviceEvent(HotCodePushModel):
     reason: str | None
     release: Release | None = None
     release_id: str
-    type: Literal["applied", "checked", "confirmed", "failed"]
+    type: Literal["applied", "checked", "confirmed", "failed"] | str
     updated_at: datetime
 
 
@@ -816,7 +821,7 @@ class SsoProvider(HotCodePushModel):
     issuer: str
     organization_id: str
     provider_id: str
-    type: Literal["oidc", "saml"]
+    type: Literal["oidc", "saml"] | str
     updated_at: datetime
     user_id: str | None
 
@@ -835,7 +840,7 @@ class TelemetryExport(HotCodePushModel):
     header_names: list[str]
     id: str
     organization_id: str
-    signals: list[TelemetrySignal]
+    signals: list[TelemetrySignal | str]
     updated_at: datetime
     url: str
 
@@ -847,6 +852,15 @@ class TimeToAdoption(HotCodePushModel):
 
     percent50_at: datetime | None
     percent90_at: datetime | None
+
+
+class UnknownCondition(HotCodePushModel):
+    """A condition the client cannot read, such as one of a type newer than the client.
+
+    Its other fields are in `model_extra`, under the API's camelCase names.
+    """
+
+    type: str
 
 
 class UpdateStatistics(HotCodePushModel):
@@ -929,13 +943,16 @@ class User(HotCodePushModel):
             "x_twitter",
             "youtube",
         ]
+        | str
         | None
     )
     email: str
     email_verified: bool
     id: str
     image: str | None
-    intended_framework: Literal["capacitor", "cordova", "expo", "react_native", "unsure"] | None
+    intended_framework: (
+        Literal["capacitor", "cordova", "expo", "react_native", "unsure"] | str | None
+    )
     job_role: (
         Literal[
             "cto_or_founder",
@@ -945,13 +962,14 @@ class User(HotCodePushModel):
             "other",
             "student_or_hobbyist",
         ]
+        | str
         | None
     )
     last_seen_at: datetime
     locale: str | None
     members: list[Member] | None = None
     name: str
-    time_format: Literal["12h", "24h"] | None
+    time_format: Literal["12h", "24h"] | str | None
     time_zone: str | None
     two_factor_enabled: bool
     updated_at: datetime
@@ -970,7 +988,7 @@ class Webhook(HotCodePushModel):
     created_at: datetime
     disabled_at: datetime | None
     events: list[str]
-    format: Literal["discord", "raw", "slack", "teams"]
+    format: Literal["discord", "raw", "slack", "teams"] | str
     id: str
     name: str
     organization_id: str

@@ -73,7 +73,8 @@ Run `uv run ruff format .` before every commit; the format check, lint, type che
 - The body and the query are dicts whose keys are the API's camelCase names, written out, `{"isProtected": is_protected}`, so a name greps against `openapi.json`.
 - Every path goes through `resolve_path` with the snapshot's template verbatim, `resolve_path("/v1/apps/{appId}", appId=app_id)`.
 - A method returns a model or a list of models, as the API answers; a status-only answer returns `None` through `fetch_status`.
-- A model is a `HotCodePushModel` named after the API's entity, its fields the snapshot's properties in snake_case: required ones without a default, nullable ones `X | None`, a relation `X | None = None`; a date-time is a `datetime`, an enum a `Literal`, an alias in `models.py` when two types share it.
+- A model is a `HotCodePushModel` named after the API's entity, its fields the snapshot's properties in snake_case: required ones without a default, nullable ones `X | None`, a relation `X | None = None`; a date-time is a `datetime`, an enum the caller sends a `Literal`, an alias in `models.py` when two types share it.
+- An enum a model reads from a response is that `Literal` or alias with `| str`, as in `Framework | str`, so a value newer than the client passes through. The `type` of a release condition picks the model, so it stays a closed `Literal`, and a condition the client cannot read, such as one of a type newer than the client, is read as an `UnknownCondition`.
 - A query flag documented as `"true" | "false"` is a `bool`.
 - After a resource's `list` method, an annotation writes `builtins.list`, since the method shadows the builtin in the class body.
 - A method whose operation the document marks with `sessionAuth` carries ``An API token answers `forbidden`; sign in with a session.`` in its docstring; the contract test holds the note to the document.
@@ -81,7 +82,7 @@ Run `uv run ruff format .` before every commit; the format check, lint, type che
 ## The OpenAPI snapshot
 
 The API's `/openapi` document is the contract, and `openapi.json` is its committed snapshot, the same bytes as `hotcodepush-node`'s, so the package builds and CI checks without the API.
-A schema change breaks `tests/test_openapi.py`, which calls every resource method once with every option it can send and answers it with the example of its operation's documented response: it fails when a method sends a path, method, query parameter, body field or content type the snapshot lacks, when it sends an `Idempotency-Key` where the operation documents none or none where it does, when a response property lands in a model's `model_extra` or fails its validation, when the session note and `sessionAuth` disagree, when a resource method has no call in `CALLS`, and when an operation has no method.
+A schema change breaks `tests/test_openapi.py`, which calls every resource method once with every option it can send and answers it with the example of its operation's documented response: it fails when a method sends a path, method, query parameter, body field or content type the snapshot lacks, when it sends an `Idempotency-Key` where the operation documents none or none where it does, when a response property lands in a model's `model_extra` or fails its validation, when a model refuses a catalog value newer than the client, when the session note and `sessionAuth` disagree, when a resource method has no call in `CALLS`, and when an operation has no method.
 
 When the API changes:
 
